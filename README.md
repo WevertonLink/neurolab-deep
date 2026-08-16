@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 200 caixas para os quatro mecanismos: 58 construir, 58
-reconstruir, 58 depurar e **26 perturbar** — a assimetria é o sinal de que a
+Hoje isso dá 285 caixas para os cinco mecanismos: 83 construir, 83
+reconstruir, 83 depurar e **36 perturbar** — a assimetria é o sinal de que a
 regra está derivando, não carimbando.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
@@ -352,15 +352,16 @@ Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
 `app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
 de estudo, leitura do mecanismo e deslizador de escala.
 
-Fase D em curso: **4 mecanismos** (gradiente eletroquímico, potencial de
-membrana, potencial de ação, condução saltatória), **3 etapas** calculadas,
-58 transições. Nenhum arquivo declara ligação com outro.
+Fase D em curso: **5 mecanismos** (gradiente eletroquímico, potencial de
+membrana, potencial de ação, condução saltatória, transmissão sináptica),
+**4 etapas** calculadas, 83 transições. Nenhum arquivo declara ligação com
+outro, e o caminho do ATP até o terminal do quinto atravessa 4 arquivos em
+16 transições.
 
-A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha:
-o terminal do potencial de ação (o código de frequência) não fica a montante
-da velocidade de condução, então os dois são irmãos e não sequência. A grade
-16×4 do v2 nunca poderia ter dito isso.
+A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha: o
+terminal do potencial de ação (o código de frequência) não fica a montante
+da velocidade de condução, então os dois são irmãos e não sequência. A
+grade 16×4 do v2 nunca poderia ter dito isso.
 
-Restam: transmissão sináptica, LTP, LTD, consolidação sistêmica, erro de
-previsão, acúmulo de evidência, controle top-down, eixo HPA. E a tela, com o
-deslizador de escala como projeção do grafo.
+Restam: LTP, LTD, consolidação sistêmica, erro de previsão, acúmulo de
+evidência, controle top-down, eixo HPA.

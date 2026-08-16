@@ -1,0 +1,220 @@
+{
+  "arquivo": "transmissão sináptica",
+  "nota_de_autoria": "Sem aresta declarada para arquivo nenhum: começa em `despolarizacao-cresce` (do 03) e usa `codigo-de-frequencia-com-teto` (terminal do 03) como modulador da plasticidade de curto prazo — porque o que chega ao terminal é literalmente uma taxa de disparos, e é a taxa que decide se domina facilitação ou depressão. A pergunta central não é como a sinapse funciona: é POR QUE o cérebro converte elétrico em químico e de volta, se a conversão custa meio milissegundo. Este é o primeiro arquivo com `certeza: debatido` — o sensor do Ca²⁺ residual está genuinamente em disputa, e o formato exige que isso chegue ao estudo com ressalva.",
+
+  "entidades": [
+    { "id": "canal-ca-voltagem", "nome": "Canal de Ca²⁺ dependente de voltagem", "escala": "molecular",
+      "funcao": "abre com a despolarização no terminal pré-sináptico e fica agrupado a poucos nanômetros das vesículas prontas",
+      "se_falhar": "o disparo chega ao terminal e não acontece nada: a conversão de elétrico para químico não começa" },
+
+    { "id": "ca", "nome": "Íon cálcio (Ca²⁺)", "escala": "molecular",
+      "funcao": "cátion divalente mantido ridiculamente baixo dentro da célula, o que o torna um sinal e não um solvente",
+      "se_falhar": "sem o mensageiro nenhuma vesícula funde, por mais disparos que cheguem" },
+
+    { "id": "vesicula", "nome": "Vesícula sináptica", "escala": "molecular",
+      "funcao": "bolsa com uma quantidade aproximadamente fixa de transmissor, já encostada na membrana e esperando",
+      "se_falhar": "não há o que liberar; o terminal despolariza e a fenda continua vazia" },
+
+    { "id": "proteinas-snare", "nome": "Complexo SNARE e sinaptotagmina", "escala": "molecular",
+      "funcao": "maquinaria que mantém a vesícula engatilhada e funde as membranas quando o sensor liga Ca²⁺",
+      "se_falhar": "a vesícula fica encostada e nunca funde — é o que as toxinas botulínica e tetânica fazem, cortando essas proteínas" },
+
+    { "id": "neurotransmissor", "nome": "Neurotransmissor", "escala": "molecular",
+      "funcao": "molécula que atravessa a fenda por difusão e é lida por um receptor do outro lado",
+      "se_falhar": "a vesícula funde e nada é comunicado" },
+
+    { "id": "fenda-sinaptica", "nome": "Fenda sináptica", "escala": "celular",
+      "funcao": "o espaço de cerca de vinte nanômetros que separa as duas células e impede continuidade elétrica",
+      "se_falhar": "sem separação as células ficariam eletricamente contínuas, e o sinal passaria sem poder ser alterado" },
+
+    { "id": "receptor-ionotropico", "nome": "Receptor ionotrópico", "escala": "molecular",
+      "funcao": "canal que abre ao ligar o transmissor; o íon que ele deixa passar é o que define excitação ou inibição",
+      "se_falhar": "o transmissor chega à fenda e não é lido: não há corrente do outro lado" },
+
+    { "id": "transportador-de-recaptacao", "nome": "Transportador de recaptação", "escala": "molecular",
+      "funcao": "recolhe o transmissor da fenda em poucos milissegundos, encerrando o sinal",
+      "se_falhar": "o receptor fica ligado, a resposta se arrasta e a sinapse perde a capacidade de transmitir um segundo evento" }
+  ],
+
+  "nos": [
+    { "id": "canais-de-ca-abrem", "entidade": "canal-ca-voltagem", "escala": "molecular",
+      "descricao": "Os canais de Ca²⁺ do terminal pré-sináptico abrem" },
+
+    { "id": "ca-entra-no-terminal", "entidade": "ca", "escala": "molecular",
+      "descricao": "Ca²⁺ entra e a concentração local salta",
+      "quant": { "fora": "≈ 2 mM", "dentro_em_repouso": "≈ 100 nM", "razao": "≈ 20 000×" } },
+
+    { "id": "sensor-de-ca-dispara-fusao", "entidade": "proteinas-snare", "escala": "molecular",
+      "descricao": "A sinaptotagmina liga Ca²⁺ e destrava o complexo SNARE" },
+
+    { "id": "vesicula-funde", "entidade": "vesicula", "escala": "molecular",
+      "descricao": "A vesícula funde com a membrana e se abre para a fenda" },
+
+    { "id": "transmissor-na-fenda", "entidade": "neurotransmissor", "escala": "molecular",
+      "descricao": "O transmissor está na fenda e difunde até o outro lado",
+      "quant": { "largura_da_fenda": "≈ 20 nm", "atraso_sinaptico_total": "≈ 0,5 ms" } },
+
+    { "id": "receptor-abre", "entidade": "receptor-ionotropico", "escala": "molecular",
+      "descricao": "O receptor liga o transmissor e o próprio poro dele abre" },
+
+    { "id": "receptor-decide-o-sinal", "entidade": "receptor-ionotropico", "escala": "molecular",
+      "descricao": "É o receptor, e não o transmissor, que determina se o efeito excita ou inibe" },
+
+    { "id": "corrente-pos-sinaptica", "escala": "molecular",
+      "descricao": "Íons atravessam o receptor aberto, gerando corrente na célula que recebe" },
+
+    { "id": "potencial-pos-sinaptico-graduado", "escala": "celular",
+      "descricao": "A voltagem da célula receptora muda em proporção a quanto transmissor chegou" },
+
+    { "id": "remocao-do-transmissor", "entidade": "transportador-de-recaptacao", "escala": "molecular",
+      "descricao": "O transmissor é recolhido da fenda em poucos milissegundos" },
+
+    { "id": "sinal-vira-analogico", "escala": "celular",
+      "descricao": "O disparo tudo-ou-nada volta a ser um sinal contínuo, que pode ser somado" },
+
+    { "id": "numero-de-vesiculas-varia", "escala": "molecular",
+      "descricao": "Quantas vesículas fundem muda de um disparo para outro",
+      "quant": { "dependencia_do_ca": "aproximadamente quártica" } },
+
+    { "id": "ganho-ajustavel", "escala": "celular",
+      "descricao": "A força da sinapse tem um botão do lado de quem envia" },
+
+    { "id": "ca-residual-no-terminal", "entidade": "ca", "escala": "molecular",
+      "descricao": "Sobra Ca²⁺ no terminal depois do disparo, por dezenas a centenas de milissegundos" },
+
+    { "id": "facilitacao-de-curto-prazo", "escala": "celular",
+      "descricao": "O disparo seguinte solta mais transmissor que o anterior" },
+
+    { "id": "esgotamento-do-estoque", "entidade": "vesicula", "escala": "molecular",
+      "descricao": "O conjunto de vesículas prontas para fundir se esvazia mais rápido do que é reposto" },
+
+    { "id": "depressao-de-curto-prazo", "escala": "celular",
+      "descricao": "O disparo seguinte solta menos transmissor que o anterior" },
+
+    { "id": "historia-recente-muda-a-forca", "escala": "celular",
+      "descricao": "A força da sinapse depende do que aconteceu nela nos últimos milissegundos" },
+
+    { "id": "sinal-pode-ser-mudado-na-passagem", "escala": "celular",
+      "descricao": "A conversão para química existe para que o sinal possa ser alterado no caminho, e não apenas transportado" }
+  ],
+
+  "transicoes": [
+    { "de": "despolarizacao-cresce", "para": "canais-de-ca-abrem",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-ca-voltagem"],
+      "porque": "O terminal pré-sináptico tem canais de Ca²⁺ dependentes de voltagem, e eles respondem à mesma despolarização que percorreu o axônio. O sinal elétrico não atravessa a fenda: ele para aqui, e a partir deste ponto o que segue é outra coisa." },
+
+    { "de": "canais-de-ca-abrem", "para": "ca-entra-no-terminal",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-ca-voltagem", "ca", "membrana"],
+      "porque": "O gradiente de Ca²⁺ é o mais extremo da célula: cerca de vinte mil vezes mais concentrado fora do que dentro. Uma abertura brevíssima produz um salto local de concentração enorme, e é essa desproporção que faz do Ca²⁺ um sinal em vez de um solvente." },
+
+    { "de": "ca-entra-no-terminal", "para": "sensor-de-ca-dispara-fusao",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["ca", "proteinas-snare"],
+      "porque": "A sinaptotagmina liga Ca²⁺ e muda de forma, destravando um complexo SNARE que já mantinha a vesícula encostada na membrana. A maquinaria estava pronta antes do disparo: o Ca²⁺ não a constrói, só solta o gatilho, e é daí que vem a rapidez." },
+
+    { "de": "sensor-de-ca-dispara-fusao", "para": "vesicula-funde",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["vesicula", "proteinas-snare", "membrana"],
+      "porque": "As proteínas SNARE se enrolam umas nas outras e puxam as duas membranas uma contra a outra até elas se fundirem. O conteúdo da vesícula passa a estar do lado de fora sem nunca ter atravessado membrana alguma." },
+
+    { "de": "vesicula-funde", "para": "transmissor-na-fenda",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neurotransmissor", "fenda-sinaptica"],
+      "porque": "Cada vesícula despeja uma quantidade aproximadamente fixa de transmissor. Por isso a liberação é quântica: o que varia de um disparo para outro é o NÚMERO de vesículas que fundem, e não o quanto cada uma carrega." },
+
+    { "de": "transmissor-na-fenda", "para": "receptor-abre",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neurotransmissor", "receptor-ionotropico"],
+      "porque": "O transmissor difunde os poucos nanômetros da fenda e se liga ao receptor. Como a distância é minúscula, essa travessia é quase instantânea: o meio milissegundo de atraso sináptico vem do passo do Ca²⁺ e da fusão, não do trajeto." },
+
+    { "de": "transmissor-na-fenda", "para": "remocao-do-transmissor",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["transportador-de-recaptacao", "neurotransmissor"],
+      "porque": "Transportadores no próprio terminal e nas células gliais vizinhas recolhem o transmissor da fenda em poucos milissegundos. Sem essa retirada o receptor permaneceria ligado, e a sinapse não teria como comunicar um segundo evento." },
+
+    { "de": "receptor-abre", "para": "corrente-pos-sinaptica",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-ionotropico", "membrana"],
+      "porque": "O receptor ionotrópico é ele próprio um canal: ligar o transmissor abre o poro, sem nenhum intermediário entre a ligação e a corrente. É esse atalho que torna a transmissão rápida o bastante para sustentar comportamento." },
+
+    { "de": "receptor-abre", "para": "receptor-decide-o-sinal",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-ionotropico"],
+      "porque": "Quem determina se o efeito excita ou inibe é o íon que aquele receptor deixa passar, e não a molécula que o abriu. O mesmo transmissor despolariza numa célula e hiperpolariza noutra: a informação sobre o sinal mora no lado que recebe, não no que envia." },
+
+    { "de": "corrente-pos-sinaptica", "para": "potencial-pos-sinaptico-graduado",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana"],
+      "porque": "A corrente muda a voltagem da célula receptora em proporção a quanto transmissor chegou. Aqui não existe laço regenerativo como no axônio, e por isso a resposta é graduada: o dobro de entrada dá aproximadamente o dobro de resposta." },
+
+    { "de": "remocao-do-transmissor", "para": "potencial-pos-sinaptico-graduado",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "A duração do potencial pós-sináptico é fixada por quanto tempo o transmissor permanece na fenda. Remover mais devagar alarga a resposta em vez de aumentar o pico — é assim que um bloqueador de recaptação age, prolongando e não intensificando." },
+
+    { "de": "potencial-pos-sinaptico-graduado", "para": "sinal-vira-analogico",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O disparo que chegou era tudo-ou-nada e o que sai é contínuo. A sinapse desfaz a digitalização de propósito: sem voltar ao analógico não haveria o que somar, e somar entradas de muitas origens é a operação que um neurônio existe para fazer." },
+
+    { "de": "ca-entra-no-terminal", "para": "numero-de-vesiculas-varia",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "A probabilidade de uma vesícula fundir cresce com a concentração local de Ca²⁺ elevada à quarta potência, aproximadamente. Uma mudança pequena no Ca²⁺ que entra vira uma mudança grande em quantas vesículas soltam." },
+
+    { "de": "numero-de-vesiculas-varia", "para": "ganho-ajustavel",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se o que varia é o número de vesículas, a força da sinapse tem um controle do lado de quem envia. Qualquer coisa que altere o Ca²⁺ do terminal muda o ganho sem encostar no receptor do outro lado." },
+
+    { "de": "ca-entra-no-terminal", "para": "ca-residual-no-terminal",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Bombas e tampões levam dezenas a centenas de milissegundos para devolver o Ca²⁺ ao nível de repouso. Se outro disparo chega antes disso, o Ca²⁺ novo se soma ao que ainda não foi retirado." },
+
+    { "de": "ca-residual-no-terminal", "para": "facilitacao-de-curto-prazo",
+      "tipo": "causa", "certeza": "debatido",
+      "porque": "O resíduo aumenta a probabilidade de liberação no disparo seguinte. QUAL proteína lê esse resíduo continua em disputa: a sinaptotagmina-7 é a candidata com mais apoio experimental, e há evidência de que outras proteínas ligadoras de Ca²⁺ respondem por parte do efeito, em proporção que varia conforme o tipo de sinapse." },
+
+    { "de": "vesicula-funde", "para": "esgotamento-do-estoque",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O conjunto de vesículas já engatilhadas é pequeno e leva tempo para ser reposto. Disparos em sequência rápida consomem esse estoque mais depressa do que a reposição consegue acompanhar." },
+
+    { "de": "esgotamento-do-estoque", "para": "depressao-de-curto-prazo",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Com menos vesículas prontas, o disparo seguinte solta menos transmissor. A sinapse fica mais fraca por ter sido usada, sem que nada tenha sido decidido a respeito e sem nenhum sinal de controle envolvido." },
+
+    { "de": "facilitacao-de-curto-prazo", "para": "historia-recente-muda-a-forca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A facilitação empurra a força para cima quando os disparos chegam juntos. Como ela depende do intervalo entre eles, quem a governa é o ritmo de chegada, e não a intensidade de qualquer disparo isolado." },
+
+    { "de": "depressao-de-curto-prazo", "para": "historia-recente-muda-a-forca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A depressão empurra a força para baixo pelo mesmo motivo temporal, em sentido contrário. Qual das duas domina depende da sinapse e da frequência, e a mesma via pode amplificar rajadas curtas enquanto filtra as longas." },
+
+    { "de": "codigo-de-frequencia-com-teto", "para": "historia-recente-muda-a-forca",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "O que chega ao terminal é uma sequência de disparos idênticos, e a única grandeza que ela carrega é a taxa. É essa taxa que decide se domina a facilitação ou a depressão, de modo que a sinapse lê exatamente a variável em que a intensidade tinha sido codificada." },
+
+    { "de": "historia-recente-muda-a-forca", "para": "sinal-pode-ser-mudado-na-passagem",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Uma sinapse cuja força depende do próprio uso recente não é um fio: é um elemento com memória de curtíssimo prazo. Nenhuma junção puramente elétrica tem como fazer isso, porque não há nada nela que se gaste ou se acumule." },
+
+    { "de": "ganho-ajustavel", "para": "sinal-pode-ser-mudado-na-passagem",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Ter um controle de força do lado de quem envia é o que permite a uma terceira célula regular a conversa entre duas. Modulação assim exige um ponto de conversão: num contato elétrico direto não há onde encaixar o botão." },
+
+    { "de": "receptor-decide-o-sinal", "para": "sinal-pode-ser-mudado-na-passagem",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Como o sinal do efeito é escolhido por quem recebe, a mesma mensagem pode excitar um alvo e inibir outro. Inverter o sinal na passagem é impossível num condutor, e é uma das coisas que a conversão química compra." },
+
+    { "de": "sinal-vira-analogico", "para": "sinal-pode-ser-mudado-na-passagem",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Voltar ao contínuo é o que torna as entradas somáveis, e sem soma não há decisão a tomar no corpo celular. Junto com as outras três, fecha a resposta: o meio milissegundo perdido na conversão é o preço de o sinal poder ser mudado em vez de apenas transportado." }
+  ],
+
+  "mecanismos": [
+    { "id": "transmissao-sinaptica",
+      "fenomeno": "Se converter elétrico em químico e de volta custa meio milissegundo, por que o cérebro faz isso em quase toda conexão?",
+      "entrada": "despolarizacao-cresce",
+      "terminal": "sinal-pode-ser-mudado-na-passagem",
+      "limites": "Descreve sinapse química rápida com receptor ionotrópico, do tipo que domina a comunicação ponto a ponto no sistema nervoso central. Não cobre receptores metabotrópicos e cascatas de segundo mensageiro, nem sinapses elétricas por junção comunicante (que existem e são rápidas, justamente por não fazerem nada disto), nem plasticidade de longo prazo, nem liberação por volume. A dependência quártica do Ca²⁺ é aproximação: o expoente medido varia com a sinapse." }
+  ]
+}
