@@ -1,0 +1,101 @@
+{
+  "arquivo": "gradiente eletroquímico",
+  "nota_de_autoria": "Cada `porque` nomeia UM princípio. Se precisou de dois, são duas transições.",
+
+  "entidades": [
+    { "id": "membrana", "nome": "Membrana plasmática", "escala": "celular",
+      "funcao": "bicamada lipídica que separa dois meios aquosos e não deixa íons passarem por conta própria",
+      "se_falhar": "os dois meios se misturam; nenhuma diferença de concentração ou de carga pode ser mantida" },
+
+    { "id": "bomba-na-k", "nome": "Bomba de sódio-potássio (Na⁺/K⁺-ATPase)", "escala": "molecular",
+      "funcao": "gasta ATP para mover 3 Na⁺ para fora e 2 K⁺ para dentro por ciclo, contra os gradientes",
+      "se_falhar": "os gradientes se dissipam em minutos; sem desequilíbrio não há energia armazenada na membrana" },
+
+    { "id": "canal-vazamento-k", "nome": "Canal de vazamento de K⁺", "escala": "molecular",
+      "funcao": "poro sempre aberto que deixa K⁺ atravessar a membrana",
+      "se_falhar": "o K⁺ fica preso; a diferença de concentração existe mas não gera voltagem" },
+
+    { "id": "k", "nome": "Íon potássio (K⁺)", "escala": "molecular",
+      "funcao": "cátion monovalente — carrega uma carga positiva a cada íon que se move",
+      "se_falhar": "sem o íon que atravessa, não há corrente" },
+
+    { "id": "anions-internos", "nome": "Ânions intracelulares", "escala": "molecular",
+      "funcao": "proteínas e fosfatos com carga negativa, grandes demais para atravessar a membrana",
+      "se_falhar": "a saída de K⁺ não deixaria excesso de carga negativa para trás" }
+  ],
+
+  "nos": [
+    { "id": "atp-disponivel", "descricao": "A célula tem ATP", "escala": "celular" },
+
+    { "id": "k-concentrado-dentro", "entidade": "k", "escala": "molecular",
+      "descricao": "K⁺ muito mais concentrado dentro do que fora",
+      "quant": { "dentro": "≈140 mM", "fora": "≈4 mM", "razao": "35×" } },
+
+    { "id": "k-difunde-para-fora", "entidade": "k", "escala": "molecular",
+      "descricao": "Mais K⁺ sai do que entra, através dos canais de vazamento" },
+
+    { "id": "carga-positiva-deixa-a-celula", "escala": "molecular",
+      "descricao": "Cada K⁺ que sai leva consigo uma carga positiva" },
+
+    { "id": "interior-mais-negativo", "escala": "celular",
+      "descricao": "O interior fica eletricamente negativo em relação ao exterior" },
+
+    { "id": "campo-eletrico-puxa-k-de-volta", "entidade": "k", "escala": "molecular",
+      "descricao": "O interior negativo atrai K⁺ de volta para dentro" },
+
+    { "id": "equilibrio-eletroquimico", "escala": "celular",
+      "descricao": "A saída por difusão e a entrada por atração elétrica se igualam: fluxo líquido zero" },
+
+    { "id": "potencial-de-equilibrio-do-k", "escala": "celular",
+      "descricao": "A voltagem em que as duas forças se anulam para o K⁺",
+      "quant": { "valor": "≈ −95 mV com estas concentrações", "equacao": "E_K = 61,5 · log([K⁺]fora / [K⁺]dentro) = 61,5 · log(4/140)", "por_que_os_livros_dizem_90": "o número muda com as concentrações assumidas: 5/140 mM dá ≈ −90 mV. A faixa −90 a −95 mV é a mesma conta com entradas diferentes, não duas teorias" } }
+  ],
+
+  "transicoes": [
+    { "de": "atp-disponivel", "para": "k-concentrado-dentro",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana", "bomba-na-k"],
+      "porque": "Transporte ativo: a ATPase usa a energia liberada pela quebra do ATP para empurrar íons CONTRA o gradiente — 3 Na⁺ para fora e 2 K⁺ para dentro a cada ciclo. É a única etapa desta cadeia que consome energia; todo o resto acontece de graça, a favor do que já está desequilibrado.",
+      "condicao": "membrana íntegra separando os dois meios" },
+
+    { "de": "k-concentrado-dentro", "para": "k-difunde-para-fora",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-vazamento-k", "membrana"],
+      "porque": "Difusão: o movimento térmico de cada íon é aleatório e não tem direção preferida. Mas como há 35× mais K⁺ dentro, o número de íons que por acaso cruza para fora é maior que o número que cruza para dentro. O fluxo líquido não vem de nenhuma força puxando — vem só de haver mais partículas de um lado.",
+      "condicao": "canal de vazamento aberto — sem ele a diferença de concentração existe e não vai a lugar nenhum" },
+
+    { "de": "k-difunde-para-fora", "para": "carga-positiva-deixa-a-celula",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O K⁺ é um cátion: mover o íon é mover a carga. Não existe transporte de matéria sem transporte de carga quando a partícula é carregada." },
+
+    { "de": "carga-positiva-deixa-a-celula", "para": "interior-mais-negativo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["anions-internos", "membrana"],
+      "porque": "Os ânions intracelulares — proteínas e fosfatos — são grandes demais para atravessar a membrana. Quando o K⁺ sai, essas cargas negativas ficam para trás sem contraparte positiva. A negatividade não é criada: ela é o que sobra." },
+
+    { "de": "interior-mais-negativo", "para": "campo-eletrico-puxa-k-de-volta",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Atração eletrostática: cargas opostas se atraem. O interior negativo passa a exercer força sobre o K⁺ positivo, no sentido oposto ao da difusão." },
+
+    { "de": "k-difunde-para-fora", "para": "equilibrio-eletroquimico",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A força química continua empurrando K⁺ para fora enquanto houver diferença de concentração." },
+
+    { "de": "campo-eletrico-puxa-k-de-volta", "para": "equilibrio-eletroquimico",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A força elétrica cresce à medida que mais K⁺ sai. Quando ela iguala a força química, cada íon que sai é compensado por um que entra: o fluxo líquido cessa, mas os dois fluxos continuam acontecendo. Equilíbrio não é imobilidade." },
+
+    { "de": "equilibrio-eletroquimico", "para": "potencial-de-equilibrio-do-k",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Nernst quantifica em que voltagem as duas forças se anulam. O valor depende só da razão entre as concentrações — não de quantos íons existem, mas de quão desiguais estão.",
+      "quant": { "calculo": "61,5 · log(4/140) = 61,5 · (−1,544) ≈ −95 mV" } }
+  ],
+
+  "mecanismos": [
+    { "id": "gradiente-eletroquimico",
+      "fenomeno": "Por que existe uma diferença de carga elétrica entre o interior e o exterior da célula?",
+      "entrada": "atp-disponivel",
+      "terminal": "potencial-de-equilibrio-do-k",
+      "limites": "Descreve o equilíbrio para UM íon (K⁺) numa membrana permeável só a ele. A célula real é permeável a vários íons ao mesmo tempo, e por isso o potencial de repouso não fica no valor de equilíbrio do K⁺ — ver o mecanismo do potencial de membrana. Nernst também assume temperatura fixa e atividade iônica ideal." }
+  ]
+}

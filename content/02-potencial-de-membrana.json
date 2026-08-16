@@ -1,0 +1,96 @@
+{
+  "arquivo": "potencial de membrana em repouso",
+  "nota_de_autoria": "Este arquivo NÃO declara nenhuma aresta de ligação com o arquivo 01. Ele apenas usa os mesmos ids de nó (`atp-disponivel`, `potencial-de-equilibrio-do-k`). Se a travessia encontrar o caminho de ponta a ponta, a composição sem costura está provada.",
+
+  "entidades": [
+    { "id": "canal-vazamento-na", "nome": "Canal de vazamento de Na⁺", "escala": "molecular",
+      "funcao": "poro sempre aberto para Na⁺, mas MUITO menos numeroso que os de K⁺",
+      "se_falhar": "a membrana ficaria permeável só a K⁺ e o repouso cairia praticamente em cima do equilíbrio do K⁺ (≈ −95 mV)" },
+
+    { "id": "na", "nome": "Íon sódio (Na⁺)", "escala": "molecular",
+      "funcao": "cátion monovalente, concentrado do lado de FORA",
+      "se_falhar": "some a força que puxa o potencial para cima" }
+  ],
+
+  "nos": [
+    { "id": "na-concentrado-fora", "entidade": "na", "escala": "molecular",
+      "descricao": "Na⁺ muito mais concentrado fora do que dentro",
+      "quant": { "fora": "≈145 mM", "dentro": "≈15 mM", "razao": "≈10×" } },
+
+    { "id": "na-difunde-para-dentro", "entidade": "na", "escala": "molecular",
+      "descricao": "Mais Na⁺ entra do que sai, pelos poucos canais de vazamento de Na⁺" },
+
+    { "id": "carga-positiva-entra-na-celula", "escala": "molecular",
+      "descricao": "Cada Na⁺ que entra traz uma carga positiva para dentro" },
+
+    { "id": "mais-canais-de-k-que-de-na", "escala": "molecular",
+      "descricao": "Há muito mais canais de vazamento de K⁺ abertos na membrana em repouso do que de Na⁺",
+      "quant": { "proporcao": "ordem de 25 a 40 canais de K⁺ para cada um de Na⁺, em número efetivo de poros abertos" } },
+
+    { "id": "permeabilidade-desigual", "escala": "celular",
+      "descricao": "A membrana em repouso é muito mais permeável a K⁺ do que a Na⁺",
+      "quant": { "razao_P_K_por_P_Na": "≈ 25 a 40 vezes" } },
+
+    { "id": "bomba-e-eletrogenica", "escala": "molecular",
+      "descricao": "A bomba tira 3 cargas positivas e devolve 2 — o saldo por ciclo é negativo",
+      "quant": { "contribuicao_direta": "≈ −3 mV" } },
+
+    { "id": "potencial-de-repouso", "escala": "celular",
+      "descricao": "A voltagem em que a célula se estabiliza quando nada a perturba",
+      "quant": { "valor": "≈ −70 mV",
+                 "equacao": "Goldman: pondera cada íon pela permeabilidade da membrana a ele" } }
+  ],
+
+  "transicoes": [
+    { "de": "atp-disponivel", "para": "na-concentrado-fora",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana", "bomba-na-k"],
+      "porque": "Transporte ativo: a mesma ATPase que puxa K⁺ para dentro empurra Na⁺ para fora, no mesmo ciclo. Os dois gradientes são o mesmo investimento de energia.",
+      "condicao": "membrana íntegra separando os dois meios" },
+
+    { "de": "na-concentrado-fora", "para": "na-difunde-para-dentro",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-vazamento-na", "membrana"],
+      "porque": "Difusão: há mais Na⁺ fora, então cruzam mais para dentro do que para fora. É o mesmo princípio do K⁺, no sentido oposto — porque o desequilíbrio é oposto." },
+
+    { "de": "na-difunde-para-dentro", "para": "carga-positiva-entra-na-celula",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O Na⁺ é um cátion: mover o íon é mover a carga." },
+
+    { "de": "potencial-de-equilibrio-do-k", "para": "potencial-de-repouso",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O K⁺ é o íon a que a membrana é mais permeável, então é ele quem mais puxa o potencial. Por isso o repouso fica PERTO de E_K — mas não nele." },
+
+    { "de": "carga-positiva-entra-na-celula", "para": "potencial-de-repouso",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A entrada contínua de Na⁺ despeja carga positiva no interior e impede o potencial de chegar ao equilíbrio do K⁺ puro (≈ −95 mV). É esta a resposta para 'por que −70 e não o valor do potássio': existe um vazamento de sódio o tempo todo." },
+
+    { "de": "mais-canais-de-k-que-de-na", "para": "permeabilidade-desigual",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-vazamento-k", "canal-vazamento-na", "membrana"],
+      "porque": "Permeabilidade não é propriedade do íon, é do número de portas abertas para ele. A membrana não escolhe o K⁺: ela simplesmente tem muito mais poros por onde o K⁺ passa. Troque a densidade de canais e a permeabilidade muda junto, sem que nada no íon mude." },
+
+    { "de": "permeabilidade-desigual", "para": "potencial-de-repouso",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "Goldman: o potencial final é uma média dos potenciais de equilíbrio de cada íon, PONDERADA pela permeabilidade a cada um. Como P_K é 25 a 40× maior que P_Na, o resultado fica muito mais perto de E_K que de E_Na.",
+      "quant": { "E_K": "≈ −95 mV", "E_Na": "≈ +60 mV", "resultado": "≈ −70 mV" } },
+
+    { "de": "bomba-e-eletrogenica", "para": "potencial-de-repouso",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "Além de manter os gradientes, a bomba retira uma carga positiva líquida por ciclo. É uma contribuição pequena e direta, somada por cima do efeito dos gradientes.",
+      "quant": { "peso": "≈ −3 mV de ≈ −70 mV" } },
+
+    { "de": "atp-disponivel", "para": "bomba-e-eletrogenica",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["bomba-na-k"],
+      "porque": "A assimetria 3:2 é uma propriedade do ciclo da bomba; ela só acontece enquanto há ATP para o ciclo rodar." }
+  ],
+
+  "mecanismos": [
+    { "id": "potencial-de-membrana",
+      "fenomeno": "Por que a célula em repouso fica em ≈ −70 mV, e não no equilíbrio do potássio (≈ −95 mV)?",
+      "entrada": "atp-disponivel",
+      "terminal": "potencial-de-repouso",
+      "limites": "Trata a permeabilidade como fixa. Ela não é: canais que abrem e fecham mudam esses pesos em milissegundos, e é exatamente disso que trata o potencial de ação. Os valores numéricos são de neurônio de mamífero a 37 °C e variam entre tipos celulares." }
+  ]
+}
