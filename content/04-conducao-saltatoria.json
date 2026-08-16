@@ -1,0 +1,162 @@
+{
+  "arquivo": "condução saltatória",
+  "nota_de_autoria": "Também sem aresta declarada para arquivo nenhum: começa usando o id `despolarizacao-cresce`, que o arquivo 03 produz. A pergunta central é uma correção de intuição — quase todo mundo imagina que a mielina faz o sinal CORRER mais rápido. Não faz: a corrente pelo axoplasma já é praticamente instantânea com ou sem mielina. O que custa tempo é REGENERAR o disparo, e a mielina reduz o número de regenerações necessárias. O terminal do mecanismo é exatamente isso.",
+
+  "entidades": [
+    { "id": "mielina", "nome": "Bainha de mielina", "escala": "celular",
+      "funcao": "dezenas de camadas de membrana glial enroladas em volta do axônio, cobrindo tudo menos as lacunas",
+      "se_falhar": "a corrente volta a vazar por todo o comprimento e o alcance passivo despenca; se o próximo nodo ficar fora de alcance, a condução não fica lenta, ela BLOQUEIA (é o que acontece na esclerose múltipla)" },
+
+    { "id": "axoplasma", "nome": "Axoplasma", "escala": "celular",
+      "funcao": "o citoplasma do axônio, caminho condutor por dentro da fibra",
+      "se_falhar": "não há por onde a corrente local caminhar adiante, e cada ponto do axônio ficaria eletricamente isolado do vizinho" },
+
+    { "id": "nodo-de-ranvier", "nome": "Nodo de Ranvier", "escala": "celular",
+      "funcao": "lacuna descoberta entre duas bainhas, onde a membrana fica exposta e os canais dependentes de voltagem se concentram",
+      "se_falhar": "sem membrana exposta não há onde regenerar, e o sinal atravessa passivamente até morrer" }
+  ],
+
+  "nos": [
+    { "id": "corrente-local-pelo-axoplasma", "entidade": "axoplasma", "escala": "celular",
+      "descricao": "A carga que entrou se redistribui pelo interior do axônio, adiante do ponto de entrada" },
+
+    { "id": "vazamento-pela-membrana", "entidade": "membrana", "escala": "celular",
+      "descricao": "Parte da corrente que caminha por dentro escapa pela membrana antes de chegar adiante" },
+
+    { "id": "decaimento-exponencial-com-a-distancia", "escala": "celular",
+      "descricao": "A despolarização passiva fica menor quanto mais longe do ponto de origem",
+      "quant": { "lambda_sem_mielina": "≈ 0,1 a 1 mm", "forma": "queda exponencial, não linear" } },
+
+    { "id": "precisa-regenerar", "escala": "celular",
+      "descricao": "O sinal tem de ser refeito com amplitude cheia em pontos sucessivos, ou não chega ao fim" },
+
+    { "id": "regeneracao-custa-tempo", "escala": "celular",
+      "descricao": "Cada regeneração consome tempo: abrir comportas e carregar a membrana até o limiar",
+      "quant": { "por_regeneracao": "algumas décimas de milissegundo" } },
+
+    { "id": "mielina-envolve-o-axonio", "entidade": "mielina", "escala": "celular",
+      "descricao": "Camadas de membrana glial cobrem o axônio, deixando lacunas descobertas a intervalos regulares",
+      "quant": { "camadas": "dezenas a mais de cem", "intervalo_entre_nodos": "≈ 1 a 2 mm" } },
+
+    { "id": "resistencia-da-membrana-sobe", "escala": "celular",
+      "descricao": "No trecho coberto, o caminho de fuga da corrente fica muito mais resistivo" },
+
+    { "id": "capacitancia-da-membrana-cai", "escala": "celular",
+      "descricao": "No trecho coberto, a membrana armazena muito menos carga por volt" },
+
+    { "id": "constante-de-comprimento-aumenta", "escala": "celular",
+      "descricao": "A distância em que a despolarização passiva ainda é aproveitável fica muito maior",
+      "quant": { "lambda_com_mielina": "vários milímetros", "regra": "cresce com a raiz da razão entre resistência de membrana e resistência interna" } },
+
+    { "id": "menos-carga-para-mudar-a-voltagem", "escala": "celular",
+      "descricao": "O trecho coberto muda de voltagem quase sem atraso, porque exige pouca carga" },
+
+    { "id": "diametro-do-axonio-maior", "entidade": "axoplasma", "escala": "celular",
+      "descricao": "O axônio é grosso",
+      "quant": { "axonio_gigante_da_lula": "≈ 0,5 a 1 mm de diâmetro" } },
+
+    { "id": "resistencia-interna-cai", "entidade": "axoplasma", "escala": "celular",
+      "descricao": "A corrente encontra menos resistência para seguir adiante por dentro" },
+
+    { "id": "canais-de-na-so-nos-nodos", "entidade": "canal-na-voltagem", "escala": "molecular",
+      "descricao": "Os canais de Na⁺ dependentes de voltagem ficam concentrados nas lacunas descobertas",
+      "quant": { "densidade_no_nodo": "ordens de grandeza acima da do trecho coberto" } },
+
+    { "id": "regeneracao-so-nos-nodos", "escala": "celular",
+      "descricao": "O disparo só é refeito nos nodos; o trecho coberto é atravessado passivamente" },
+
+    { "id": "velocidade-vem-de-pular-regeneracoes", "escala": "celular",
+      "descricao": "A velocidade não vem de o sinal correr mais rápido, e sim de ele parar menos vezes no caminho",
+      "quant": { "sem_mielina": "≈ 0,5 a 2 m/s", "com_mielina": "até ≈ 120 m/s" } }
+  ],
+
+  "transicoes": [
+    { "de": "despolarizacao-cresce", "para": "corrente-local-pelo-axoplasma",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["axoplasma"],
+      "porque": "A carga que entrou não fica onde entrou. O interior do axônio conduz, e o excesso de carga positiva repele as cargas positivas vizinhas, redistribuindo-se adiante quase à velocidade da eletricidade. Nenhum canal participa desse passo: é condução elétrica, não transporte de íon ponto a ponto." },
+
+    { "de": "corrente-local-pelo-axoplasma", "para": "vazamento-pela-membrana",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana"],
+      "porque": "A membrana não é isolante perfeito: tem canais de vazamento abertos o tempo todo. Parte da corrente que caminha por dentro encontra esse caminho de saída e escapa em vez de seguir adiante." },
+
+    { "de": "vazamento-pela-membrana", "para": "decaimento-exponencial-com-a-distancia",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Cada trecho de membrana subtrai uma fração constante da corrente que ainda segue. Fração constante por unidade de comprimento é justamente o que produz queda exponencial, e não linear: dobrar a distância não corta a voltagem pela metade, corta muito mais." },
+
+    { "de": "constante-de-comprimento-aumenta", "para": "decaimento-exponencial-com-a-distancia",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "O decaimento não desaparece com a mielina: ele passa a acontecer numa escala de distância muito maior. O sinal continua morrendo sozinho, só que agora morre depois de milímetros em vez de depois de décimos de milímetro." },
+
+    { "de": "decaimento-exponencial-com-a-distancia", "para": "precisa-regenerar",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Um sinal que decai não atravessa um axônio de um metro. A única saída é refazê-lo: usar a despolarização que ainda sobrou para cruzar o limiar adiante e produzir um disparo novo, de amplitude cheia, que recomeça a contagem." },
+
+    { "de": "precisa-regenerar", "para": "regeneracao-custa-tempo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "Regenerar não é instantâneo: as comportas de ativação levam décimos de milissegundo para abrir, e a corrente ainda precisa carregar a capacitância local até o limiar. É este passo, e não a corrida da corrente pelo axoplasma, que consome o tempo da condução." },
+
+    { "de": "regeneracao-custa-tempo", "para": "velocidade-vem-de-pular-regeneracoes",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O custo de uma regeneração é praticamente o mesmo com mielina ou sem ela: são os mesmos canais, com a mesma cinética. É por isso que ele entra na conta da velocidade como um preço fixo por parada, e não como algo que a mielina acelere." },
+
+    { "de": "mielina-envolve-o-axonio", "para": "resistencia-da-membrana-sobe",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["mielina"],
+      "porque": "A bainha são dezenas de camadas de membrana empilhadas em série, e resistências em série somam. O caminho de fuga da corrente fica tão resistivo no trecho coberto que praticamente nada vaza por ali." },
+
+    { "de": "mielina-envolve-o-axonio", "para": "capacitancia-da-membrana-cai",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["mielina"],
+      "porque": "Capacitância cai quando a distância entre as placas aumenta, e a bainha afasta o meio externo do axoplasma por muitas camadas. Menos capacitância significa menos carga necessária para mover a voltagem daquele trecho." },
+
+    { "de": "mielina-envolve-o-axonio", "para": "canais-de-na-so-nos-nodos",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["mielina", "nodo-de-ranvier", "canal-na-voltagem"],
+      "porque": "O contato da célula glial com o axônio organiza a membrana embaixo dela e empurra os canais dependentes de voltagem para as lacunas descobertas. A concentração nos nodos depende desse contato: sem bainha, os canais ficam espalhados por todo o comprimento." },
+
+    { "de": "resistencia-da-membrana-sobe", "para": "constante-de-comprimento-aumenta",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A constante de comprimento cresce com a raiz da razão entre a resistência da membrana e a do interior. Com menos fuga por unidade de comprimento, a mesma corrente chega muito mais longe antes de a voltagem cair ao ponto de não servir." },
+
+    { "de": "diametro-do-axonio-maior", "para": "resistencia-interna-cai",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["axoplasma"],
+      "porque": "Resistência de um condutor cai quando a área da seção aumenta, porque há mais caminhos em paralelo para a corrente. Dobrar o diâmetro quadruplica a área e derruba a resistência interna para um quarto." },
+
+    { "de": "resistencia-interna-cai", "para": "constante-de-comprimento-aumenta",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O alcance passivo melhora tanto dificultando a fuga quanto facilitando o avanço por dentro. Esta é a segunda rota, e é a que os invertebrados usam: o axônio gigante da lula não tem mielina nenhuma e compensa com quase um milímetro de diâmetro." },
+
+    { "de": "capacitancia-da-membrana-cai", "para": "menos-carga-para-mudar-a-voltagem",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Voltagem é carga dividida por capacitância. Com a capacitância menor, a mesma corrente que chega do nodo anterior levanta a voltagem daquele trecho muito mais depressa, quase sem gastar carga no caminho." },
+
+    { "de": "canais-de-na-so-nos-nodos", "para": "regeneracao-so-nos-nodos",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem", "nodo-de-ranvier"],
+      "porque": "Regenerar exige canal de Na⁺ dependente de voltagem, e onde não há canal não existe disparo possível. O trecho coberto só pode conduzir de forma passiva, e o disparo volta a existir apenas no nodo seguinte." },
+
+    { "de": "menos-carga-para-mudar-a-voltagem", "para": "regeneracao-so-nos-nodos",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Pular um trecho só funciona se o que chega ao nodo seguinte ainda cruzar o limiar. A capacitância baixa é o que garante isso: quase nenhuma carga se perde enchendo a membrana do trecho coberto pelo caminho." },
+
+    { "de": "constante-de-comprimento-aumenta", "para": "regeneracao-so-nos-nodos",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "O nodo seguinte precisa estar dentro da distância em que a despolarização ainda é grande o bastante para disparar. É o alcance passivo aumentado que põe o próximo nodo dentro desse raio, e é por isso que perder a bainha pode bloquear a condução em vez de apenas atrasá-la." },
+
+    { "de": "regeneracao-so-nos-nodos", "para": "velocidade-vem-de-pular-regeneracoes",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Atravessar uma distância exige um número de paradas igual a essa distância dividida pelo espaçamento entre nodos. Aumentar o espaçamento reduz o número de paradas na mesma proporção, e é aí que a velocidade sobe: o sinal não corre mais rápido, ele para menos vezes." }
+  ],
+
+  "mecanismos": [
+    { "id": "conducao-saltatoria",
+      "fenomeno": "Se a corrente elétrica já atravessa o axônio quase instantaneamente, por que a mielina torna a condução mais rápida?",
+      "entrada": "despolarizacao-cresce",
+      "terminal": "velocidade-vem-de-pular-regeneracoes",
+      "limites": "Descreve condução em axônio mielinizado de vertebrado, tratando a bainha como isolante passivo. Não cobre o papel metabólico da glia no sustento do axônio, nem a remodelação de mielina dependente de atividade, nem os canais de K⁺ justaparanodais. Trata o nodo como ponto; em fibras finas o comprimento do nodo importa. Os números de velocidade são de fibras motoras grandes de mamífero." }
+  ]
+}

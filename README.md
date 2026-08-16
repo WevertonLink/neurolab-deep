@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 140 caixas para os três mecanismos: 40 construir, 40
-reconstruir, 40 depurar e **20 perturbar** — a assimetria é o sinal de que a
+Hoje isso dá 200 caixas para os quatro mecanismos: 58 construir, 58
+reconstruir, 58 depurar e **26 perturbar** — a assimetria é o sinal de que a
 regra está derivando, não carimbando.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
@@ -197,11 +197,15 @@ Fase B fechada: o cronograma — caixa por transição × operação,
 mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
 percurso: etapas calculadas, conquista como troféu. Sem UI ainda.
 
-Fase D em curso: **3 mecanismos** (gradiente eletroquímico, potencial de
-membrana, potencial de ação), 3 etapas calculadas, 40 transições. O caminho
-de `atp-disponivel` até `codigo-de-frequencia-com-teto` atravessa os três
-arquivos em 14 transições, e nenhum arquivo declara ligação com outro.
+Fase D em curso: **4 mecanismos** (gradiente eletroquímico, potencial de
+membrana, potencial de ação, condução saltatória), **3 etapas** calculadas,
+58 transições. Nenhum arquivo declara ligação com outro.
 
-Restam: condução saltatória, transmissão sináptica, LTP, LTD, consolidação
-sistêmica, erro de previsão, acúmulo de evidência, controle top-down, eixo
-HPA. E a tela, com o deslizador de escala como projeção do grafo.
+A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha:
+o terminal do potencial de ação (o código de frequência) não fica a montante
+da velocidade de condução, então os dois são irmãos e não sequência. A grade
+16×4 do v2 nunca poderia ter dito isso.
+
+Restam: transmissão sináptica, LTP, LTD, consolidação sistêmica, erro de
+previsão, acúmulo de evidência, controle top-down, eixo HPA. E a tela, com o
+deslizador de escala como projeção do grafo.
