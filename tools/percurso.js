@@ -55,9 +55,12 @@ if(p.ciclicos.length){
   console.log(`⚠ sem ordem possível entre: ${p.ciclicos.join(', ')}\n`);
 }
 
+const pct = f => (f * 100).toFixed(0) + '%';
+
 p.etapas.forEach(e=>{
   const selo = e.concluida ? '  ✓ CONCLUÍDA' : (e.iniciada ? '  ◐ em curso' : '');
-  console.log(`\nEtapa ${e.numero}${selo}`);
+  console.log(`\nEtapa ${e.numero}${selo}` +
+              `   ·   ${e.total} caixas, ${pct(e.peso)} do percurso`);
   e.mecanismos.forEach(m=>{
     console.log(`  ${m.mecanismo}`);
     console.log(`    ${g.mecanismos[m.mecanismo].fenomeno}`);
@@ -71,7 +74,20 @@ p.etapas.forEach(e=>{
 console.log(`\n${'─'.repeat(56)}`);
 console.log('PERCURSO   ' + P.trilha(p));
 console.log('           ' + p.etapas.map((e, i)=>(' ' + (i + 1)).padEnd(5)).join(''));
-console.log(`\nConquistado: ${p.conquistadas}/${p.total} caixas` +
-            `   ·   Revisões para hoje (${data(agora)}): ${p.revisoesHoje}`);
+
+/* Os dois números lado a lado, de propósito. Contar etapa não é contar
+   progresso: as etapas têm pesos muito diferentes, e a trilha desenha
+   degraus iguais. Enquanto os dois percentuais não baterem, quem olha só a
+   trilha está sendo enganado sobre quanto falta. */
+const porEtapa = p.etapas.length ? p.etapasConcluidas / p.etapas.length : 0;
+const porCaixa = p.total ? p.conquistadas / p.total : 0;
+console.log(`\nEtapas concluídas:  ${p.etapasConcluidas} de ${p.etapas.length}   (${pct(porEtapa)})`);
+console.log(`Caixas conquistadas: ${p.conquistadas} de ${p.total}   (${pct(porCaixa)})   ← este é o que vale`);
+if(Math.abs(porEtapa - porCaixa) > 0.1){
+  console.log(`\n⚠ Os dois números discordam em ${pct(Math.abs(porEtapa - porCaixa))}. ` +
+              `A contagem de etapas está\n  ${porEtapa > porCaixa ? 'otimista' : 'pessimista'} ` +
+              `porque as etapas não têm o mesmo tamanho.`);
+}
+console.log(`\nRevisões para hoje (${data(agora)}): ${p.revisoesHoje}`);
 console.log('\nA conquista não desce. As revisões vêm por fora — e continuam vindo\n' +
             'mesmo com o percurso inteiro fechado, porque é assim que ele fica fechado.');

@@ -385,6 +385,29 @@ PROVAS.push({
     });
     exigir(pp.conquistadas === soma,
       `o percurso soma ${pp.conquistadas} conquistadas contra ${soma} das etapas`);
+    exigir(pp.etapasConcluidas === pp.etapas.filter(e=>e.concluida).length,
+      'a contagem de etapas concluídas não bate com as etapas concluídas');
+
+    /* O PESO de cada etapa. Contar etapa não é contar progresso: no conteúdo
+       real a etapa 3 sozinha carrega a maioria das caixas, e uma trilha de
+       degraus iguais diria que fechar as duas primeiras é a maior parte do
+       caminho quando é menos de um terço dele. */
+    let somaDosPesos = 0;
+    pp.etapas.forEach(e=>{
+      exigir(Math.abs(e.peso - e.total / pp.total) < 1e-9,
+        `etapa ${e.numero}: peso ${e.peso} não é a fração ${e.total}/${pp.total} do percurso`);
+      somaDosPesos += e.peso;
+    });
+    exigir(Math.abs(somaDosPesos - 1) < 1e-9,
+      `os pesos das etapas somam ${somaDosPesos}, e teriam de somar 1`);
+
+    /* E no conteúdo real os pesos são DESIGUAIS — é o fato que motivou o
+       campo existir. Se um dia ficarem iguais, esta prova avisa que a
+       assimetria sumiu e a correção deixou de ser necessária. */
+    const real = P.percurso(g, estadoReal, T0, idx);
+    const pesos = real.etapas.map(e=>e.peso);
+    exigir(Math.max(...pesos) - Math.min(...pesos) > 0.05,
+      'as etapas do conteúdo real têm peso praticamente igual: a trilha de degraus iguais não mentiria');
 
     /* Conteúdo NOVO reabre o que estava fechado. O denominador é o total de
        caixas do mecanismo, não o que já foi semeado — senão a Fase D
@@ -426,6 +449,13 @@ PROVAS.push({
                    conquistadas:conq.length, fracao: abertas.length ? conq.length/abertas.length : 0,
                    concluido: abertas.length > 0 && conq.length === abertas.length,
                    iniciado: abertas.some(k=>estado.caixas[k].tentativas > 0) };
+        }; return m; } },
+    { como: 'todas as etapas pesam igual (é a mentira que a trilha de degraus iguais conta)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.P.percurso;
+        m.P.percurso = (g, estado, agora, idx)=>{
+          const p = real(g, estado, agora, idx);
+          p.etapas.forEach(e=>{ e.peso = p.etapas.length ? 1 / p.etapas.length : 0; });
+          return p;
         }; return m; } },
     { como: 'o percurso soma as conquistas da etapa errado',
       aplicar(s){ const m = clonarSujeito(s); const real = s.P.percurso;

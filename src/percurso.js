@@ -122,13 +122,23 @@ function percurso(g, estado, agora, idx){
     };
   });
 
+  /* O PESO de cada etapa: que fração do percurso inteiro ela representa.
+     Sem isto a trilha mente. Hoje a etapa 3 tem 142 das 200 caixas, e
+     `[✓]──[✓]──[◐]` desenha três degraus do mesmo tamanho: fechar as duas
+     primeiras parece "2 de 3 feito" e são 29% do trabalho. Contar etapa não
+     é contar progresso, e a barra que ele pediu não pode mentir sobre
+     quanto falta. */
+  const total = lista.reduce((n, e)=>n + e.total, 0);
+  lista.forEach(e=>{ e.peso = total ? e.total / total : 0; });
+
   return {
     agora,
     etapas: lista,
     ciclicos,
     revisoesHoje: E.devidas(estado, agora).length,   // ao lado, não dentro
     conquistadas: lista.reduce((n, e)=>n + e.conquistadas, 0),
-    total: lista.reduce((n, e)=>n + e.total, 0)
+    total,
+    etapasConcluidas: lista.filter(e=>e.concluida).length
   };
 }
 
