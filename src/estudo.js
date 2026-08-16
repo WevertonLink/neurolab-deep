@@ -38,6 +38,7 @@ const TETO_SESSAO = 16;     // piso de parada da sessão, em caixas
 const DIA = 86400000;
 const FOLGA = 0.12;         // ±12% no vencimento, para o lote semeado junto não vencer junto para sempre
 const MIN_NOS_PARA_ORDENAR = 3;  // com 2 nós a ordem é trivial e a operação não mede nada
+const MIN_SOBREVIVENTES = 2;     // sem sobrevivente não há distrator, e "marcar tudo" acerta
 
 /* ---------- o endereço ---------- */
 function chaveDaTransicao(t){ return t.de + '>' + t.para; }
@@ -82,8 +83,16 @@ function operacoesMensuraveisEm(g, t, mecanismoId, idx){
   const ops = [];
   if(sg.nos.size >= MIN_NOS_PARA_ORDENAR){ ops.push('construir'); ops.push('reconstruir'); }
 
-  const perturbavel = (t.requer||[]).some(entidade=>
-    G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos.length > 0);
+  /* Perturbar precisa de perda REAL e de sobreviventes. Entidade cuja
+     remoção não derruba nada gera pergunta sem resposta; entidade que
+     derruba o recorte inteiro gera pergunta sem distrator, e aí "marcar
+     tudo" acerta. As duas degeneram para o mesmo lugar: item decorável. */
+  const perturbavel = (t.requer||[]).some(entidade=>{
+    const perdidos = G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos
+      .filter(n=>sg.nos.has(n));
+    if(!perdidos.length) return false;
+    return (sg.nos.size - perdidos.length) >= MIN_SOBREVIVENTES;
+  });
   if(perturbavel) ops.push('perturbar');
 
   // `depurar` é a única que não depende do recorte: se a inversa existe no
@@ -319,7 +328,7 @@ function resumo(estado, agora){
 
 module.exports = {
   OPERACOES, INTERVALOS, PASSA, TETO_RECAIDA, TETO_SESSAO, DIA, FOLGA,
-  MIN_NOS_PARA_ORDENAR,
+  MIN_NOS_PARA_ORDENAR, MIN_SOBREVIVENTES,
   chaveDaTransicao, chaveDaCaixa, lerChave, indexar,
   operacoesMensuraveis, operacoesMensuraveisEm, mecanismosDe, donoDaCaixa,
   novoEstado, semear, iniciarLote, anotar, fecharLote, agendar,

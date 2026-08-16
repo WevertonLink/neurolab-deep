@@ -48,7 +48,9 @@ const DIAS = n => n * EST.DIA;
      a→c  entidade viva   → única rota até c; removê-la perde alcance
      a→b  entidade inerte → b também chega por c; removê-la não perde nada
      b→d / d→b            → inversas uma da outra; inverter não é erro
-     p→q                  → recorte de 2 nós; não há ordem a construir
+     p→q                  → recorte de 2 nós; não há ordem a construir, e a
+                            entidade dele derruba o recorte INTEIRO menos um
+                            nó: sem sobrevivente não há distrator possível
      x→y                  → fora de todo mecanismo; nada a estudar
 */
 function T(de, para, requer, certeza){
@@ -59,7 +61,8 @@ function T(de, para, requer, certeza){
 function fixture(){
   return {
     entidades: { 'ent-viva':   { id:'ent-viva',   nome:'Entidade viva' },
-                 'ent-inerte': { id:'ent-inerte', nome:'Entidade inerte' } },
+                 'ent-inerte': { id:'ent-inerte', nome:'Entidade inerte' },
+                 'ent-total':  { id:'ent-total',  nome:'Entidade total' } },
     nos: ['a','b','c','d','p','q','x','y'].reduce((o, id)=>{
       o[id] = { id, descricao:'Nó ' + id.toUpperCase() }; return o;
     }, {}),
@@ -69,7 +72,7 @@ function fixture(){
       T('c','b', [], 'debatido'),
       T('b','d', [], 'hipotese'),
       T('d','b', []),
-      T('p','q', []),
+      T('p','q', ['ent-total']),
       T('x','y', [])
     ],
     mecanismos: {
@@ -235,7 +238,8 @@ PROVAS.push({
     exigir(ops('d','b') === 'construir,reconstruir',
       `d→b tem inversa no grafo: inverter não é erro, logo não é depurável. Mediu "${ops('d','b')}"`);
     exigir(ops('p','q') === 'depurar',
-      `p→q mora num recorte de 2 nós: não há ordem a construir nem cadeia a reconstruir. Mediu "${ops('p','q')}"`);
+      `p→q mora num recorte de 2 nós (nada a ordenar) e a entidade dele não deixa sobrevivente ` +
+      `(nenhum distrator possível, "marcar tudo" acertaria). Mediu "${ops('p','q')}"`);
     exigir(ops('x','y') === '',
       `x→y está fora de todo mecanismo: não há recorte onde estudá-la. Mediu "${ops('x','y')}"`);
 
@@ -262,6 +266,25 @@ PROVAS.push({
           if((t.requer||[]).length) ops.push('perturbar');
           return ops;
         }; return m; } },
+    { como: 'perturbar não exige sobreviventes (entidade que derruba tudo vira pergunta sem distrator)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.E.operacoesMensuraveisEm;
+        m.E.operacoesMensuraveisEm = (g, t, mecId, idx)=>{
+          const ops = real(g, t, mecId, idx);
+          const sg = (idx || m.E.indexar(g))[mecId];
+          if(!sg || !sg.transicoes.includes(t) || ops.includes('perturbar')) return ops;
+          const derruba = (t.requer||[]).some(entidade=>
+            s.E.indexar && G.perturbar(g, { entidade }, sg.mecanismo.entrada)
+              .perdidos.filter(n=>sg.nos.has(n)).length > 0);
+          return derruba ? ops.concat(['perturbar']) : ops;
+        };
+        m.E.operacoesMensuraveis = (g, t, idx)=>{
+          idx = idx || m.E.indexar(g);
+          const vistas = new Set();
+          m.E.mecanismosDe(g, t, idx).forEach(id=>
+            m.E.operacoesMensuraveisEm(g, t, id, idx).forEach(o=>vistas.add(o)));
+          return m.E.OPERACOES.filter(o=>vistas.has(o));
+        };
+        return m; } },
     { como: 'depurar ignora se a transição inversa já existe no grafo',
       aplicar(s){ const m = clonarSujeito(s); const real = s.E.operacoesMensuraveis;
         m.E.operacoesMensuraveis = (g, t, idx)=>{
