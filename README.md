@@ -186,6 +186,18 @@ rodaria um motor que portão nenhum vigia. `tools/test-app.js` confere que a
 fonte inteira de cada módulo está lá dentro e que o `app.html` commitado é o
 que as fontes geram hoje.
 
+A **escala** é atributo do nó, e o deslizador é uma projeção do mesmo grafo —
+nunca uma tela nova nem texto por camada. Se cada escala tivesse conteúdo
+próprio, a camada voltaria a ser dona do material, que é o defeito da grade
+16×4. O vocabulário de escalas é derivado do conteúdo: escala nova num
+mecanismo futuro aparece no deslizador sozinha. Há ainda a faixa **pontes**,
+que mostra só as transições cujas pontas trocam de nível — é onde o
+molecular vira celular, e são 25 das 58 transições de hoje.
+
+A tela de leitura mostra o **endereço** de cada transição (`03-….json[7]`),
+para um erro de neurociência poder ser reportado por número em vez de por
+descrição. É a auditoria no celular, em vez de no terminal.
+
 A tela é **burra de propósito**: não escolhe pergunta, não corrige, não
 calcula intervalo, não sabe o que é caixa de revisão. Uma das provas do
 portão lê `app/ui.js` procurando constante de estudo (nota de corte,
@@ -337,8 +349,8 @@ mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
 percurso: etapas calculadas, conquista como troféu.
 
 Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
-`app.html` é o protótipo jogável — arquivo único, sem servidor. Falta o
-deslizador de escala.
+`app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
+de estudo, leitura do mecanismo e deslizador de escala.
 
 Fase D em curso: **4 mecanismos** (gradiente eletroquímico, potencial de
 membrana, potencial de ação, condução saltatória), **3 etapas** calculadas,

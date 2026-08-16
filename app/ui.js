@@ -54,6 +54,7 @@ function el(tag, attrs, filhos){
 }
 function limpar(){ app.innerHTML = ''; }
 function pct(f){ return Math.round(f * 100) + '%'; }
+function nomeNo(id){ return (g.nos[id] && g.nos[id].descricao) || id; }
 function botao(rotulo, aoClicar){
   rodape.classList.remove('oculto');
   acao.textContent = rotulo;
@@ -105,6 +106,9 @@ function telaPercurso(){
       if(m.prerequisitos.length){
         cartao.appendChild(el('div', { class: 'dep', texto: 'depende de: ' + m.prerequisitos.join(', ') }));
       }
+      var ver = el('button', { class: 'fantasma explorar', type: 'button', texto: 'Ler o mecanismo' });
+      ver.onclick = (function(id){ return function(){ telaExplorar(id, 'todas'); }; })(m.mecanismo);
+      cartao.appendChild(ver);
     });
     app.appendChild(cartao);
   });
@@ -137,6 +141,84 @@ function telaPercurso(){
 
   if(p.revisoesHoje > 0) botao('Estudar (' + p.revisoesHoje + ' vencidas)', comecarSessao);
   else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
+}
+
+/* ---------- ler o mecanismo ----------
+   A mesma cadeia que gera as perguntas, em ordem causal e por extenso. Serve
+   para duas coisas: estudar antes de ser cobrado, e AUDITAR — por isso cada
+   transição mostra o endereço no arquivo, para um erro de neurociência poder
+   ser reportado por número em vez de por descrição.
+
+   O deslizador de escala é uma projeção deste mesmo grafo. Não existe texto
+   por camada: se existisse, a camada voltaria a ser dona do conteúdo. */
+function telaExplorar(mecanismoId, escala){
+  limpar();
+  semBotao();
+  var m = g.mecanismos[mecanismoId];
+  var cadeia = G.projetar(g, mecanismoId, escala);
+  var total = G.cadeiaOrdenada(g, mecanismoId).length;
+
+  var voltar = el('button', { class: 'fantasma', type: 'button', texto: '‹ percurso' });
+  voltar.onclick = telaPercurso;
+  app.appendChild(voltar);
+
+  app.appendChild(el('h1', { texto: mecanismoId }));
+  app.appendChild(el('p', { class: 'sub', texto: m.fenomeno }));
+
+  var cabeca = el('div', { class: 'cartao' });
+  cabeca.appendChild(el('div', { class: 'rotulo', texto: 'entrada' }));
+  cabeca.appendChild(el('div', { texto: nomeNo(m.entrada) }));
+  cabeca.appendChild(el('div', { class: 'rotulo', style: 'margin-top:10px', texto: 'termina em' }));
+  cabeca.appendChild(el('div', { texto: nomeNo(m.terminal) }));
+  var pre = G.prerequisitos(g, mecanismoId);
+  if(pre.length) cabeca.appendChild(el('div', { class: 'dep', texto: 'pré-requisitos derivados: ' + pre.join(', ') }));
+  cabeca.appendChild(el('div', { class: 'rotulo', style: 'margin-top:10px', texto: 'limites declarados' }));
+  cabeca.appendChild(el('p', { class: 'fenomeno', texto: m.limites }));
+  app.appendChild(cabeca);
+
+  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui. */
+  var faixas = [{ id: 'todas', rotulo: 'todas' }]
+    .concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))
+    .concat([{ id: 'pontes', rotulo: 'pontes entre escalas' }]);
+  var barra = el('div', { class: 'faixas' });
+  faixas.forEach(function(f){
+    var b = el('button', { class: 'faixa' + (f.id === escala ? ' viva' : ''), type: 'button', texto: f.rotulo });
+    b.onclick = (function(id){ return function(){ telaExplorar(mecanismoId, id); }; })(f.id);
+    barra.appendChild(b);
+  });
+  app.appendChild(barra);
+  app.appendChild(el('p', { class: 'rotulo',
+    texto: cadeia.length + ' de ' + total + ' transições nesta projeção' }));
+
+  if(!cadeia.length){
+    app.appendChild(el('p', { class: 'aviso', texto: 'Nenhuma transição nesta escala.' }));
+    return;
+  }
+
+  cadeia.forEach(function(t){
+    var ex = G.explicar(g, t);
+    var cartao = el('div', { class: 'cartao' });
+    var rel = el('div', { class: 'rel' });
+    rel.appendChild(document.createTextNode(nomeNo(t.de) + ' '));
+    rel.appendChild(el('span', { class: 'verbo', texto: G.VERBO[t.tipo] || t.tipo }));
+    rel.appendChild(document.createTextNode(' ' + nomeNo(t.para)));
+    cartao.appendChild(rel);
+    cartao.appendChild(el('div', { class: 'escalas',
+      texto: (g.nos[t.de].escala || '?') + ' › ' + (g.nos[t.para].escala || '?') }));
+    cartao.appendChild(el('p', { texto: ex.resposta }));
+    var meta = [];
+    if(ex.condicao) meta.push('condição: ' + ex.condicao);
+    if(ex.requer && ex.requer.length) meta.push('depende de: ' + ex.requer.join(' · '));
+    if(meta.length) cartao.appendChild(el('div', { class: 'meta', texto: meta.join('   ') }));
+    if(ex.ressalva) cartao.appendChild(el('div', { class: 'ressalva', texto: ex.ressalva }));
+    /* o endereço, para auditoria: dá para dizer "03[7] está errado" */
+    cartao.appendChild(el('div', { class: 'endereco', texto: t._arquivo + '[' + t._i + ']' }));
+    app.appendChild(cartao);
+  });
+
+  app.appendChild(el('p', { class: 'aviso',
+    texto: 'Nenhum portão sabe se isto é verdade — eles verificam coerência. ' +
+           'Se uma destas relações estiver errada, o endereço embaixo dela é o que identifica.' }));
 }
 
 /* ---------- sessão ---------- */

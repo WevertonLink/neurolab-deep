@@ -91,6 +91,16 @@ button:disabled{opacity:.4;cursor:default}
         padding:22px 14px calc(14px + env(safe-area-inset-bottom))}
 .rodape > div{max-width:720px;margin:0 auto}
 .oculto{display:none}
+.explorar{margin-top:12px;width:100%;padding:10px;font-size:14px}
+.faixas{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
+.faixa{white-space:nowrap;padding:8px 13px;font-size:13px;border-radius:99px;background:var(--painel);color:var(--fraco)}
+.faixa.viva{background:var(--acento);border-color:var(--acento);color:#06121f;font-weight:600}
+.rel{font-weight:600;font-size:14px;margin-bottom:3px}
+.verbo{color:var(--acento);font-weight:600}
+.escalas{font-size:11px;color:var(--tenue);letter-spacing:.04em;margin-bottom:7px}
+.meta{font-size:12px;color:var(--tenue);margin-top:7px}
+.endereco{font:11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--tenue);margin-top:9px;opacity:.7}
+.cartao > p{margin:6px 0 0;font-size:14px;color:var(--fraco)}
 .aviso{font-size:12px;color:var(--tenue);margin-top:14px;line-height:1.5}
 </style>
 </head>
@@ -340,10 +350,53 @@ function reconstruir(g, mecanismoId, sentido){
            transicoesCobertas: new Set(passos.flatMap(p=>p.transicoes)) };
 }
 
+/* ---------- projeção por escala ----------
+   A escala é atributo do NÓ, e o deslizador é uma projeção do mesmo grafo —
+   nunca uma tela nova nem um conteúdo paralelo. Era a condição do plano: se
+   cada escala tivesse texto próprio, voltaria a existir conteúdo escrito
+   por camada, e a camada viraria dona do material.
+
+   O vocabulário de escalas é DERIVADO do conteúdo, não uma lista fixa. No
+   dia em que um mecanismo trouxer escala nova, ela aparece sozinha. */
+function escalasDe(g){
+  return [...new Set(Object.values(g.nos).map(n=>n.escala).filter(Boolean))].sort();
+}
+
+/* A cadeia do mecanismo em ordem causal: das raízes ao terminal, sem
+   repetir transição. É a mesma travessia que gera as perguntas — a leitura
+   e o estudo não podem discordar sobre a ordem das coisas. */
+function cadeiaOrdenada(g, mecanismoId){
+  const r = reconstruir(g, mecanismoId, 'frente');
+  if(!r) return [];
+  const vistas = new Set(), ordem = [];
+  r.passos.forEach(p=>p.transicoes.forEach(t=>{
+    if(vistas.has(t)) return;
+    vistas.add(t); ordem.push(t);
+  }));
+  return ordem;
+}
+
+/* Uma transição pertence a uma escala quando QUALQUER das pontas está nela.
+   Assim as pontes entre níveis aparecem nos dois — que é onde mora o que
+   interessa, porque é ali que o molecular vira celular.
+
+   `escala` pode ser 'pontes': só as transições cujas pontas discordam. */
+function projetar(g, mecanismoId, escala){
+  const cadeia = cadeiaOrdenada(g, mecanismoId);
+  if(!escala || escala === 'todas') return cadeia;
+  if(escala === 'pontes'){
+    return cadeia.filter(t=>g.nos[t.de] && g.nos[t.para] &&
+      g.nos[t.de].escala !== g.nos[t.para].escala);
+  }
+  return cadeia.filter(t=>
+    (g.nos[t.de] && g.nos[t.de].escala === escala) ||
+    (g.nos[t.para] && g.nos[t.para].escala === escala));
+}
+
 module.exports = {
   carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
   prerequisitos, arquivosDoCaminho, perturbar, transicoesQueDependemDe,
-  explicar, reconstruir, RESSALVA, VERBO,
+  explicar, reconstruir, escalasDe, cadeiaOrdenada, projetar, RESSALVA, VERBO,
   TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
 };
 
@@ -1203,6 +1256,7 @@ function el(tag, attrs, filhos){
 }
 function limpar(){ app.innerHTML = ''; }
 function pct(f){ return Math.round(f * 100) + '%'; }
+function nomeNo(id){ return (g.nos[id] && g.nos[id].descricao) || id; }
 function botao(rotulo, aoClicar){
   rodape.classList.remove('oculto');
   acao.textContent = rotulo;
@@ -1254,6 +1308,9 @@ function telaPercurso(){
       if(m.prerequisitos.length){
         cartao.appendChild(el('div', { class: 'dep', texto: 'depende de: ' + m.prerequisitos.join(', ') }));
       }
+      var ver = el('button', { class: 'fantasma explorar', type: 'button', texto: 'Ler o mecanismo' });
+      ver.onclick = (function(id){ return function(){ telaExplorar(id, 'todas'); }; })(m.mecanismo);
+      cartao.appendChild(ver);
     });
     app.appendChild(cartao);
   });
@@ -1286,6 +1343,84 @@ function telaPercurso(){
 
   if(p.revisoesHoje > 0) botao('Estudar (' + p.revisoesHoje + ' vencidas)', comecarSessao);
   else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
+}
+
+/* ---------- ler o mecanismo ----------
+   A mesma cadeia que gera as perguntas, em ordem causal e por extenso. Serve
+   para duas coisas: estudar antes de ser cobrado, e AUDITAR — por isso cada
+   transição mostra o endereço no arquivo, para um erro de neurociência poder
+   ser reportado por número em vez de por descrição.
+
+   O deslizador de escala é uma projeção deste mesmo grafo. Não existe texto
+   por camada: se existisse, a camada voltaria a ser dona do conteúdo. */
+function telaExplorar(mecanismoId, escala){
+  limpar();
+  semBotao();
+  var m = g.mecanismos[mecanismoId];
+  var cadeia = G.projetar(g, mecanismoId, escala);
+  var total = G.cadeiaOrdenada(g, mecanismoId).length;
+
+  var voltar = el('button', { class: 'fantasma', type: 'button', texto: '‹ percurso' });
+  voltar.onclick = telaPercurso;
+  app.appendChild(voltar);
+
+  app.appendChild(el('h1', { texto: mecanismoId }));
+  app.appendChild(el('p', { class: 'sub', texto: m.fenomeno }));
+
+  var cabeca = el('div', { class: 'cartao' });
+  cabeca.appendChild(el('div', { class: 'rotulo', texto: 'entrada' }));
+  cabeca.appendChild(el('div', { texto: nomeNo(m.entrada) }));
+  cabeca.appendChild(el('div', { class: 'rotulo', style: 'margin-top:10px', texto: 'termina em' }));
+  cabeca.appendChild(el('div', { texto: nomeNo(m.terminal) }));
+  var pre = G.prerequisitos(g, mecanismoId);
+  if(pre.length) cabeca.appendChild(el('div', { class: 'dep', texto: 'pré-requisitos derivados: ' + pre.join(', ') }));
+  cabeca.appendChild(el('div', { class: 'rotulo', style: 'margin-top:10px', texto: 'limites declarados' }));
+  cabeca.appendChild(el('p', { class: 'fenomeno', texto: m.limites }));
+  app.appendChild(cabeca);
+
+  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui. */
+  var faixas = [{ id: 'todas', rotulo: 'todas' }]
+    .concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))
+    .concat([{ id: 'pontes', rotulo: 'pontes entre escalas' }]);
+  var barra = el('div', { class: 'faixas' });
+  faixas.forEach(function(f){
+    var b = el('button', { class: 'faixa' + (f.id === escala ? ' viva' : ''), type: 'button', texto: f.rotulo });
+    b.onclick = (function(id){ return function(){ telaExplorar(mecanismoId, id); }; })(f.id);
+    barra.appendChild(b);
+  });
+  app.appendChild(barra);
+  app.appendChild(el('p', { class: 'rotulo',
+    texto: cadeia.length + ' de ' + total + ' transições nesta projeção' }));
+
+  if(!cadeia.length){
+    app.appendChild(el('p', { class: 'aviso', texto: 'Nenhuma transição nesta escala.' }));
+    return;
+  }
+
+  cadeia.forEach(function(t){
+    var ex = G.explicar(g, t);
+    var cartao = el('div', { class: 'cartao' });
+    var rel = el('div', { class: 'rel' });
+    rel.appendChild(document.createTextNode(nomeNo(t.de) + ' '));
+    rel.appendChild(el('span', { class: 'verbo', texto: G.VERBO[t.tipo] || t.tipo }));
+    rel.appendChild(document.createTextNode(' ' + nomeNo(t.para)));
+    cartao.appendChild(rel);
+    cartao.appendChild(el('div', { class: 'escalas',
+      texto: (g.nos[t.de].escala || '?') + ' › ' + (g.nos[t.para].escala || '?') }));
+    cartao.appendChild(el('p', { texto: ex.resposta }));
+    var meta = [];
+    if(ex.condicao) meta.push('condição: ' + ex.condicao);
+    if(ex.requer && ex.requer.length) meta.push('depende de: ' + ex.requer.join(' · '));
+    if(meta.length) cartao.appendChild(el('div', { class: 'meta', texto: meta.join('   ') }));
+    if(ex.ressalva) cartao.appendChild(el('div', { class: 'ressalva', texto: ex.ressalva }));
+    /* o endereço, para auditoria: dá para dizer "03[7] está errado" */
+    cartao.appendChild(el('div', { class: 'endereco', texto: t._arquivo + '[' + t._i + ']' }));
+    app.appendChild(cartao);
+  });
+
+  app.appendChild(el('p', { class: 'aviso',
+    texto: 'Nenhum portão sabe se isto é verdade — eles verificam coerência. ' +
+           'Se uma destas relações estiver errada, o endereço embaixo dela é o que identifica.' }));
 }
 
 /* ---------- sessão ---------- */

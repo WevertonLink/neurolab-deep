@@ -215,9 +215,52 @@ function reconstruir(g, mecanismoId, sentido){
            transicoesCobertas: new Set(passos.flatMap(p=>p.transicoes)) };
 }
 
+/* ---------- projeção por escala ----------
+   A escala é atributo do NÓ, e o deslizador é uma projeção do mesmo grafo —
+   nunca uma tela nova nem um conteúdo paralelo. Era a condição do plano: se
+   cada escala tivesse texto próprio, voltaria a existir conteúdo escrito
+   por camada, e a camada viraria dona do material.
+
+   O vocabulário de escalas é DERIVADO do conteúdo, não uma lista fixa. No
+   dia em que um mecanismo trouxer escala nova, ela aparece sozinha. */
+function escalasDe(g){
+  return [...new Set(Object.values(g.nos).map(n=>n.escala).filter(Boolean))].sort();
+}
+
+/* A cadeia do mecanismo em ordem causal: das raízes ao terminal, sem
+   repetir transição. É a mesma travessia que gera as perguntas — a leitura
+   e o estudo não podem discordar sobre a ordem das coisas. */
+function cadeiaOrdenada(g, mecanismoId){
+  const r = reconstruir(g, mecanismoId, 'frente');
+  if(!r) return [];
+  const vistas = new Set(), ordem = [];
+  r.passos.forEach(p=>p.transicoes.forEach(t=>{
+    if(vistas.has(t)) return;
+    vistas.add(t); ordem.push(t);
+  }));
+  return ordem;
+}
+
+/* Uma transição pertence a uma escala quando QUALQUER das pontas está nela.
+   Assim as pontes entre níveis aparecem nos dois — que é onde mora o que
+   interessa, porque é ali que o molecular vira celular.
+
+   `escala` pode ser 'pontes': só as transições cujas pontas discordam. */
+function projetar(g, mecanismoId, escala){
+  const cadeia = cadeiaOrdenada(g, mecanismoId);
+  if(!escala || escala === 'todas') return cadeia;
+  if(escala === 'pontes'){
+    return cadeia.filter(t=>g.nos[t.de] && g.nos[t.para] &&
+      g.nos[t.de].escala !== g.nos[t.para].escala);
+  }
+  return cadeia.filter(t=>
+    (g.nos[t.de] && g.nos[t.de].escala === escala) ||
+    (g.nos[t.para] && g.nos[t.para].escala === escala));
+}
+
 module.exports = {
   carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
   prerequisitos, arquivosDoCaminho, perturbar, transicoesQueDependemDe,
-  explicar, reconstruir, RESSALVA, VERBO,
+  explicar, reconstruir, escalasDe, cadeiaOrdenada, projetar, RESSALVA, VERBO,
   TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
 };

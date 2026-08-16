@@ -354,6 +354,91 @@ PROVAS.push({
   ]
 });
 
+/* ---------- 6. PROJEÇÃO ---------- */
+PROVAS.push({
+  nome: 'PROJEÇÃO · a escala é um recorte do mesmo grafo, não um conteúdo à parte',
+  roda(s){
+    const { g, M } = s;
+    const escalas = M.escalasDe(g);
+    exigir(escalas.length >= 2,
+      `só ${escalas.length} escala(s) no conteúdo: o deslizador não teria o que projetar`);
+    escalas.forEach(e=>exigir(typeof e === 'string' && e.length > 0, 'escala vazia declarada num nó'));
+
+    Object.keys(g.mecanismos).forEach(id=>{
+      const cadeia = M.cadeiaOrdenada(g, id);
+      const sg = M.subgrafo(g, id);
+      exigir(cadeia.length > 0, `mecanismo "${id}": cadeia ordenada vazia`);
+
+      /* A cadeia é o recorte inteiro, sem repetir e sem inventar. */
+      exigir(new Set(cadeia).size === cadeia.length, `mecanismo "${id}": transição repetida na cadeia`);
+      exigir(cadeia.length === sg.transicoes.length,
+        `mecanismo "${id}": a cadeia tem ${cadeia.length} transições e o recorte tem ${sg.transicoes.length}`);
+      cadeia.forEach(t=>exigir(sg.transicoes.includes(t),
+        `mecanismo "${id}": a cadeia trouxe transição de fora do recorte`));
+
+      /* Ordem causal: quando chego a uma transição, a origem dela já
+         apareceu como destino de alguma anterior — ou é raiz do recorte. */
+      const jaProduzidos = new Set(sg.raizes);
+      cadeia.forEach(t=>{
+        exigir(jaProduzidos.has(t.de),
+          `mecanismo "${id}": "${t.de}" é usado antes de ter sido produzido — a ordem não é causal`);
+        jaProduzidos.add(t.para);
+      });
+
+      /* A projeção NÃO cria nem reescreve nada: toda transição projetada é
+         a mesma da cadeia, com o mesmo `porque`. É o que impede a escala de
+         virar conteúdo paralelo. */
+      const todas = M.projetar(g, id, 'todas');
+      exigir(todas.length === cadeia.length, `mecanismo "${id}": "todas" não devolve a cadeia inteira`);
+
+      const uniao = new Set();
+      escalas.forEach(e=>{
+        const proj = M.projetar(g, id, e);
+        proj.forEach(t=>{
+          exigir(cadeia.includes(t), `mecanismo "${id}"/${e}: a projeção inventou transição`);
+          exigir((g.nos[t.de].escala === e) || (g.nos[t.para].escala === e),
+            `mecanismo "${id}"/${e}: transição projetada sem nenhuma ponta nessa escala`);
+          uniao.add(t);
+        });
+        /* e a projeção preserva a ordem da cadeia */
+        const posicoes = proj.map(t=>cadeia.indexOf(t));
+        posicoes.forEach((x, i)=>exigir(i === 0 || posicoes[i - 1] < x,
+          `mecanismo "${id}"/${e}: a projeção embaralhou a ordem causal`));
+      });
+      exigir(uniao.size === cadeia.length,
+        `mecanismo "${id}": ${cadeia.length - uniao.size} transição(ões) some(m) em toda escala — ` +
+        `conteúdo que o deslizador nunca mostra`);
+
+      /* As pontes são exatamente as que trocam de escala, e são elas que
+         explicam como um nível vira o outro. */
+      const pontes = M.projetar(g, id, 'pontes');
+      pontes.forEach(t=>exigir(g.nos[t.de].escala !== g.nos[t.para].escala,
+        `mecanismo "${id}": "ponte" entre nós da mesma escala`));
+      cadeia.filter(t=>g.nos[t.de].escala !== g.nos[t.para].escala).forEach(t=>
+        exigir(pontes.includes(t), `mecanismo "${id}": ponte real ficou de fora da projeção`));
+    });
+  },
+  mutantes: [
+    { como: 'a projeção devolve a cadeia inteira, seja qual for a escala',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.projetar = (g, id)=>m.M.cadeiaOrdenada(g, id); return m; } },
+    { como: 'a projeção exige que as DUAS pontas estejam na escala (as pontes somem)',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.projetar = (g, id, escala)=>{
+          const cadeia = m.M.cadeiaOrdenada(g, id);
+          if(!escala || escala === 'todas') return cadeia;
+          if(escala === 'pontes') return cadeia.filter(t=>g.nos[t.de].escala !== g.nos[t.para].escala);
+          return cadeia.filter(t=>g.nos[t.de].escala === escala && g.nos[t.para].escala === escala);
+        }; return m; } },
+    { como: 'a cadeia sai em ordem de arquivo em vez de ordem causal',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.cadeiaOrdenada = (g, id)=>{
+          const sg = m.M.subgrafo(g, id);
+          return sg.transicoes.slice().reverse();
+        }; return m; } }
+  ]
+});
+
 /* ===================================================================== */
 const base = sujeito();
 let falhou = false, mutantesMortos = 0, mutantesVivos = 0;

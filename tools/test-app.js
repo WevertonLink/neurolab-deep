@@ -409,6 +409,84 @@ PROVAS.push({
   ]
 });
 
+/* ---------- 6. EXPLORAR ---------- */
+PROVAS.push({
+  nome: 'EXPLORAR · ler o mecanismo, projetar por escala e poder reportar erro',
+  roda(s){
+    const v = subir(s.html);
+    const G = v.req('./grafo.js');
+    const g = G.carregar();
+
+    const explorar = porClasse(v.app, 'explorar');
+    exigir(explorar.length === Object.keys(g.mecanismos).length,
+      `${explorar.length} botões de leitura para ${Object.keys(g.mecanismos).length} mecanismos`);
+
+    explorar[0].onclick();
+    const texto = textoTodo(v.app);
+
+    /* Descobre qual mecanismo abriu e confere que a cadeia INTEIRA está lá:
+       leitura truncada é pior que ausente, porque parece completa. */
+    const id = Object.keys(g.mecanismos).sort().find(x=>texto.indexOf(g.mecanismos[x].fenomeno) >= 0);
+    exigir(!!id, 'a tela de leitura não mostra o fenômeno de mecanismo nenhum');
+    const cadeia = G.cadeiaOrdenada(g, id);
+    exigir(cadeia.length > 0, `mecanismo "${id}" sem cadeia`);
+    cadeia.forEach(t=>{
+      exigir(texto.indexOf(t.porque) >= 0,
+        `a leitura de "${id}" não traz o \`porque\` de ${t.de} → ${t.para}`);
+    });
+    exigir(texto.indexOf(g.mecanismos[id].limites) >= 0,
+      'a leitura não declara os limites do modelo');
+
+    /* O endereço de cada transição, que é o que torna a auditoria possível:
+       dá para dizer "03-...json[7] está errado" em vez de descrever. */
+    const enderecos = porClasse(v.app, 'endereco').map(e=>e.textContent);
+    exigir(enderecos.length === cadeia.length,
+      `${enderecos.length} endereços para ${cadeia.length} transições`);
+    cadeia.forEach(t=>{
+      exigir(enderecos.indexOf(t._arquivo + '[' + t._i + ']') >= 0,
+        `falta o endereço de ${t.de} → ${t.para}, e sem ele o erro não tem como ser reportado`);
+    });
+
+    /* As faixas de escala vêm do CONTEÚDO, não de uma lista fixa na tela. */
+    const escalas = G.escalasDe(g);
+    const faixas = porClasse(v.app, 'faixa').map(f=>f.textContent);
+    escalas.forEach(e=>exigir(faixas.indexOf(e) >= 0,
+      `a escala "${e}" existe no conteúdo e não aparece no deslizador`));
+    exigir(faixas.indexOf('todas') >= 0 && faixas.indexOf('pontes entre escalas') >= 0,
+      'faltam as faixas "todas" e "pontes"');
+
+    /* E projetar realmente projeta: menos transições, todas com ponta na escala. */
+    const alvo = escalas[0];
+    porClasse(v.app, 'faixa').find(f=>f.textContent === alvo).onclick();
+    const projetado = G.projetar(g, id, alvo);
+    exigir(projetado.length < cadeia.length,
+      `a escala "${alvo}" não filtrou nada: o deslizador não está projetando`);
+    const enderecosProj = porClasse(v.app, 'endereco').map(e=>e.textContent);
+    exigir(enderecosProj.length === projetado.length,
+      `a tela mostrou ${enderecosProj.length} transições e a projeção tem ${projetado.length}`);
+    const textoProj = textoTodo(v.app);
+    projetado.forEach(t=>exigir(textoProj.indexOf(t.porque) >= 0,
+      `a projeção "${alvo}" perdeu ${t.de} → ${t.para}`));
+    cadeia.filter(t=>projetado.indexOf(t) < 0).forEach(t=>{
+      exigir(textoProj.indexOf(t.porque) < 0,
+        `a projeção "${alvo}" mostrou ${t.de} → ${t.para}, que não é dessa escala`);
+    });
+  },
+  mutantes: [
+    { como: 'a leitura mostra só as primeiras transições da cadeia',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = m.html.replace('var cadeia = G.projetar(g, mecanismoId, escala);',
+                                'var cadeia = G.projetar(g, mecanismoId, escala).slice(0, 3);'); return m; } },
+    { como: 'as escalas do deslizador são uma lista fixa escrita na tela',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = m.html.replace('.concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))',
+                                ".concat([{ id: 'sistemico', rotulo: 'sistemico' }])"); return m; } },
+    { como: 'a leitura não mostra o endereço, e o erro não tem como ser reportado',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = m.html.replace(/cartao\.appendChild\(el\('div', \{ class: 'endereco'[^;]*;/, ''); return m; } }
+  ]
+});
+
 /* ===================================================================== */
 const base = sujeito();
 let falhou = false, mutantesMortos = 0, mutantesVivos = 0;
