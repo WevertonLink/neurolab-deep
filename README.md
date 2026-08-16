@@ -168,6 +168,104 @@ node tools/percurso.js       # o mapa a partir do estado zero
 node tools/percurso.js 200   # simula 200 dias e mostra o percurso preenchendo
 ```
 
+## Como testar
+
+Quatro coisas diferentes, em ordem de custo.
+
+### 1. O sistema está íntegro? (30 segundos)
+
+```sh
+node tools/valida-grafo.js && node tools/test-motor.js && \
+node tools/test-estudo.js && node tools/test-percurso.js
+```
+
+Tem de terminar com quatro linhas `ok`. Qualquer `✕` diz exatamente qual
+propriedade quebrou e onde.
+
+### 2. Os portões mordem? (2 minutos — o teste mais importante)
+
+Portão verde não significa nada se ele não fecha quando devia. Quebre de
+propósito e confira que ele grita:
+
+```sh
+# guarde o original
+cp content/03-potencial-de-acao.json /tmp/backup.json
+
+# invente um nó que não existe
+sed -i 's/"para": "na-entra-rapido"/"para": "nao-existe"/' content/03-potencial-de-acao.json
+node tools/valida-grafo.js       # tem de FALHAR dizendo que o nó não existe
+
+# devolva
+cp /tmp/backup.json content/03-potencial-de-acao.json
+node tools/valida-grafo.js       # verde de novo
+```
+
+Outras quebras que o portão tem de pegar, todas em `content/`:
+
+| o que fazer | o que tem de acontecer |
+|---|---|
+| apagar um `porque` | erro: toda transição responde "por que A causa B" |
+| pôr uma seta `→` dentro de um `porque` | erro: isso é cadeia, quebre a transição |
+| acrescentar um campo `pergunta` a uma transição | erro: chave fora do formato |
+| trocar um `tipo` por `bloqueia` | erro: o motor ainda não tem polaridade |
+| duplicar uma entidade que já existe noutro arquivo | erro: a segunda apagaria a primeira |
+| apagar `limites` de um mecanismo | erro: modelo sem fronteira ensina certeza falsa |
+
+E os portões de teste têm mutantes próprios. Para ver **por que** cada um
+morreu:
+
+```sh
+MOTIVOS=1 node tools/test-percurso.js
+```
+
+Toda morte tem de ser de uma asserção nomeada. Se aparecer `exceção:`, o
+mutante morreu por acidente e aquela propriedade continua **sem prova**.
+
+### 3. A neurociência está certa? (o gargalo real, e é trabalho humano)
+
+Nenhum portão sabe se o conteúdo é verdadeiro — eles verificam coerência.
+Esta é a parte que só você pode fazer:
+
+```sh
+node tools/mostrar.js potencial-de-acao canal-na-voltagem
+node tools/mostrar.js conducao-saltatoria mielina
+node tools/mostrar.js potencial-de-membrana bomba-na-k
+node tools/mostrar.js gradiente-eletroquimico canal-vazamento-k
+```
+
+A seção **AUDITORIA** lista cada transição com o `porque` inteiro. Leia
+procurando três coisas:
+
+1. **O `porque` está errado?** Diga o número da linha.
+2. **O `porque` não basta para reconstruir a relação?** Se você lê e não
+   consegue refazer o raciocínio sozinho, ele está curto demais — ainda que
+   esteja correto.
+3. **Falta um passo no meio?** Se a transição pula uma etapa, ela está
+   grossa demais e tem de virar duas.
+
+Depois da auditoria, a seção **OPERAÇÕES** mostra as quatro perguntas
+geradas a partir daquele mesmo material. Se a transição está certa, a
+pergunta está certa — é essa a aposta do formato.
+
+### 4. O estudo faz sentido? (a ergonomia)
+
+```sh
+node tools/agenda.js             # a sessão de hoje
+node tools/agenda.js 180         # a carga ao longo de 180 dias
+node tools/percurso.js           # o mapa, do zero
+node tools/percurso.js 200       # o mapa preenchendo
+```
+
+Olhe a coluna de respostas por sessão em `agenda.js 180`. Se a mediana for
+1 ou 2, a sessão está fragmentada demais para valer a pena abrir o app — é
+sintoma de corpus pequeno, e some conforme os mecanismos entram.
+
+### O que ainda NÃO dá para testar
+
+**Não dá para estudar.** Não existe tela: você consegue ver as perguntas
+geradas (`mostrar.js`) e o cronograma decidindo (`agenda.js`), mas não
+consegue responder nenhuma e ver a caixa subir. Isso é a Fase C.
+
 ## Os portões
 
 ```sh
