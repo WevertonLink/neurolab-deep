@@ -133,6 +133,23 @@ Object.keys(pares).forEach(par=>{
     `elas colidiriam no cronograma. Se as duas relações são reais, o nó do meio está faltando.`);
 });
 
+/* ---------- 8. o percurso tem ordem ----------
+   Etapa é camada topológica do DAG de pré-requisitos. Se dois mecanismos
+   dependem um do outro, não existe "antes" entre eles e os dois somem do
+   percurso — o estudo perderia o começo-meio-fim sem avisar. Não é erro de
+   digitação: é sinal de que os dois recortes são o mesmo mecanismo partido
+   em dois, ou de que um terminal está no lugar errado. */
+const P = require('../src/percurso.js');
+const { camadas, ciclicos } = P.etapas(g);
+exigir(ciclicos.length === 0,
+  `mecanismos em dependência mútua, sem ordem possível entre eles: ${ciclicos.join(', ')}. ` +
+  `Ou são o mesmo mecanismo partido em dois, ou um \`terminal\` está no lugar errado.`);
+camadas.forEach((ids, i)=>ids.forEach(id=>{
+  exigir(P.caixasDoMecanismo(g, id).length > 0,
+    `mecanismo "${id}" (etapa ${i + 1}) não é dono de caixa de revisão nenhuma: ` +
+    `o recorte dele é coberto inteiro por outro mecanismo menor.`);
+}));
+
 /* ---------- resultado ---------- */
 console.log(`grafo: ${Object.keys(g.nos).length} nós · ${g.transicoes.length} transições · ` +
             `${Object.keys(g.entidades).length} entidades · ${Object.keys(g.mecanismos).length} mecanismos ` +

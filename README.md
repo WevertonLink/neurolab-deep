@@ -121,15 +121,52 @@ node tools/agenda.js         # a sessão de hoje, do zero
 node tools/agenda.js 180     # simula 180 dias e mostra a carga por dia
 ```
 
+## O percurso: etapas calculadas, não módulos
+
+O NeuroLab v2 tinha módulos, e o módulo era **dono** do conteúdo: existia a
+grade 16×4 e o material tinha de caber nela. Quando o container manda, o
+conteúdo é escrito para preencher slot — e o banco de perguntas acaba finito
+e decorável. É metade do problema que este projeto existe para resolver.
+
+Aqui a **etapa é calculada**: uma camada topológica do DAG de pré-requisitos,
+que por sua vez já é derivado (`A` é pré-requisito de `B` quando o *terminal*
+de `A` mora dentro do recorte de `B`). Ninguém escreve a que etapa um
+mecanismo pertence, e **não existe campo `modulo:`** — nem pode passar a
+existir, pela mesma razão da lista branca fechada.
+
+Consequência: a ordem do percurso é a ordem em que a matéria **depende de si
+mesma**, e não a ordem em que alguém listou os arquivos. E vem um diagnóstico
+de brinde que a grade nunca pôde dar — mecanismo que cai numa camada sem
+ninguém depender dele está *solto* do resto do corpo de conhecimento.
+
+**A barra é troféu: sobe e não desce.** `recorde` guarda o mais longe que
+cada caixa já chegou; `caixa` guarda onde ela está hoje. São dois números
+diferentes de propósito — o cronograma precisa da verdade de hoje para saber
+o que cobrar, e o percurso precisa da conquista para não desfazer o que já
+foi conquistado. Esquecer devolve a caixa à revisão e **não** reabre etapa
+fechada. Uma caixa conta como conquistada ao alcançar o intervalo de 30 dias:
+antes disso é reconhecimento recente, não retenção.
+
+Recortes se sobrepõem — o do potencial de membrana contém o do gradiente
+inteiro. Por isso cada caixa tem um **dono**: o menor recorte em que aquela
+operação mede. Sem essa regra o progresso somava 85 de 58 caixas, e a mesma
+caixa era cobrada duas vezes na mesma sessão.
+
+```sh
+node tools/percurso.js       # o mapa a partir do estado zero
+node tools/percurso.js 200   # simula 200 dias e mostra o percurso preenchendo
+```
+
 ## Os portões
 
 ```sh
 node tools/valida-grafo.js   # estrutura do conteúdo
 node tools/test-motor.js     # as quatro propriedades do motor
 node tools/test-estudo.js    # as cinco propriedades do cronograma
+node tools/test-percurso.js  # as cinco propriedades do percurso
 ```
 
-Os dois portões de teste rodam cada propriedade duas vezes: no grafo real
+Os três portões de teste rodam cada propriedade duas vezes: no grafo real
 (tem de passar) e em **mutantes** — versões deliberadamente quebradas do
 grafo ou do módulo (têm de falhar). Um mutante que sobrevive não acusa
 conteúdo errado: acusa **teste decorativo**, e o portão fecha do mesmo jeito.
@@ -146,8 +183,8 @@ Fase A fechada: formato, portões, vista humana e dois mecanismos
 (gradiente eletroquímico, potencial de membrana).
 
 Fase B fechada: o cronograma — caixa por transição × operação,
-mensurabilidade derivada, lote de evidências, Leitner, plano de sessão.
-Sem UI ainda.
+mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
+percurso: etapas calculadas, conquista como troféu. Sem UI ainda.
 
 Fases seguintes: a tela, com o deslizador de escala como projeção do grafo;
 e os mecanismos restantes — potencial de ação, condução saltatória,

@@ -71,34 +71,69 @@ function indexar(g){
    Transição fora de todo mecanismo não é estudável: o estudo acontece
    dentro de um recorte, e sem recorte não há contexto para nenhuma das
    quatro. */
-function operacoesMensuraveis(g, t, idx){
+/* A mensurabilidade é DENTRO DE UM RECORTE, não no grafo inteiro: a mesma
+   transição pode dar uma boa pergunta de reconstrução num mecanismo e
+   nenhuma noutro, porque quem decide é o recorte em volta dela. */
+function operacoesMensuraveisEm(g, t, mecanismoId, idx){
   idx = idx || indexar(g);
-  const meus = Object.keys(idx).sort().filter(id=>idx[id] && idx[id].transicoes.includes(t));
-  if(!meus.length) return [];
+  const sg = idx[mecanismoId];
+  if(!sg || !sg.transicoes.includes(t)) return [];
 
   const ops = [];
-
-  if(meus.some(id=>idx[id].nos.size >= MIN_NOS_PARA_ORDENAR)){
-    ops.push('construir');
-    ops.push('reconstruir');
-  }
+  if(sg.nos.size >= MIN_NOS_PARA_ORDENAR){ ops.push('construir'); ops.push('reconstruir'); }
 
   const perturbavel = (t.requer||[]).some(entidade=>
-    meus.some(id=>G.perturbar(g, { entidade }, idx[id].mecanismo.entrada).perdidos.length > 0));
+    G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos.length > 0);
   if(perturbavel) ops.push('perturbar');
 
-  const inversoExiste = g.transicoes.some(o=>o.de === t.para && o.para === t.de);
-  if(!inversoExiste) ops.push('depurar');
+  // `depurar` é a única que não depende do recorte: se a inversa existe no
+  // grafo, inverter é verdade em qualquer contexto.
+  if(!g.transicoes.some(o=>o.de === t.para && o.para === t.de)) ops.push('depurar');
 
   return ops;
+}
+
+/* No grafo inteiro, a transição mede o que qualquer recorte dela medir. */
+function mecanismosDe(g, t, idx){
+  return Object.keys(idx).sort().filter(id=>idx[id] && idx[id].transicoes.includes(t));
+}
+function operacoesMensuraveis(g, t, idx){
+  idx = idx || indexar(g);
+  const vistas = new Set();
+  mecanismosDe(g, t, idx).forEach(id=>
+    operacoesMensuraveisEm(g, t, id, idx).forEach(op=>vistas.add(op)));
+  return OPERACOES.filter(op=>vistas.has(op));
+}
+
+/* ---------- de quem é a caixa ----------
+   Recortes se sobrepõem — é o que significa um mecanismo depender de outro.
+   Sem uma regra de posse, a mesma caixa seria contada duas vezes no
+   progresso e cobrada duas vezes na mesma sessão.
+
+   A caixa é do MENOR recorte em que aquela operação mede: é onde ela é
+   exercitada com menos ruído em volta. Empate desempata por id, para o
+   resultado ser reproduzível. */
+function donoDaCaixa(g, t, operacao, idx){
+  idx = idx || indexar(g);
+  const candidatos = mecanismosDe(g, t, idx)
+    .filter(id=>operacoesMensuraveisEm(g, t, id, idx).includes(operacao));
+  if(!candidatos.length) return null;
+  return candidatos.sort((a, b)=>
+    (idx[a].nos.size - idx[b].nos.size) || (a < b ? -1 : 1))[0];
 }
 
 /* ---------- estado ----------
    Projeto novo, estado zero: não existe migração e não vai existir. */
 function novoEstado(){ return { versao: 1, caixas: {} }; }
 
+/* `caixa` é onde a revisão está HOJE; `recorde` é o mais longe que ela já
+   chegou, e nunca desce. São duas coisas diferentes de propósito: o
+   cronograma precisa da verdade de hoje para saber o que cobrar, e o
+   percurso precisa da conquista para não desfazer o que já foi conquistado.
+   Misturar as duas é o que faz uma barra de progresso ou mentir sobre
+   retenção, ou desmanchar um trecho já vencido. */
 function caixaNova(agora){
-  return { caixa: 0, vencimento: agora, tentativas: 0, evidencias: 0,
+  return { caixa: 0, recorde: 0, vencimento: agora, tentativas: 0, evidencias: 0,
            ultimaNota: null, ultimoEstudo: null };
 }
 
@@ -184,6 +219,7 @@ function agendar(estado, chave, nota, agora, evidencias){
   } else {
     c.caixa = Math.max(0, Math.min(c.caixa - 1, TETO_RECAIDA));
   }
+  c.recorde = Math.max(c.recorde || 0, c.caixa);   // monótono, por definição
   c.tentativas += 1;
   c.evidencias += (evidencias || 1);
   c.ultimaNota = nota;
@@ -208,9 +244,10 @@ function devidas(estado, agora){
    ganho do lote — dezessete evidências, dezessete decisões de intervalo,
    uma atividade.
 
-   Caixa cuja transição mora em mais de um mecanismo entra no MENOR recorte
-   que a contém: é onde ela é exercitada com menos ruído em volta. Empate
-   desempata por id, para o plano ser reproduzível. */
+   Quem é o dono de cada caixa é `donoDaCaixa`, a mesma regra que o percurso
+   usa para contar progresso. Tem de ser a mesma: se a sessão cobrasse a
+   caixa num mecanismo e o progresso a creditasse noutro, o estudo andaria
+   sem a barra andar. */
 function planoDeSessao(g, estado, agora, teto, idx){
   idx = idx || indexar(g);
   teto = (teto == null) ? TETO_SESSAO : teto;
@@ -223,11 +260,8 @@ function planoDeSessao(g, estado, agora, teto, idx){
     const { de, para, operacao } = lerChave(chave);
     const t = porTransicao[de + '>' + para];
     if(!t) return;                       // o conteúdo mudou debaixo do estado
-    const donos = Object.keys(idx)
-      .filter(id=>idx[id].transicoes.includes(t))
-      .sort((a, b)=>(idx[a].nos.size - idx[b].nos.size) || (a < b ? -1 : 1));
-    if(!donos.length) return;            // deixou de ser estudável
-    const mecanismo = donos[0];
+    const mecanismo = donoDaCaixa(g, t, operacao, idx);
+    if(!mecanismo) return;               // deixou de ser estudável
     const id = mecanismo + '#' + operacao;
     if(!grupos.has(id)){
       grupos.set(id, { id, mecanismo, operacao, caixas: [], transicoes: [],
@@ -286,7 +320,8 @@ function resumo(estado, agora){
 module.exports = {
   OPERACOES, INTERVALOS, PASSA, TETO_RECAIDA, TETO_SESSAO, DIA, FOLGA,
   MIN_NOS_PARA_ORDENAR,
-  chaveDaTransicao, chaveDaCaixa, lerChave, indexar, operacoesMensuraveis,
+  chaveDaTransicao, chaveDaCaixa, lerChave, indexar,
+  operacoesMensuraveis, operacoesMensuraveisEm, mecanismosDe, donoDaCaixa,
   novoEstado, semear, iniciarLote, anotar, fecharLote, agendar,
   devidas, planoDeSessao, resumo
 };
