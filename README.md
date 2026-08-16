@@ -87,30 +87,69 @@ para nó inexistente; não tem como saber se a neurociência está certa. Por
 isso o formato precisa ser legível: a auditoria é humana, e `tools/mostrar.js`
 existe para torná-la barata.
 
+## A revisão espaçada
+
+O que se agenda **não é aula nem mecanismo: é o par transição × operação**.
+Saber reconstruir um elo não é o mesmo que saber o que acontece quando ele
+quebra, e as duas coisas se esquecem em ritmos diferentes — então são duas
+caixas de revisão distintas. O endereço da caixa é `de>para#operacao`: a
+transição não tem `id` de propósito, porque id é coisa que se digita errado,
+e o par de nós já a identifica.
+
+**Quais operações valem para cada transição é derivado do grafo**, pela mesma
+razão que as perguntas são derivadas — se coubesse declarar "esta transição
+serve para perturbar", alguém declararia:
+
+- **construir / reconstruir** — precisam de um mecanismo onde morar, e de
+  ordem não trivial. Num recorte de dois nós não há o que ordenar.
+- **perturbar** — precisa de uma entidade cuja remoção realmente derrube
+  alcance. Entidade cujo sumiço não muda nada gera pergunta sem resposta.
+- **depurar** — se a transição inversa **também** existe no grafo
+  (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
+
+Hoje isso dá 58 caixas para os dois mecanismos: 17 construir, 17 reconstruir,
+17 depurar e **7 perturbar** — a assimetria é o sinal de que a regra está
+derivando, não carimbando.
+
+A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
+uma passada só que liquida as caixas de `reconstruir` de todo o recorte. As
+respostas entram num **lote**, e o lote vira **uma** decisão de intervalo por
+caixa, pela média — não uma promoção por resposta.
+
+```sh
+node tools/agenda.js         # a sessão de hoje, do zero
+node tools/agenda.js 180     # simula 180 dias e mostra a carga por dia
+```
+
 ## Os portões
 
 ```sh
 node tools/valida-grafo.js   # estrutura do conteúdo
 node tools/test-motor.js     # as quatro propriedades do motor
+node tools/test-estudo.js    # as cinco propriedades do cronograma
 ```
 
-`test-motor.js` roda cada propriedade duas vezes: no grafo real (tem de
-passar) e em **mutantes** — versões deliberadamente quebradas do grafo ou do
-módulo (têm de falhar). Um mutante que sobrevive não acusa conteúdo errado:
-acusa **teste decorativo**, e o portão fecha do mesmo jeito. Isto é
-disciplina do projeto, não opcional — no NeuroLab v2, cinco testes passaram
-com o código quebrado e nenhum foi pego por leitura.
+Os dois portões de teste rodam cada propriedade duas vezes: no grafo real
+(tem de passar) e em **mutantes** — versões deliberadamente quebradas do
+grafo ou do módulo (têm de falhar). Um mutante que sobrevive não acusa
+conteúdo errado: acusa **teste decorativo**, e o portão fecha do mesmo jeito.
+Isto é disciplina do projeto, não opcional — no NeuroLab v2, cinco testes
+passaram com o código quebrado e nenhum foi pego por leitura.
 
-`MOTIVOS=1 node tools/test-motor.js` mostra por que cada mutante morreu. Um
-mutante que morre de `exceção:` em vez de asserção morreu por acidente, e a
-propriedade continua sem prova.
+`MOTIVOS=1` mostra por que cada mutante morreu. Um mutante que morre de
+`exceção:` em vez de asserção morreu por acidente, e a propriedade continua
+sem prova.
 
 ## Estado
 
-Fase A fechada: formato, os dois portões, a vista humana e dois mecanismos
-(gradiente eletroquímico, potencial de membrana). Sem UI ainda.
+Fase A fechada: formato, portões, vista humana e dois mecanismos
+(gradiente eletroquímico, potencial de membrana).
 
-Fases seguintes: revisão espaçada por operação; a tela; e os mecanismos
-restantes — potencial de ação, condução saltatória, transmissão sináptica,
-LTP, LTD, consolidação, erro de previsão, acúmulo de evidência, controle
-top-down, eixo HPA.
+Fase B fechada: o cronograma — caixa por transição × operação,
+mensurabilidade derivada, lote de evidências, Leitner, plano de sessão.
+Sem UI ainda.
+
+Fases seguintes: a tela, com o deslizador de escala como projeção do grafo;
+e os mecanismos restantes — potencial de ação, condução saltatória,
+transmissão sináptica, LTP, LTD, consolidação, erro de previsão, acúmulo de
+evidência, controle top-down, eixo HPA.

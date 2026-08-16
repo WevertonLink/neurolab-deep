@@ -11,7 +11,7 @@
 
    Uso: node tools/mostrar.js [id-do-mecanismo] [entidade-a-perturbar]
    ===================================================================== */
-const G = require('./grafo.js');
+const G = require('../src/grafo.js');
 
 const g = G.carregar();
 const alvoMec = process.argv[2] || Object.keys(g.mecanismos)[0];

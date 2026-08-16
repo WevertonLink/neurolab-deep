@@ -9,7 +9,7 @@
 
    Uso: node tools/valida-grafo.js
    ===================================================================== */
-const G = require('./grafo.js');
+const G = require('../src/grafo.js');
 
 const erros = [], avisos = [];
 let checagens = 0;
@@ -108,6 +108,29 @@ g.arquivos.forEach(()=>{});
 Object.keys(g.nos).forEach(id=>{ vistos[id] = (vistos[id]||0)+1; });
 Object.keys(vistos).forEach(id=>{
   exigir(vistos[id] === 1, `id de nó duplicado: "${id}"`);
+});
+
+/* ---------- 7. o par (de, para) endereça a caixa de revisão ----------
+   A transição não tem `id` — de propósito, para não haver id a errar de
+   digitação. O endereço dela é o par de nós, e o cronograma guarda o
+   progresso nesse endereço. Duas transições com o mesmo par colidiriam no
+   estado e uma comeria o histórico da outra em silêncio. */
+const pares = {};
+g.transicoes.forEach(t=>{
+  const par = t.de + '>' + t.para;
+  (pares[par] = pares[par] || []).push(`${t._arquivo}[${t._i}]`);
+});
+/* O endereço completo da caixa é `de>para#operacao`. Um id que contenha `>`
+   ou `#` torna o endereço ambíguo de ler de volta, e o cronograma passa a
+   escrever progresso na caixa errada — em silêncio. */
+Object.keys(g.nos).forEach(id=>{
+  exigir(!/[>#]/.test(id),
+    `id de nó "${id}" contém ">" ou "#", que separam os campos do endereço da caixa de revisão`);
+});
+Object.keys(pares).forEach(par=>{
+  exigir(pares[par].length === 1,
+    `duas transições com o mesmo par "${par}" (${pares[par].join(', ')}): ` +
+    `elas colidiriam no cronograma. Se as duas relações são reais, o nó do meio está faltando.`);
 });
 
 /* ---------- resultado ---------- */

@@ -22,7 +22,7 @@
    ===================================================================== */
 const fs = require('node:fs');
 const path = require('node:path');
-const G = require('./grafo.js');
+const G = require('../src/grafo.js');
 
 /* ---------- utilitários do portão ---------- */
 class Falha extends Error {}
