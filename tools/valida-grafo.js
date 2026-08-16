@@ -133,6 +133,40 @@ Object.keys(pares).forEach(par=>{
     `elas colidiriam no cronograma. Se as duas relações são reais, o nó do meio está faltando.`);
 });
 
+/* ---------- 7b. os tipos negativos ainda não podem ser usados ----------
+   `inibe`, `bloqueia` e `remove` são relações reais e estão no vocabulário,
+   mas o motor trata TODA aresta como propagação: `aJusante` e `aMontante`
+   não sabem de sinal. Numa aresta "A bloqueia B", remover a entidade que A
+   precisa mataria a aresta e a perturbação concluiria que B deixa de
+   acontecer — quando na verdade B passaria a acontecer MAIS. O gabarito
+   sairia invertido, e gabarito derivado errado é pior que pergunta escrita
+   à mão.
+
+   Enquanto o motor não tiver polaridade, escreva o ESTADO que resulta do
+   bloqueio, com aresta positiva: em vez de "inativação bloqueia entrada de
+   Na⁺", um nó `corrente-de-na-cessa` e "inativação causa corrente cessa". */
+const TIPOS_SEM_MOTOR = ['inibe', 'bloqueia', 'remove'];
+g.transicoes.forEach(t=>{
+  exigir(!TIPOS_SEM_MOTOR.includes(t.tipo),
+    `${t._arquivo}[${t._i}] ${t.de} → ${t.para}: tipo "${t.tipo}" está no vocabulário mas o motor ` +
+    `ainda não tem polaridade — a perturbação calcularia ao contrário. Escreva o estado que ` +
+    `resulta do bloqueio e ligue com aresta positiva.`);
+});
+
+/* ---------- 7c. entidade não pode ser declarada duas vezes ----------
+   O carregador faz `g.entidades[e.id] = e`: a segunda declaração come a
+   primeira em silêncio, e um `se_falhar` some sem ninguém notar. */
+const entPorArquivo = {};
+g.arquivos.forEach(arq=>{
+  const d = JSON.parse(fs.readFileSync(path.join(G.CONTEUDO, arq), 'utf8'));
+  (d.entidades||[]).forEach(e=>{ (entPorArquivo[e.id] = entPorArquivo[e.id] || []).push(arq); });
+});
+Object.keys(entPorArquivo).forEach(id=>{
+  exigir(entPorArquivo[id].length === 1,
+    `entidade "${id}" declarada em ${entPorArquivo[id].join(' e ')}: a segunda apaga a primeira. ` +
+    `Para reusar, basta citar o id — entidade não precisa ser redeclarada.`);
+});
+
 /* ---------- 8. o percurso tem ordem ----------
    Etapa é camada topológica do DAG de pré-requisitos. Se dois mecanismos
    dependem um do outro, não existe "antes" entre eles e os dois somem do
@@ -149,6 +183,24 @@ camadas.forEach((ids, i)=>ids.forEach(id=>{
     `mecanismo "${id}" (etapa ${i + 1}) não é dono de caixa de revisão nenhuma: ` +
     `o recorte dele é coberto inteiro por outro mecanismo menor.`);
 }));
+
+/* ---------- 9. nada escrito fica fora do estudo ----------
+   Um mecanismo é o recorte a MONTANTE do terminal. Nó que só existe a
+   jusante dele é conteúdo autorado que nenhuma operação alcança: não gera
+   caixa de revisão, não aparece em travessia nenhuma, e some sem erro. Se o
+   nó importa, ele tem de levar ao terminal de alguém — e se não leva, ou
+   falta uma transição, ou falta um mecanismo que o tenha por terminal. */
+const dentroDeAlgum = new Set();
+Object.keys(g.mecanismos).forEach(id=>{
+  const sg = G.subgrafo(g, id);
+  if(sg) sg.nos.forEach(n=>dentroDeAlgum.add(n));
+});
+Object.keys(g.nos).forEach(id=>{
+  exigir(dentroDeAlgum.has(id),
+    `nó "${id}" (${g.origem[id]}) está fora do recorte de todos os mecanismos: ` +
+    `ele foi escrito e nunca será estudado. Falta uma transição que o leve a algum terminal, ` +
+    `ou falta um mecanismo que termine nele.`);
+});
 
 /* ---------- resultado ---------- */
 console.log(`grafo: ${Object.keys(g.nos).length} nós · ${g.transicoes.length} transições · ` +

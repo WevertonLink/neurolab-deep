@@ -78,7 +78,18 @@ projeto, não conveniência de autoria.
 - **`limites` obrigatório no mecanismo, ≥ 40 caracteres.** Um modelo sem
   fronteira declarada ensina certeza falsa.
 - **Vocabulário de `tipo` fechado**, e todo tipo lê no sentido da seta:
-  `causa · permite · compoe · modula · inibe · bloqueia · remove`.
+  `causa · permite · compoe · modula · inibe · bloqueia · remove`. Os três
+  últimos estão **barrados pelo validador** por enquanto: o motor trata toda
+  aresta como propagação, e numa aresta "A bloqueia B" a perturbação
+  concluiria que B deixa de acontecer quando na verdade B passaria a
+  acontecer mais. Gabarito derivado invertido é pior que pergunta escrita à
+  mão. Enquanto o motor não tiver polaridade, escreva o **estado** que
+  resulta do bloqueio e ligue com aresta positiva.
+- **Nada escrito fica fora do estudo**: todo nó tem de cair no recorte de
+  algum mecanismo. Nó só a jusante de todos os terminais é conteúdo que
+  nenhuma operação alcança — ele sumiria sem erro.
+- **Entidade não se redeclara.** Para reusar entre arquivos basta citar o id;
+  declarar de novo faz a segunda apagar a primeira em silêncio.
 - **Nada órfão**: todo nó participa de alguma transição; todo terminal é
   alcançável a partir da sua entrada.
 
@@ -107,9 +118,9 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 58 caixas para os dois mecanismos: 17 construir, 17 reconstruir,
-17 depurar e **7 perturbar** — a assimetria é o sinal de que a regra está
-derivando, não carimbando.
+Hoje isso dá 140 caixas para os três mecanismos: 40 construir, 40
+reconstruir, 40 depurar e **20 perturbar** — a assimetria é o sinal de que a
+regra está derivando, não carimbando.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
 uma passada só que liquida as caixas de `reconstruir` de todo o recorte. As
@@ -147,8 +158,8 @@ foi conquistado. Esquecer devolve a caixa à revisão e **não** reabre etapa
 fechada. Uma caixa conta como conquistada ao alcançar o intervalo de 30 dias:
 antes disso é reconhecimento recente, não retenção.
 
-Recortes se sobrepõem — o do potencial de membrana contém o do gradiente
-inteiro. Por isso cada caixa tem um **dono**: o menor recorte em que aquela
+Recortes se sobrepõem — o do potencial de ação contém os outros dois
+inteiros. Por isso cada caixa tem um **dono**: o menor recorte em que aquela
 operação mede. Sem essa regra o progresso somava 85 de 58 caixas, e a mesma
 caixa era cobrada duas vezes na mesma sessão.
 
@@ -186,7 +197,11 @@ Fase B fechada: o cronograma — caixa por transição × operação,
 mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
 percurso: etapas calculadas, conquista como troféu. Sem UI ainda.
 
-Fases seguintes: a tela, com o deslizador de escala como projeção do grafo;
-e os mecanismos restantes — potencial de ação, condução saltatória,
-transmissão sináptica, LTP, LTD, consolidação, erro de previsão, acúmulo de
-evidência, controle top-down, eixo HPA.
+Fase D em curso: **3 mecanismos** (gradiente eletroquímico, potencial de
+membrana, potencial de ação), 3 etapas calculadas, 40 transições. O caminho
+de `atp-disponivel` até `codigo-de-frequencia-com-teto` atravessa os três
+arquivos em 14 transições, e nenhum arquivo declara ligação com outro.
+
+Restam: condução saltatória, transmissão sináptica, LTP, LTD, consolidação
+sistêmica, erro de previsão, acúmulo de evidência, controle top-down, eixo
+HPA. E a tela, com o deslizador de escala como projeção do grafo.

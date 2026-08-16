@@ -1,0 +1,193 @@
+{
+  "arquivo": "potencial de ação",
+  "nota_de_autoria": "Este arquivo também NÃO declara aresta nenhuma com 01 ou 02. Ele começa usando o id `potencial-de-repouso`, que o arquivo 02 produz, e a travessia costura sozinha. O mecanismo vai de canal iônico até código neural: termina em POR QUE a intensidade tem de ser representada na frequência, e não na amplitude. Nenhuma transição aqui é `inibe`, `bloqueia` ou `remove` — o que o fechamento de um canal produz está escrito como o ESTADO que resulta dele (`corrente-de-na-cessa`), porque o motor ainda trata toda aresta como propagação e uma aresta negativa faria a perturbação calcular ao contrário.",
+
+  "entidades": [
+    { "id": "canal-na-voltagem", "nome": "Canal de Na⁺ dependente de voltagem", "escala": "molecular",
+      "funcao": "poro com DUAS comportas em série e independentes: a de ativação abre rápido com a despolarização, a de inativação fecha devagar com a mesma despolarização",
+      "se_falhar": "não há disparo nenhum; a membrana responde ao estímulo de forma passiva e o sinal se apaga em poucos milímetros (é o que a tetrodotoxina faz)" },
+
+    { "id": "canal-k-voltagem", "nome": "Canal de K⁺ dependente de voltagem", "escala": "molecular",
+      "funcao": "retificador tardio: abre com a despolarização, mas com cinética lenta, e não se inativa nesta escala de tempo",
+      "se_falhar": "a repolarização passa a depender só do vazamento; o disparo alarga muito e o teto de frequência desaba (é o que a tetraetilamônio faz)" }
+  ],
+
+  "nos": [
+    { "id": "canais-de-na-disponiveis", "entidade": "canal-na-voltagem", "escala": "molecular",
+      "descricao": "Os canais de Na⁺ estão fechados mas PRONTOS: a comporta de inativação está aberta" },
+
+    { "id": "estimulo-despolarizante", "escala": "celular",
+      "descricao": "Uma corrente de entrada empurra o potencial para cima do repouso" },
+
+    { "id": "limiar-atingido", "escala": "celular",
+      "descricao": "O potencial cruza o limiar",
+      "quant": { "limiar": "≈ −55 mV", "ressalva": "varia com o tipo celular e com a densidade local de canais" } },
+
+    { "id": "comporta-de-ativacao-abre", "entidade": "canal-na-voltagem", "escala": "molecular",
+      "descricao": "As comportas de ativação giram e destravam o poro de Na⁺",
+      "quant": { "tempo": "menos de 0,5 ms" } },
+
+    { "id": "na-entra-rapido", "entidade": "na", "escala": "molecular",
+      "descricao": "Na⁺ entra em grande quantidade pelos canais abertos" },
+
+    { "id": "despolarizacao-cresce", "escala": "celular",
+      "descricao": "O interior perde a negatividade e passa a positivo" },
+
+    { "id": "amplitude-independente-do-estimulo", "escala": "celular",
+      "descricao": "O disparo tem sempre a mesma altura, qualquer que tenha sido o estímulo que o iniciou" },
+
+    { "id": "pico-do-potencial", "escala": "celular",
+      "descricao": "A subida para perto do pico",
+      "quant": { "pico": "≈ +30 a +40 mV", "E_Na": "≈ +60 mV", "por_que_nao_chega": "a inativação começa antes de o equilíbrio ser alcançado" } },
+
+    { "id": "comporta-de-inativacao-fecha", "entidade": "canal-na-voltagem", "escala": "molecular",
+      "descricao": "A comporta de inativação se fecha, com atraso, sobre o poro ainda ativado" },
+
+    { "id": "corrente-de-na-cessa", "entidade": "na", "escala": "molecular",
+      "descricao": "A entrada de Na⁺ para, mesmo com a membrana ainda despolarizada" },
+
+    { "id": "canais-de-k-abrem", "entidade": "canal-k-voltagem", "escala": "molecular",
+      "descricao": "Os canais de K⁺ dependentes de voltagem terminam de abrir",
+      "quant": { "atraso": "≈ 1 ms depois do início da despolarização" } },
+
+    { "id": "k-sai-rapido", "entidade": "k", "escala": "molecular",
+      "descricao": "K⁺ sai em grande quantidade pelos canais dependentes de voltagem" },
+
+    { "id": "repolarizacao", "escala": "celular",
+      "descricao": "O interior volta a ficar negativo" },
+
+    { "id": "hiperpolarizacao-tardia", "escala": "celular",
+      "descricao": "O potencial passa do repouso e desce mais que ele",
+      "quant": { "vale": "≈ −80 mV", "repouso": "≈ −70 mV", "E_K": "≈ −95 mV" } },
+
+    { "id": "fim-da-inativacao", "entidade": "canal-na-voltagem", "escala": "molecular",
+      "descricao": "As comportas de inativação reabrem e os canais voltam a ficar disponíveis" },
+
+    { "id": "periodo-refratario", "escala": "celular",
+      "descricao": "A célula não dispara de novo, por maior que seja o estímulo",
+      "quant": { "refratario_absoluto": "≈ 1 ms" } },
+
+    { "id": "codigo-de-frequencia-com-teto", "escala": "celular",
+      "descricao": "A intensidade só pode ser representada na frequência dos disparos, e essa frequência tem teto",
+      "quant": { "teto": "≈ 500 a 1000 disparos por segundo" } }
+  ],
+
+  "transicoes": [
+    { "de": "potencial-de-repouso", "para": "canais-de-na-disponiveis",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem", "membrana"],
+      "porque": "A comporta de inativação do canal de Na⁺ só permanece aberta enquanto a membrana está polarizada. É o repouso que mantém o canal disponível: numa célula que já esteja parcialmente despolarizada, boa parte dos canais está travada antes de qualquer estímulo chegar." },
+
+    { "de": "estimulo-despolarizante", "para": "limiar-atingido",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Toda corrente de entrada desloca o potencial para cima. O limiar não é um número mágico gravado na célula: é a voltagem em que a corrente de Na⁺ que entra passa a superar a de K⁺ que sai, e o balanço deixa de puxar de volta para o repouso.",
+      "quant": { "limiar": "≈ −55 mV" } },
+
+    { "de": "limiar-atingido", "para": "comporta-de-ativacao-abre",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "O sensor de voltagem do canal é um segmento com resíduos carregados positivamente, segurados pelo campo elétrico da membrana polarizada. Quando o interior fica menos negativo, a força que os segurava afrouxa e o segmento se desloca, destravando o poro." },
+
+    { "de": "canais-de-na-disponiveis", "para": "comporta-de-ativacao-abre",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "O poro tem duas portas em série, e a corrente só passa com as duas abertas. Abrir a de ativação não serve de nada se a de inativação já estiver fechada, e é por isso que a disponibilidade prévia é condição do disparo, não consequência dele." },
+
+    { "de": "comporta-de-ativacao-abre", "para": "na-entra-rapido",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem", "na", "membrana"],
+      "porque": "Com o poro aberto, as duas forças sobre o Na⁺ apontam para o mesmo lado: ele está dez vezes mais concentrado fora, e o interior está negativo, o que atrai um cátion. Somadas, produzem a maior corrente iônica que a célula gera.",
+      "quant": { "fora": "≈145 mM", "dentro": "≈15 mM" } },
+
+    { "de": "na-entra-rapido", "para": "despolarizacao-cresce",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana"],
+      "porque": "Cada Na⁺ que entra traz uma carga positiva para o interior. Como a capacitância da membrana é pequena, um número de íons irrisório perto do total dissolvido já basta para mover a voltagem dezenas de milivolts." },
+
+    { "de": "despolarizacao-cresce", "para": "comporta-de-ativacao-abre",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "É a mesma sensibilidade à voltagem da abertura inicial, agora alimentada pela corrente que ela própria produziu. Aqui o laço se fecha sobre si mesmo, e é exatamente esse fechamento que separa um disparo de uma resposta passiva." },
+
+    { "de": "despolarizacao-cresce", "para": "amplitude-independente-do-estimulo",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Depois que o laço se fecha, quem alimenta a subida é a corrente de Na⁺, não o estímulo. Um estímulo que mal cruza o limiar produz o mesmo disparo de um estímulo dez vezes maior, porque a partir daí o estímulo já não participa." },
+
+    { "de": "despolarizacao-cresce", "para": "pico-do-potencial",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A subida para quando o interior fica positivo o bastante para que a força elétrica empurrando o Na⁺ para fora anule a química que o empurra para dentro. O teto é o potencial de equilíbrio do Na⁺, e ele nunca é alcançado por inteiro porque a inativação começa antes." },
+
+    { "de": "despolarizacao-cresce", "para": "comporta-de-inativacao-fecha",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "condicao": "alguns décimos de milissegundo depois da abertura",
+      "porque": "A mesma despolarização que abre a comporta de ativação também fecha a de inativação, só que devagar. É a diferença de velocidade entre as duas comportas, e não um sinal vindo de fora, que fixa a duração do disparo." },
+
+    { "de": "comporta-de-inativacao-fecha", "para": "corrente-de-na-cessa",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "Com a porta de inativação fechada o poro deixa de conduzir, mesmo com a de ativação ainda aberta e a membrana ainda despolarizada. É um fechamento por tempo decorrido, e não por a voltagem ter voltado." },
+
+    { "de": "despolarizacao-cresce", "para": "canais-de-k-abrem",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-k-voltagem"],
+      "condicao": "com atraso de cerca de um milissegundo",
+      "porque": "O canal de K⁺ dependente de voltagem responde à mesma despolarização, mas com cinética lenta. O atraso é o que faz o K⁺ chegar quando o Na⁺ já está saindo de cena, em vez de cancelá-lo desde o início e impedir o disparo." },
+
+    { "de": "canais-de-k-abrem", "para": "k-sai-rapido",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-k-voltagem", "k", "membrana"],
+      "porque": "Com a membrana despolarizada, as duas forças sobre o K⁺ apontam para fora: ele continua mais concentrado dentro, e agora o interior positivo também o repele. A saída fica mais forte do que jamais é no repouso." },
+
+    { "de": "pico-do-potencial", "para": "k-sai-rapido",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "Quanto mais positivo o interior chegou, maior a distância até o equilíbrio do K⁺ e mais forte a força que empurra esse íon para fora. A altura do pico regula a velocidade da descida, e não só o tamanho do disparo." },
+
+    { "de": "k-sai-rapido", "para": "repolarizacao",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana"],
+      "porque": "Cada K⁺ que sai leva uma carga positiva embora do interior. É a mesma aritmética de carga da subida, com o sinal trocado, porque agora o cátion atravessa no sentido contrário." },
+
+    { "de": "corrente-de-na-cessa", "para": "repolarizacao",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Enquanto o Na⁺ entrava, a saída de K⁺ apenas competia com ele. A descida só acontece porque a corrente de entrada já parou: com as duas ativas ao mesmo tempo elas se anulariam e a membrana ficaria travada no alto." },
+
+    { "de": "repolarizacao", "para": "hiperpolarizacao-tardia",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-k-voltagem"],
+      "porque": "Os canais de K⁺ fecham devagar e continuam abertos depois que a voltagem já voltou. Com a condutância ao K⁺ maior do que no repouso, a membrana é puxada para mais perto do equilíbrio do próprio K⁺ do que costuma ficar." },
+
+    { "de": "repolarizacao", "para": "fim-da-inativacao",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "A comporta de inativação não reabre por tempo decorrido: ela reabre quando a membrana volta a polarizar. É a repolarização, e não o relógio, que devolve o canal ao estado disponível." },
+
+    { "de": "hiperpolarizacao-tardia", "para": "fim-da-inativacao",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "Com a membrana mais negativa do que no repouso, o campo que reposiciona as comportas de inativação fica mais forte e elas reabrem mais depressa. O undershoot não é sobra do mecanismo: é o que devolve a célula à prontidão antes do prazo normal." },
+
+    { "de": "comporta-de-inativacao-fecha", "para": "periodo-refratario",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["canal-na-voltagem"],
+      "porque": "Com a comporta de inativação fechada, o canal fica num terceiro estado: nem aberto, nem pronto. Enquanto ela não reabrir, nenhum estímulo produz disparo, porque o que falta à célula não é força de estímulo, é canal disponível." },
+
+    { "de": "fim-da-inativacao", "para": "periodo-refratario",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "Quem fixa a duração do refratário não é o disparo que passou, é a velocidade com que as comportas de inativação reabrem depois de a membrana repolarizar. Membrana mais negativa encurta esse tempo; despolarização sustentada o prolonga indefinidamente." },
+
+    { "de": "amplitude-independente-do-estimulo", "para": "codigo-de-frequencia-com-teto",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se a altura do disparo não varia com a intensidade, a intensidade não cabe na amplitude e precisa de outro parâmetro. O único que sobra livre é quantos disparos acontecem por segundo, e é por isso que o axônio codifica em frequência." },
+
+    { "de": "periodo-refratario", "para": "codigo-de-frequencia-com-teto",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O tempo em que a célula fica indisponível é um piso para o intervalo entre dois disparos, e o inverso desse piso é o número máximo de disparos por segundo. O refratário deixa de ser detalhe de cinética e vira o limite de quanta informação o axônio consegue carregar." }
+  ],
+
+  "mecanismos": [
+    { "id": "potencial-de-acao",
+      "fenomeno": "Por que o disparo tem sempre a mesma altura, e o que isso obriga o neurônio a fazer para representar intensidade?",
+      "entrada": "potencial-de-repouso",
+      "terminal": "codigo-de-frequencia-com-teto",
+      "limites": "Descreve o disparo de axônio de mamífero, com canal de Na⁺ dependente de voltagem e retificador tardio de K⁺. Não cobre disparo dependente de Ca²⁺ (dendrito, célula cardíaca, célula ciliada), nem canais de K⁺ do tipo A, nem adaptação de frequência por correntes lentas. O teto de frequência aqui é o imposto pela inativação do Na⁺; em muitos neurônios reais o teto efetivo é bem menor e vem de outras correntes." }
+  ]
+}
