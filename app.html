@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<title>NeuroLab Profundo</title>
+<style>
+:root{
+  --fundo:#0e1116; --painel:#161b23; --painel2:#1d2430; --borda:#2a3442;
+  --texto:#e6edf5; --fraco:#93a1b3; --tenue:#5d6b7e;
+  --acento:#4da3ff; --certo:#3fbf7f; --errado:#e8615a; --aviso:#e0a23c;
+  --raio:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--fundo); color:var(--texto);
+  font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-text-size-adjust:100%;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#app{max-width:720px;margin:0 auto;padding:16px 14px 96px}
+h1{font-size:19px;margin:0 0 2px;letter-spacing:-.01em}
+h2{font-size:16px;margin:0 0 10px;font-weight:600}
+.sub{color:var(--fraco);font-size:13px;margin:0 0 18px}
+
+.cartao{background:var(--painel);border:1px solid var(--borda);border-radius:var(--raio);padding:14px;margin:0 0 12px}
+.linha{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+
+/* trilha do percurso */
+.trilha{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:2px;
+        color:var(--tenue);overflow-x:auto;padding:10px 0;white-space:nowrap}
+.trilha .feito{color:var(--certo)} .trilha .curso{color:var(--acento)}
+
+.barra{height:8px;background:var(--painel2);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.barra > i{display:block;height:100%;background:var(--certo);border-radius:99px;transition:width .35s}
+.barra.tenue > i{background:var(--acento)}
+
+.rotulo{font-size:12px;color:var(--fraco)}
+.numero{font:600 15px/1 system-ui}
+.selo{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:3px 8px;border-radius:99px;background:var(--painel2);color:var(--fraco)}
+.selo.ok{background:rgba(63,191,127,.15);color:var(--certo)}
+.selo.curso{background:rgba(77,163,255,.15);color:var(--acento)}
+.fenomeno{color:var(--fraco);font-size:13px;margin:2px 0 8px}
+.dep{font-size:11px;color:var(--tenue);margin-top:6px}
+
+/* dois números lado a lado */
+.dois{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.dois > div{background:var(--painel2);border-radius:10px;padding:10px 12px}
+.discorda{margin-top:10px;font-size:12px;color:var(--aviso);
+          background:rgba(224,162,60,.1);border-radius:10px;padding:9px 11px}
+
+/* botões */
+button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--borda);
+       background:var(--painel2);color:var(--texto);padding:12px 16px}
+button:disabled{opacity:.4;cursor:default}
+.principal{background:var(--acento);border-color:var(--acento);color:#06121f;font-weight:600;width:100%;padding:15px}
+.fantasma{background:transparent}
+
+/* alternativas */
+.alt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
+     padding:13px 14px;margin:0 0 8px;background:var(--painel);border:1px solid var(--borda);border-radius:12px}
+.alt .marca{flex:0 0 20px;height:20px;margin-top:1px;border:2px solid var(--tenue);
+            border-radius:6px;display:grid;place-items:center;font-size:12px;color:transparent}
+.alt.unica .marca{border-radius:99px}
+.alt[aria-pressed="true"]{border-color:var(--acento);background:rgba(77,163,255,.09)}
+.alt[aria-pressed="true"] .marca{border-color:var(--acento);background:var(--acento);color:#06121f}
+.alt.certa{border-color:var(--certo);background:rgba(63,191,127,.1)}
+.alt.errada{border-color:var(--errado);background:rgba(232,97,90,.1)}
+.alt.perdida{border-color:var(--certo);border-style:dashed}
+
+/* revelação */
+.rev{border-left:3px solid var(--borda);padding:0 0 0 12px;margin:12px 0 0}
+.rev + .rev{margin-top:14px}
+.rev .rel{font-weight:600;font-size:14px;margin-bottom:4px}
+.rev .verbo{color:var(--acento);font-weight:600}
+.rev p{margin:6px 0 0;font-size:14px;color:var(--fraco)}
+.rev .meta{font-size:12px;color:var(--tenue);margin-top:6px}
+.ressalva{margin-top:8px;font-size:13px;color:var(--aviso);
+          background:rgba(224,162,60,.1);border-radius:10px;padding:9px 11px}
+.destaque{border-left-color:var(--errado)}
+
+.progresso{display:flex;gap:4px;margin:0 0 14px}
+.progresso i{flex:1;height:4px;background:var(--painel2);border-radius:99px}
+.progresso i.feita{background:var(--certo)} .progresso i.falha{background:var(--errado)}
+.progresso i.atual{background:var(--acento)}
+
+.rodape{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--fundo) 26%);
+        padding:22px 14px calc(14px + env(safe-area-inset-bottom))}
+.rodape > div{max-width:720px;margin:0 auto}
+.oculto{display:none}
+.aviso{font-size:12px;color:var(--tenue);margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="rodape oculto" id="rodape"><div><button class="principal" id="acao"></button></div></div>
+<script>
+/* gerado por tools/build-app.js — não edite à mão */
+var __CONTEUDO = {"01-gradiente-eletroquimico.json":{"arquivo":"gradiente eletroquímico","nota_de_autoria":"Cada `porque` nomeia UM princípio. Se precisou de dois, são duas transições.","entidades":[{"id":"membrana","nome":"Membrana plasmática","escala":"celular","funcao":"bicamada lipídica que separa dois meios aquosos e não deixa íons passarem por conta própria","se_falhar":"os dois meios se misturam; nenhuma diferença de concentração ou de carga pode ser mantida"},{"id":"bomba-na-k","nome":"Bomba de sódio-potássio (Na⁺/K⁺-ATPase)","escala":"molecular","funcao":"gasta ATP para mover 3 Na⁺ para fora e 2 K⁺ para dentro por ciclo, contra os gradientes","se_falhar":"os gradientes se dissipam em minutos; sem desequilíbrio não há energia armazenada na membrana"},{"id":"canal-vazamento-k","nome":"Canal de vazamento de K⁺","escala":"molecular","funcao":"poro sempre aberto que deixa K⁺ atravessar a membrana","se_falhar":"o K⁺ fica preso; a diferença de concentração existe mas não gera voltagem"},{"id":"k","nome":"Íon potássio (K⁺)","escala":"molecular","funcao":"cátion monovalente — carrega uma carga positiva a cada íon que se move","se_falhar":"sem o íon que atravessa, não há corrente"},{"id":"anions-internos","nome":"Ânions intracelulares","escala":"molecular","funcao":"proteínas e fosfatos com carga negativa, grandes demais para atravessar a membrana","se_falhar":"a saída de K⁺ não deixaria excesso de carga negativa para trás"}],"nos":[{"id":"atp-disponivel","descricao":"A célula tem ATP","escala":"celular"},{"id":"k-concentrado-dentro","entidade":"k","escala":"molecular","descricao":"K⁺ muito mais concentrado dentro do que fora","quant":{"dentro":"≈140 mM","fora":"≈4 mM","razao":"35×"}},{"id":"k-difunde-para-fora","entidade":"k","escala":"molecular","descricao":"Mais K⁺ sai do que entra, através dos canais de vazamento"},{"id":"carga-positiva-deixa-a-celula","escala":"molecular","descricao":"Cada K⁺ que sai leva consigo uma carga positiva"},{"id":"interior-mais-negativo","escala":"celular","descricao":"O interior fica eletricamente negativo em relação ao exterior"},{"id":"campo-eletrico-puxa-k-de-volta","entidade":"k","escala":"molecular","descricao":"O interior negativo atrai K⁺ de volta para dentro"},{"id":"equilibrio-eletroquimico","escala":"celular","descricao":"A saída por difusão e a entrada por atração elétrica se igualam: fluxo líquido zero"},{"id":"potencial-de-equilibrio-do-k","escala":"celular","descricao":"A voltagem em que as duas forças se anulam para o K⁺","quant":{"valor":"≈ −95 mV com estas concentrações","equacao":"E_K = 61,5 · log([K⁺]fora / [K⁺]dentro) = 61,5 · log(4/140)","por_que_os_livros_dizem_90":"o número muda com as concentrações assumidas: 5/140 mM dá ≈ −90 mV. A faixa −90 a −95 mV é a mesma conta com entradas diferentes, não duas teorias"}}],"transicoes":[{"de":"atp-disponivel","para":"k-concentrado-dentro","tipo":"causa","certeza":"consolidado","requer":["membrana","bomba-na-k"],"porque":"Transporte ativo: a ATPase usa a energia liberada pela quebra do ATP para empurrar íons CONTRA o gradiente — 3 Na⁺ para fora e 2 K⁺ para dentro a cada ciclo. É a única etapa desta cadeia que consome energia; todo o resto acontece de graça, a favor do que já está desequilibrado.","condicao":"membrana íntegra separando os dois meios"},{"de":"k-concentrado-dentro","para":"k-difunde-para-fora","tipo":"causa","certeza":"consolidado","requer":["canal-vazamento-k","membrana"],"porque":"Difusão: o movimento térmico de cada íon é aleatório e não tem direção preferida. Mas como há 35× mais K⁺ dentro, o número de íons que por acaso cruza para fora é maior que o número que cruza para dentro. O fluxo líquido não vem de nenhuma força puxando — vem só de haver mais partículas de um lado.","condicao":"canal de vazamento aberto — sem ele a diferença de concentração existe e não vai a lugar nenhum"},{"de":"k-difunde-para-fora","para":"carga-positiva-deixa-a-celula","tipo":"causa","certeza":"consolidado","porque":"O K⁺ é um cátion: mover o íon é mover a carga. Não existe transporte de matéria sem transporte de carga quando a partícula é carregada."},{"de":"carga-positiva-deixa-a-celula","para":"interior-mais-negativo","tipo":"causa","certeza":"consolidado","requer":["anions-internos","membrana"],"porque":"Os ânions intracelulares — proteínas e fosfatos — são grandes demais para atravessar a membrana. Quando o K⁺ sai, essas cargas negativas ficam para trás sem contraparte positiva. A negatividade não é criada: ela é o que sobra."},{"de":"interior-mais-negativo","para":"campo-eletrico-puxa-k-de-volta","tipo":"causa","certeza":"consolidado","porque":"Atração eletrostática: cargas opostas se atraem. O interior negativo passa a exercer força sobre o K⁺ positivo, no sentido oposto ao da difusão."},{"de":"k-difunde-para-fora","para":"equilibrio-eletroquimico","tipo":"compoe","certeza":"consolidado","porque":"A força química continua empurrando K⁺ para fora enquanto houver diferença de concentração."},{"de":"campo-eletrico-puxa-k-de-volta","para":"equilibrio-eletroquimico","tipo":"compoe","certeza":"consolidado","porque":"A força elétrica cresce à medida que mais K⁺ sai. Quando ela iguala a força química, cada íon que sai é compensado por um que entra: o fluxo líquido cessa, mas os dois fluxos continuam acontecendo. Equilíbrio não é imobilidade."},{"de":"equilibrio-eletroquimico","para":"potencial-de-equilibrio-do-k","tipo":"causa","certeza":"consolidado","porque":"Nernst quantifica em que voltagem as duas forças se anulam. O valor depende só da razão entre as concentrações — não de quantos íons existem, mas de quão desiguais estão.","quant":{"calculo":"61,5 · log(4/140) = 61,5 · (−1,544) ≈ −95 mV"}}],"mecanismos":[{"id":"gradiente-eletroquimico","fenomeno":"Por que existe uma diferença de carga elétrica entre o interior e o exterior da célula?","entrada":"atp-disponivel","terminal":"potencial-de-equilibrio-do-k","limites":"Descreve o equilíbrio para UM íon (K⁺) numa membrana permeável só a ele. A célula real é permeável a vários íons ao mesmo tempo, e por isso o potencial de repouso não fica no valor de equilíbrio do K⁺ — ver o mecanismo do potencial de membrana. Nernst também assume temperatura fixa e atividade iônica ideal."}]},"02-potencial-de-membrana.json":{"arquivo":"potencial de membrana em repouso","nota_de_autoria":"Este arquivo NÃO declara nenhuma aresta de ligação com o arquivo 01. Ele apenas usa os mesmos ids de nó (`atp-disponivel`, `potencial-de-equilibrio-do-k`). Se a travessia encontrar o caminho de ponta a ponta, a composição sem costura está provada.","entidades":[{"id":"canal-vazamento-na","nome":"Canal de vazamento de Na⁺","escala":"molecular","funcao":"poro sempre aberto para Na⁺, mas MUITO menos numeroso que os de K⁺","se_falhar":"a membrana ficaria permeável só a K⁺ e o repouso cairia praticamente em cima do equilíbrio do K⁺ (≈ −95 mV)"},{"id":"na","nome":"Íon sódio (Na⁺)","escala":"molecular","funcao":"cátion monovalente, concentrado do lado de FORA","se_falhar":"some a força que puxa o potencial para cima"}],"nos":[{"id":"na-concentrado-fora","entidade":"na","escala":"molecular","descricao":"Na⁺ muito mais concentrado fora do que dentro","quant":{"fora":"≈145 mM","dentro":"≈15 mM","razao":"≈10×"}},{"id":"na-difunde-para-dentro","entidade":"na","escala":"molecular","descricao":"Mais Na⁺ entra do que sai, pelos poucos canais de vazamento de Na⁺"},{"id":"carga-positiva-entra-na-celula","escala":"molecular","descricao":"Cada Na⁺ que entra traz uma carga positiva para dentro"},{"id":"mais-canais-de-k-que-de-na","escala":"molecular","descricao":"Há muito mais canais de vazamento de K⁺ abertos na membrana em repouso do que de Na⁺","quant":{"proporcao":"ordem de 25 a 40 canais de K⁺ para cada um de Na⁺, em número efetivo de poros abertos"}},{"id":"permeabilidade-desigual","escala":"celular","descricao":"A membrana em repouso é muito mais permeável a K⁺ do que a Na⁺","quant":{"razao_P_K_por_P_Na":"≈ 25 a 40 vezes"}},{"id":"bomba-e-eletrogenica","escala":"molecular","descricao":"A bomba tira 3 cargas positivas e devolve 2 — o saldo por ciclo é negativo","quant":{"contribuicao_direta":"≈ −3 mV"}},{"id":"potencial-de-repouso","escala":"celular","descricao":"A voltagem em que a célula se estabiliza quando nada a perturba","quant":{"valor":"≈ −70 mV","equacao":"Goldman: pondera cada íon pela permeabilidade da membrana a ele"}}],"transicoes":[{"de":"atp-disponivel","para":"na-concentrado-fora","tipo":"causa","certeza":"consolidado","requer":["membrana","bomba-na-k"],"porque":"Transporte ativo: a mesma ATPase que puxa K⁺ para dentro empurra Na⁺ para fora, no mesmo ciclo. Os dois gradientes são o mesmo investimento de energia.","condicao":"membrana íntegra separando os dois meios"},{"de":"na-concentrado-fora","para":"na-difunde-para-dentro","tipo":"causa","certeza":"consolidado","requer":["canal-vazamento-na","membrana"],"porque":"Difusão: há mais Na⁺ fora, então cruzam mais para dentro do que para fora. É o mesmo princípio do K⁺, no sentido oposto — porque o desequilíbrio é oposto."},{"de":"na-difunde-para-dentro","para":"carga-positiva-entra-na-celula","tipo":"causa","certeza":"consolidado","porque":"O Na⁺ é um cátion: mover o íon é mover a carga."},{"de":"potencial-de-equilibrio-do-k","para":"potencial-de-repouso","tipo":"compoe","certeza":"consolidado","porque":"O K⁺ é o íon a que a membrana é mais permeável, então é ele quem mais puxa o potencial. Por isso o repouso fica PERTO de E_K — mas não nele."},{"de":"carga-positiva-entra-na-celula","para":"potencial-de-repouso","tipo":"compoe","certeza":"consolidado","porque":"A entrada contínua de Na⁺ despeja carga positiva no interior e impede o potencial de chegar ao equilíbrio do K⁺ puro (≈ −95 mV). É esta a resposta para 'por que −70 e não o valor do potássio': existe um vazamento de sódio o tempo todo."},{"de":"mais-canais-de-k-que-de-na","para":"permeabilidade-desigual","tipo":"causa","certeza":"consolidado","requer":["canal-vazamento-k","canal-vazamento-na","membrana"],"porque":"Permeabilidade não é propriedade do íon, é do número de portas abertas para ele. A membrana não escolhe o K⁺: ela simplesmente tem muito mais poros por onde o K⁺ passa. Troque a densidade de canais e a permeabilidade muda junto, sem que nada no íon mude."},{"de":"permeabilidade-desigual","para":"potencial-de-repouso","tipo":"modula","certeza":"consolidado","porque":"Goldman: o potencial final é uma média dos potenciais de equilíbrio de cada íon, PONDERADA pela permeabilidade a cada um. Como P_K é 25 a 40× maior que P_Na, o resultado fica muito mais perto de E_K que de E_Na.","quant":{"E_K":"≈ −95 mV","E_Na":"≈ +60 mV","resultado":"≈ −70 mV"}},{"de":"bomba-e-eletrogenica","para":"potencial-de-repouso","tipo":"modula","certeza":"consolidado","porque":"Além de manter os gradientes, a bomba retira uma carga positiva líquida por ciclo. É uma contribuição pequena e direta, somada por cima do efeito dos gradientes.","quant":{"peso":"≈ −3 mV de ≈ −70 mV"}},{"de":"atp-disponivel","para":"bomba-e-eletrogenica","tipo":"causa","certeza":"consolidado","requer":["bomba-na-k"],"porque":"A assimetria 3:2 é uma propriedade do ciclo da bomba; ela só acontece enquanto há ATP para o ciclo rodar."}],"mecanismos":[{"id":"potencial-de-membrana","fenomeno":"Por que a célula em repouso fica em ≈ −70 mV, e não no equilíbrio do potássio (≈ −95 mV)?","entrada":"atp-disponivel","terminal":"potencial-de-repouso","limites":"Trata a permeabilidade como fixa. Ela não é: canais que abrem e fecham mudam esses pesos em milissegundos, e é exatamente disso que trata o potencial de ação. Os valores numéricos são de neurônio de mamífero a 37 °C e variam entre tipos celulares."}]},"03-potencial-de-acao.json":{"arquivo":"potencial de ação","nota_de_autoria":"Este arquivo também NÃO declara aresta nenhuma com 01 ou 02. Ele começa usando o id `potencial-de-repouso`, que o arquivo 02 produz, e a travessia costura sozinha. O mecanismo vai de canal iônico até código neural: termina em POR QUE a intensidade tem de ser representada na frequência, e não na amplitude. Nenhuma transição aqui é `inibe`, `bloqueia` ou `remove` — o que o fechamento de um canal produz está escrito como o ESTADO que resulta dele (`corrente-de-na-cessa`), porque o motor ainda trata toda aresta como propagação e uma aresta negativa faria a perturbação calcular ao contrário.","entidades":[{"id":"canal-na-voltagem","nome":"Canal de Na⁺ dependente de voltagem","escala":"molecular","funcao":"poro com DUAS comportas em série e independentes: a de ativação abre rápido com a despolarização, a de inativação fecha devagar com a mesma despolarização","se_falhar":"não há disparo nenhum; a membrana responde ao estímulo de forma passiva e o sinal se apaga em poucos milímetros (é o que a tetrodotoxina faz)"},{"id":"canal-k-voltagem","nome":"Canal de K⁺ dependente de voltagem","escala":"molecular","funcao":"retificador tardio: abre com a despolarização, mas com cinética lenta, e não se inativa nesta escala de tempo","se_falhar":"a repolarização passa a depender só do vazamento; o disparo alarga muito e o teto de frequência desaba (é o que a tetraetilamônio faz)"}],"nos":[{"id":"canais-de-na-disponiveis","entidade":"canal-na-voltagem","escala":"molecular","descricao":"Os canais de Na⁺ estão fechados mas PRONTOS: a comporta de inativação está aberta"},{"id":"estimulo-despolarizante","escala":"celular","descricao":"Uma corrente de entrada empurra o potencial para cima do repouso"},{"id":"limiar-atingido","escala":"celular","descricao":"O potencial cruza o limiar","quant":{"limiar":"≈ −55 mV","ressalva":"varia com o tipo celular e com a densidade local de canais"}},{"id":"comporta-de-ativacao-abre","entidade":"canal-na-voltagem","escala":"molecular","descricao":"As comportas de ativação giram e destravam o poro de Na⁺","quant":{"tempo":"menos de 0,5 ms"}},{"id":"na-entra-rapido","entidade":"na","escala":"molecular","descricao":"Na⁺ entra em grande quantidade pelos canais abertos"},{"id":"despolarizacao-cresce","escala":"celular","descricao":"O interior perde a negatividade e passa a positivo"},{"id":"amplitude-independente-do-estimulo","escala":"celular","descricao":"O disparo tem sempre a mesma altura, qualquer que tenha sido o estímulo que o iniciou"},{"id":"pico-do-potencial","escala":"celular","descricao":"A subida para perto do pico","quant":{"pico":"≈ +30 a +40 mV","E_Na":"≈ +60 mV","por_que_nao_chega":"a inativação começa antes de o equilíbrio ser alcançado"}},{"id":"comporta-de-inativacao-fecha","entidade":"canal-na-voltagem","escala":"molecular","descricao":"A comporta de inativação se fecha, com atraso, sobre o poro ainda ativado"},{"id":"corrente-de-na-cessa","entidade":"na","escala":"molecular","descricao":"A entrada de Na⁺ para, mesmo com a membrana ainda despolarizada"},{"id":"canais-de-k-abrem","entidade":"canal-k-voltagem","escala":"molecular","descricao":"Os canais de K⁺ dependentes de voltagem terminam de abrir","quant":{"atraso":"≈ 1 ms depois do início da despolarização"}},{"id":"k-sai-rapido","entidade":"k","escala":"molecular","descricao":"K⁺ sai em grande quantidade pelos canais dependentes de voltagem"},{"id":"repolarizacao","escala":"celular","descricao":"O interior volta a ficar negativo"},{"id":"hiperpolarizacao-tardia","escala":"celular","descricao":"O potencial passa do repouso e desce mais que ele","quant":{"vale":"≈ −80 mV","repouso":"≈ −70 mV","E_K":"≈ −95 mV"}},{"id":"fim-da-inativacao","entidade":"canal-na-voltagem","escala":"molecular","descricao":"As comportas de inativação reabrem e os canais voltam a ficar disponíveis"},{"id":"periodo-refratario","escala":"celular","descricao":"A célula não dispara de novo, por maior que seja o estímulo","quant":{"refratario_absoluto":"≈ 1 ms"}},{"id":"codigo-de-frequencia-com-teto","escala":"celular","descricao":"A intensidade só pode ser representada na frequência dos disparos, e essa frequência tem teto","quant":{"teto":"≈ 500 a 1000 disparos por segundo"}}],"transicoes":[{"de":"potencial-de-repouso","para":"canais-de-na-disponiveis","tipo":"permite","certeza":"consolidado","requer":["canal-na-voltagem","membrana"],"porque":"A comporta de inativação do canal de Na⁺ só permanece aberta enquanto a membrana está polarizada. É o repouso que mantém o canal disponível: numa célula que já esteja parcialmente despolarizada, boa parte dos canais está travada antes de qualquer estímulo chegar."},{"de":"estimulo-despolarizante","para":"limiar-atingido","tipo":"causa","certeza":"consolidado","porque":"Toda corrente de entrada desloca o potencial para cima. O limiar não é um número mágico gravado na célula: é a voltagem em que a corrente de Na⁺ que entra passa a superar a de K⁺ que sai, e o balanço deixa de puxar de volta para o repouso.","quant":{"limiar":"≈ −55 mV"}},{"de":"limiar-atingido","para":"comporta-de-ativacao-abre","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"O sensor de voltagem do canal é um segmento com resíduos carregados positivamente, segurados pelo campo elétrico da membrana polarizada. Quando o interior fica menos negativo, a força que os segurava afrouxa e o segmento se desloca, destravando o poro."},{"de":"canais-de-na-disponiveis","para":"comporta-de-ativacao-abre","tipo":"permite","certeza":"consolidado","porque":"O poro tem duas portas em série, e a corrente só passa com as duas abertas. Abrir a de ativação não serve de nada se a de inativação já estiver fechada, e é por isso que a disponibilidade prévia é condição do disparo, não consequência dele."},{"de":"comporta-de-ativacao-abre","para":"na-entra-rapido","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem","na","membrana"],"porque":"Com o poro aberto, as duas forças sobre o Na⁺ apontam para o mesmo lado: ele está dez vezes mais concentrado fora, e o interior está negativo, o que atrai um cátion. Somadas, produzem a maior corrente iônica que a célula gera.","quant":{"fora":"≈145 mM","dentro":"≈15 mM"}},{"de":"na-entra-rapido","para":"despolarizacao-cresce","tipo":"causa","certeza":"consolidado","requer":["membrana"],"porque":"Cada Na⁺ que entra traz uma carga positiva para o interior. Como a capacitância da membrana é pequena, um número de íons irrisório perto do total dissolvido já basta para mover a voltagem dezenas de milivolts."},{"de":"despolarizacao-cresce","para":"comporta-de-ativacao-abre","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"É a mesma sensibilidade à voltagem da abertura inicial, agora alimentada pela corrente que ela própria produziu. Aqui o laço se fecha sobre si mesmo, e é exatamente esse fechamento que separa um disparo de uma resposta passiva."},{"de":"despolarizacao-cresce","para":"amplitude-independente-do-estimulo","tipo":"causa","certeza":"consolidado","porque":"Depois que o laço se fecha, quem alimenta a subida é a corrente de Na⁺, não o estímulo. Um estímulo que mal cruza o limiar produz o mesmo disparo de um estímulo dez vezes maior, porque a partir daí o estímulo já não participa."},{"de":"despolarizacao-cresce","para":"pico-do-potencial","tipo":"causa","certeza":"consolidado","porque":"A subida para quando o interior fica positivo o bastante para que a força elétrica empurrando o Na⁺ para fora anule a química que o empurra para dentro. O teto é o potencial de equilíbrio do Na⁺, e ele nunca é alcançado por inteiro porque a inativação começa antes."},{"de":"despolarizacao-cresce","para":"comporta-de-inativacao-fecha","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"condicao":"alguns décimos de milissegundo depois da abertura","porque":"A mesma despolarização que abre a comporta de ativação também fecha a de inativação, só que devagar. É a diferença de velocidade entre as duas comportas, e não um sinal vindo de fora, que fixa a duração do disparo."},{"de":"comporta-de-inativacao-fecha","para":"corrente-de-na-cessa","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"Com a porta de inativação fechada o poro deixa de conduzir, mesmo com a de ativação ainda aberta e a membrana ainda despolarizada. É um fechamento por tempo decorrido, e não por a voltagem ter voltado."},{"de":"despolarizacao-cresce","para":"canais-de-k-abrem","tipo":"causa","certeza":"consolidado","requer":["canal-k-voltagem"],"condicao":"com atraso de cerca de um milissegundo","porque":"O canal de K⁺ dependente de voltagem responde à mesma despolarização, mas com cinética lenta. O atraso é o que faz o K⁺ chegar quando o Na⁺ já está saindo de cena, em vez de cancelá-lo desde o início e impedir o disparo."},{"de":"canais-de-k-abrem","para":"k-sai-rapido","tipo":"causa","certeza":"consolidado","requer":["canal-k-voltagem","k","membrana"],"porque":"Com a membrana despolarizada, as duas forças sobre o K⁺ apontam para fora: ele continua mais concentrado dentro, e agora o interior positivo também o repele. A saída fica mais forte do que jamais é no repouso."},{"de":"pico-do-potencial","para":"k-sai-rapido","tipo":"modula","certeza":"consolidado","porque":"Quanto mais positivo o interior chegou, maior a distância até o equilíbrio do K⁺ e mais forte a força que empurra esse íon para fora. A altura do pico regula a velocidade da descida, e não só o tamanho do disparo."},{"de":"k-sai-rapido","para":"repolarizacao","tipo":"causa","certeza":"consolidado","requer":["membrana"],"porque":"Cada K⁺ que sai leva uma carga positiva embora do interior. É a mesma aritmética de carga da subida, com o sinal trocado, porque agora o cátion atravessa no sentido contrário."},{"de":"corrente-de-na-cessa","para":"repolarizacao","tipo":"permite","certeza":"consolidado","porque":"Enquanto o Na⁺ entrava, a saída de K⁺ apenas competia com ele. A descida só acontece porque a corrente de entrada já parou: com as duas ativas ao mesmo tempo elas se anulariam e a membrana ficaria travada no alto."},{"de":"repolarizacao","para":"hiperpolarizacao-tardia","tipo":"causa","certeza":"consolidado","requer":["canal-k-voltagem"],"porque":"Os canais de K⁺ fecham devagar e continuam abertos depois que a voltagem já voltou. Com a condutância ao K⁺ maior do que no repouso, a membrana é puxada para mais perto do equilíbrio do próprio K⁺ do que costuma ficar."},{"de":"repolarizacao","para":"fim-da-inativacao","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"A comporta de inativação não reabre por tempo decorrido: ela reabre quando a membrana volta a polarizar. É a repolarização, e não o relógio, que devolve o canal ao estado disponível."},{"de":"hiperpolarizacao-tardia","para":"fim-da-inativacao","tipo":"modula","certeza":"consolidado","porque":"Com a membrana mais negativa do que no repouso, o campo que reposiciona as comportas de inativação fica mais forte e elas reabrem mais depressa. O undershoot não é sobra do mecanismo: é o que devolve a célula à prontidão antes do prazo normal."},{"de":"comporta-de-inativacao-fecha","para":"periodo-refratario","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"Com a comporta de inativação fechada, o canal fica num terceiro estado: nem aberto, nem pronto. Enquanto ela não reabrir, nenhum estímulo produz disparo, porque o que falta à célula não é força de estímulo, é canal disponível."},{"de":"fim-da-inativacao","para":"periodo-refratario","tipo":"modula","certeza":"consolidado","porque":"Quem fixa a duração do refratário não é o disparo que passou, é a velocidade com que as comportas de inativação reabrem depois de a membrana repolarizar. Membrana mais negativa encurta esse tempo; despolarização sustentada o prolonga indefinidamente."},{"de":"amplitude-independente-do-estimulo","para":"codigo-de-frequencia-com-teto","tipo":"compoe","certeza":"consolidado","porque":"Se a altura do disparo não varia com a intensidade, a intensidade não cabe na amplitude e precisa de outro parâmetro. O único que sobra livre é quantos disparos acontecem por segundo, e é por isso que o axônio codifica em frequência."},{"de":"periodo-refratario","para":"codigo-de-frequencia-com-teto","tipo":"compoe","certeza":"consolidado","porque":"O tempo em que a célula fica indisponível é um piso para o intervalo entre dois disparos, e o inverso desse piso é o número máximo de disparos por segundo. O refratário deixa de ser detalhe de cinética e vira o limite de quanta informação o axônio consegue carregar."}],"mecanismos":[{"id":"potencial-de-acao","fenomeno":"Por que o disparo tem sempre a mesma altura, e o que isso obriga o neurônio a fazer para representar intensidade?","entrada":"potencial-de-repouso","terminal":"codigo-de-frequencia-com-teto","limites":"Descreve o disparo de axônio de mamífero, com canal de Na⁺ dependente de voltagem e retificador tardio de K⁺. Não cobre disparo dependente de Ca²⁺ (dendrito, célula cardíaca, célula ciliada), nem canais de K⁺ do tipo A, nem adaptação de frequência por correntes lentas. O teto de frequência aqui é o imposto pela inativação do Na⁺; em muitos neurônios reais o teto efetivo é bem menor e vem de outras correntes."}]},"04-conducao-saltatoria.json":{"arquivo":"condução saltatória","nota_de_autoria":"Também sem aresta declarada para arquivo nenhum: começa usando o id `despolarizacao-cresce`, que o arquivo 03 produz. A pergunta central é uma correção de intuição — quase todo mundo imagina que a mielina faz o sinal CORRER mais rápido. Não faz: a corrente pelo axoplasma já é praticamente instantânea com ou sem mielina. O que custa tempo é REGENERAR o disparo, e a mielina reduz o número de regenerações necessárias. O terminal do mecanismo é exatamente isso.","entidades":[{"id":"mielina","nome":"Bainha de mielina","escala":"celular","funcao":"dezenas de camadas de membrana glial enroladas em volta do axônio, cobrindo tudo menos as lacunas","se_falhar":"a corrente volta a vazar por todo o comprimento e o alcance passivo despenca; se o próximo nodo ficar fora de alcance, a condução não fica lenta, ela BLOQUEIA (é o que acontece na esclerose múltipla)"},{"id":"axoplasma","nome":"Axoplasma","escala":"celular","funcao":"o citoplasma do axônio, caminho condutor por dentro da fibra","se_falhar":"não há por onde a corrente local caminhar adiante, e cada ponto do axônio ficaria eletricamente isolado do vizinho"},{"id":"nodo-de-ranvier","nome":"Nodo de Ranvier","escala":"celular","funcao":"lacuna descoberta entre duas bainhas, onde a membrana fica exposta e os canais dependentes de voltagem se concentram","se_falhar":"sem membrana exposta não há onde regenerar, e o sinal atravessa passivamente até morrer"}],"nos":[{"id":"corrente-local-pelo-axoplasma","entidade":"axoplasma","escala":"celular","descricao":"A carga que entrou se redistribui pelo interior do axônio, adiante do ponto de entrada"},{"id":"vazamento-pela-membrana","entidade":"membrana","escala":"celular","descricao":"Parte da corrente que caminha por dentro escapa pela membrana antes de chegar adiante"},{"id":"decaimento-exponencial-com-a-distancia","escala":"celular","descricao":"A despolarização passiva fica menor quanto mais longe do ponto de origem","quant":{"lambda_sem_mielina":"≈ 0,1 a 1 mm","forma":"queda exponencial, não linear"}},{"id":"precisa-regenerar","escala":"celular","descricao":"O sinal tem de ser refeito com amplitude cheia em pontos sucessivos, ou não chega ao fim"},{"id":"regeneracao-custa-tempo","escala":"celular","descricao":"Cada regeneração consome tempo: abrir comportas e carregar a membrana até o limiar","quant":{"por_regeneracao":"algumas décimas de milissegundo"}},{"id":"mielina-envolve-o-axonio","entidade":"mielina","escala":"celular","descricao":"Camadas de membrana glial cobrem o axônio, deixando lacunas descobertas a intervalos regulares","quant":{"camadas":"dezenas a mais de cem","intervalo_entre_nodos":"≈ 1 a 2 mm"}},{"id":"resistencia-da-membrana-sobe","escala":"celular","descricao":"No trecho coberto, o caminho de fuga da corrente fica muito mais resistivo"},{"id":"capacitancia-da-membrana-cai","escala":"celular","descricao":"No trecho coberto, a membrana armazena muito menos carga por volt"},{"id":"constante-de-comprimento-aumenta","escala":"celular","descricao":"A distância em que a despolarização passiva ainda é aproveitável fica muito maior","quant":{"lambda_com_mielina":"vários milímetros","regra":"cresce com a raiz da razão entre resistência de membrana e resistência interna"}},{"id":"menos-carga-para-mudar-a-voltagem","escala":"celular","descricao":"O trecho coberto muda de voltagem quase sem atraso, porque exige pouca carga"},{"id":"diametro-do-axonio-maior","entidade":"axoplasma","escala":"celular","descricao":"O axônio é grosso","quant":{"axonio_gigante_da_lula":"≈ 0,5 a 1 mm de diâmetro"}},{"id":"resistencia-interna-cai","entidade":"axoplasma","escala":"celular","descricao":"A corrente encontra menos resistência para seguir adiante por dentro"},{"id":"canais-de-na-so-nos-nodos","entidade":"canal-na-voltagem","escala":"molecular","descricao":"Os canais de Na⁺ dependentes de voltagem ficam concentrados nas lacunas descobertas","quant":{"densidade_no_nodo":"ordens de grandeza acima da do trecho coberto"}},{"id":"regeneracao-so-nos-nodos","escala":"celular","descricao":"O disparo só é refeito nos nodos; o trecho coberto é atravessado passivamente"},{"id":"velocidade-vem-de-pular-regeneracoes","escala":"celular","descricao":"A velocidade não vem de o sinal correr mais rápido, e sim de ele parar menos vezes no caminho","quant":{"sem_mielina":"≈ 0,5 a 2 m/s","com_mielina":"até ≈ 120 m/s"}}],"transicoes":[{"de":"despolarizacao-cresce","para":"corrente-local-pelo-axoplasma","tipo":"causa","certeza":"consolidado","requer":["axoplasma"],"porque":"A carga que entrou não fica onde entrou. O interior do axônio conduz, e o excesso de carga positiva repele as cargas positivas vizinhas, redistribuindo-se adiante quase à velocidade da eletricidade. Nenhum canal participa desse passo: é condução elétrica, não transporte de íon ponto a ponto."},{"de":"corrente-local-pelo-axoplasma","para":"vazamento-pela-membrana","tipo":"causa","certeza":"consolidado","requer":["membrana"],"porque":"A membrana não é isolante perfeito: tem canais de vazamento abertos o tempo todo. Parte da corrente que caminha por dentro encontra esse caminho de saída e escapa em vez de seguir adiante."},{"de":"vazamento-pela-membrana","para":"decaimento-exponencial-com-a-distancia","tipo":"causa","certeza":"consolidado","porque":"Cada trecho de membrana subtrai uma fração constante da corrente que ainda segue. Fração constante por unidade de comprimento é justamente o que produz queda exponencial, e não linear: dobrar a distância não corta a voltagem pela metade, corta muito mais."},{"de":"constante-de-comprimento-aumenta","para":"decaimento-exponencial-com-a-distancia","tipo":"modula","certeza":"consolidado","porque":"O decaimento não desaparece com a mielina: ele passa a acontecer numa escala de distância muito maior. O sinal continua morrendo sozinho, só que agora morre depois de milímetros em vez de depois de décimos de milímetro."},{"de":"decaimento-exponencial-com-a-distancia","para":"precisa-regenerar","tipo":"causa","certeza":"consolidado","porque":"Um sinal que decai não atravessa um axônio de um metro. A única saída é refazê-lo: usar a despolarização que ainda sobrou para cruzar o limiar adiante e produzir um disparo novo, de amplitude cheia, que recomeça a contagem."},{"de":"precisa-regenerar","para":"regeneracao-custa-tempo","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem"],"porque":"Regenerar não é instantâneo: as comportas de ativação levam décimos de milissegundo para abrir, e a corrente ainda precisa carregar a capacitância local até o limiar. É este passo, e não a corrida da corrente pelo axoplasma, que consome o tempo da condução."},{"de":"regeneracao-custa-tempo","para":"velocidade-vem-de-pular-regeneracoes","tipo":"compoe","certeza":"consolidado","porque":"O custo de uma regeneração é praticamente o mesmo com mielina ou sem ela: são os mesmos canais, com a mesma cinética. É por isso que ele entra na conta da velocidade como um preço fixo por parada, e não como algo que a mielina acelere."},{"de":"mielina-envolve-o-axonio","para":"resistencia-da-membrana-sobe","tipo":"causa","certeza":"consolidado","requer":["mielina"],"porque":"A bainha são dezenas de camadas de membrana empilhadas em série, e resistências em série somam. O caminho de fuga da corrente fica tão resistivo no trecho coberto que praticamente nada vaza por ali."},{"de":"mielina-envolve-o-axonio","para":"capacitancia-da-membrana-cai","tipo":"causa","certeza":"consolidado","requer":["mielina"],"porque":"Capacitância cai quando a distância entre as placas aumenta, e a bainha afasta o meio externo do axoplasma por muitas camadas. Menos capacitância significa menos carga necessária para mover a voltagem daquele trecho."},{"de":"mielina-envolve-o-axonio","para":"canais-de-na-so-nos-nodos","tipo":"causa","certeza":"consolidado","requer":["mielina","nodo-de-ranvier","canal-na-voltagem"],"porque":"O contato da célula glial com o axônio organiza a membrana embaixo dela e empurra os canais dependentes de voltagem para as lacunas descobertas. A concentração nos nodos depende desse contato: sem bainha, os canais ficam espalhados por todo o comprimento."},{"de":"resistencia-da-membrana-sobe","para":"constante-de-comprimento-aumenta","tipo":"causa","certeza":"consolidado","porque":"A constante de comprimento cresce com a raiz da razão entre a resistência da membrana e a do interior. Com menos fuga por unidade de comprimento, a mesma corrente chega muito mais longe antes de a voltagem cair ao ponto de não servir."},{"de":"diametro-do-axonio-maior","para":"resistencia-interna-cai","tipo":"causa","certeza":"consolidado","requer":["axoplasma"],"porque":"Resistência de um condutor cai quando a área da seção aumenta, porque há mais caminhos em paralelo para a corrente. Dobrar o diâmetro quadruplica a área e derruba a resistência interna para um quarto."},{"de":"resistencia-interna-cai","para":"constante-de-comprimento-aumenta","tipo":"causa","certeza":"consolidado","porque":"O alcance passivo melhora tanto dificultando a fuga quanto facilitando o avanço por dentro. Esta é a segunda rota, e é a que os invertebrados usam: o axônio gigante da lula não tem mielina nenhuma e compensa com quase um milímetro de diâmetro."},{"de":"capacitancia-da-membrana-cai","para":"menos-carga-para-mudar-a-voltagem","tipo":"causa","certeza":"consolidado","porque":"Voltagem é carga dividida por capacitância. Com a capacitância menor, a mesma corrente que chega do nodo anterior levanta a voltagem daquele trecho muito mais depressa, quase sem gastar carga no caminho."},{"de":"canais-de-na-so-nos-nodos","para":"regeneracao-so-nos-nodos","tipo":"causa","certeza":"consolidado","requer":["canal-na-voltagem","nodo-de-ranvier"],"porque":"Regenerar exige canal de Na⁺ dependente de voltagem, e onde não há canal não existe disparo possível. O trecho coberto só pode conduzir de forma passiva, e o disparo volta a existir apenas no nodo seguinte."},{"de":"menos-carga-para-mudar-a-voltagem","para":"regeneracao-so-nos-nodos","tipo":"permite","certeza":"consolidado","porque":"Pular um trecho só funciona se o que chega ao nodo seguinte ainda cruzar o limiar. A capacitância baixa é o que garante isso: quase nenhuma carga se perde enchendo a membrana do trecho coberto pelo caminho."},{"de":"constante-de-comprimento-aumenta","para":"regeneracao-so-nos-nodos","tipo":"permite","certeza":"consolidado","porque":"O nodo seguinte precisa estar dentro da distância em que a despolarização ainda é grande o bastante para disparar. É o alcance passivo aumentado que põe o próximo nodo dentro desse raio, e é por isso que perder a bainha pode bloquear a condução em vez de apenas atrasá-la."},{"de":"regeneracao-so-nos-nodos","para":"velocidade-vem-de-pular-regeneracoes","tipo":"causa","certeza":"consolidado","porque":"Atravessar uma distância exige um número de paradas igual a essa distância dividida pelo espaçamento entre nodos. Aumentar o espaçamento reduz o número de paradas na mesma proporção, e é aí que a velocidade sobe: o sinal não corre mais rápido, ele para menos vezes."}],"mecanismos":[{"id":"conducao-saltatoria","fenomeno":"Se a corrente elétrica já atravessa o axônio quase instantaneamente, por que a mielina torna a condução mais rápida?","entrada":"despolarizacao-cresce","terminal":"velocidade-vem-de-pular-regeneracoes","limites":"Descreve condução em axônio mielinizado de vertebrado, tratando a bainha como isolante passivo. Não cobre o papel metabólico da glia no sustento do axônio, nem a remodelação de mielina dependente de atividade, nem os canais de K⁺ justaparanodais. Trata o nodo como ponto; em fibras finas o comprimento do nodo importa. Os números de velocidade são de fibras motoras grandes de mamífero."}]}};
+
+var __mods = {};
+var __dirname = '.';
+function require(pedido){
+  if(pedido === 'node:fs' || pedido === 'fs') return {
+    readdirSync: function(){ return Object.keys(__CONTEUDO); },
+    readFileSync: function(p){
+      var nome = String(p).split('/').pop();
+      if(!(nome in __CONTEUDO)) throw new Error('conteúdo ausente no pacote: ' + nome);
+      return JSON.stringify(__CONTEUDO[nome]);
+    }
+  };
+  if(pedido === 'node:path' || pedido === 'path') return {
+    join: function(){ return Array.prototype.slice.call(arguments).join('/'); }
+  };
+  var nome = String(pedido).replace(/^\.\//, '').replace(/\.js$/, '');
+  if(!(nome in __mods)) throw new Error('módulo não empacotado: ' + pedido);
+  return __mods[nome];
+}
+
+/* ===== src/grafo.js ===== */
+(function(){
+var module = { exports: {} }, exports = module.exports;
+/* =====================================================================
+   NeuroLab Profundo · o grafo
+
+   Os arquivos de `content/` são recortes de autoria, não módulos. Aqui eles
+   viram UM grafo só. Nenhum arquivo declara ligação com outro: a composição
+   acontece porque dois arquivos usam o mesmo id de nó.
+
+   O átomo é a TRANSIÇÃO. A entidade é o objeto sobre o qual as transições
+   operam. O mecanismo é um recorte — entrada e terminal —, e o conjunto de
+   nós dele é CALCULADO pela travessia, nunca listado à mão.
+   ===================================================================== */
+const fs = require('node:fs');
+const path = require('node:path');
+
+const RAIZ = path.join(__dirname, '..');
+const CONTEUDO = path.join(RAIZ, 'content');
+
+/* Vocabulário fechado. TODO tipo lê no sentido da seta: "A <tipo> B".
+   `requer` foi removido daqui na Fase A por violar as duas regras — lia ao
+   contrário ("A requer B" quando o sentido era B depender de A) e colidia
+   com o campo `requer:` das entidades. Virou `compoe`: A é um dos termos
+   que produzem B. */
+const TIPOS_DE_TRANSICAO = ['causa', 'permite', 'compoe', 'modula', 'inibe', 'bloqueia', 'remove'];
+const VERBO = { causa:'causa', permite:'permite', compoe:'compõe', modula:'modula',
+                inibe:'inibe', bloqueia:'bloqueia', remove:'remove' };
+const NIVEIS_DE_CERTEZA = ['consolidado', 'debatido', 'hipotese'];
+
+function carregar(){
+  const g = { entidades:{}, nos:{}, transicoes:[], mecanismos:{}, origem:{}, arquivos:[] };
+  const arquivos = fs.readdirSync(CONTEUDO).filter(f=>f.endsWith('.json')).sort();
+  for(const arq of arquivos){
+    const dados = JSON.parse(fs.readFileSync(path.join(CONTEUDO, arq), 'utf8'));
+    g.arquivos.push(arq);
+    (dados.entidades||[]).forEach(e=>{ g.entidades[e.id] = e; g.origem[e.id] = arq; });
+    (dados.nos||[]).forEach(n=>{ g.nos[n.id] = n; g.origem[n.id] = arq; });
+    (dados.transicoes||[]).forEach((t,i)=>{ t._arquivo = arq; t._i = i; g.transicoes.push(t); });
+    (dados.mecanismos||[]).forEach(m=>{ m._arquivo = arq; g.mecanismos[m.id] = m; });
+  }
+  return g;
+}
+
+/* ---------- travessia ---------- */
+
+function saindoDe(g, noId){ return g.transicoes.filter(t=>t.de === noId); }
+function chegandoEm(g, noId){ return g.transicoes.filter(t=>t.para === noId); }
+
+// tudo que depende deste nó, direta ou indiretamente
+function aJusante(g, noId){
+  const vistos = new Set(), fila = [noId];
+  while(fila.length){
+    const atual = fila.shift();
+    for(const t of saindoDe(g, atual)){
+      if(vistos.has(t.para)) continue;
+      vistos.add(t.para); fila.push(t.para);
+    }
+  }
+  return vistos;
+}
+
+// tudo de que este nó depende
+function aMontante(g, noId){
+  const vistos = new Set(), fila = [noId];
+  while(fila.length){
+    const atual = fila.shift();
+    for(const t of chegandoEm(g, atual)){
+      if(vistos.has(t.de)) continue;
+      vistos.add(t.de); fila.push(t.de);
+    }
+  }
+  return vistos;
+}
+
+/* Todos os caminhos de A até B. Devolve listas de transições, não de nós —
+   porque o átomo é a transição, e é ela que carrega o `porque`. */
+function caminhos(g, de, para, limite){
+  limite = limite || 200;
+  const achados = [];
+  (function anda(atual, trilha, visitados){
+    if(achados.length >= limite) return;
+    if(atual === para){ achados.push(trilha.slice()); return; }
+    for(const t of saindoDe(g, atual)){
+      if(visitados.has(t.para)) continue;          // não repete nó no mesmo caminho
+      visitados.add(t.para);
+      trilha.push(t);
+      anda(t.para, trilha, visitados);
+      trilha.pop();
+      visitados.delete(t.para);
+    }
+  })(de, [], new Set([de]));
+  return achados;
+}
+
+/* O recorte de um mecanismo: TUDO de que o terminal depende. Calculado,
+   nunca listado.
+
+   A primeira versão disto era `a jusante da entrada ∩ a montante do
+   terminal`, e a Fase A mostrou que essa regra estava errada: ela descarta
+   as CO-CAUSAS — o que determina o terminal sem descender da entrada. No
+   potencial de repouso isso derrubava a permeabilidade desigual, que é
+   justamente o fator de maior peso. Um mecanismo não é uma linha; é uma
+   confluência. A `entrada` continua sendo por onde a narrativa começa (e o
+   validador exige que o terminal seja alcançável a partir dela), mas quem
+   define o recorte é o terminal. */
+function subgrafo(g, mecanismoId){
+  const m = g.mecanismos[mecanismoId];
+  if(!m) return null;
+  const nos = aMontante(g, m.terminal);
+  nos.add(m.terminal);
+  const transicoes = g.transicoes.filter(t=>nos.has(t.de) && nos.has(t.para));
+  // raízes: nós do recorte que nada de dentro dele causa. A entrada é uma
+  // delas; as outras são as co-causas.
+  const raizes = [...nos].filter(n=>!transicoes.some(t=>t.para === n));
+  return { mecanismo:m, nos, transicoes, raizes };
+}
+
+/* Pré-requisitos SEM bloqueio: outro mecanismo é pré-requisito deste quando
+   o TERMINAL dele mora dentro do meu recorte — ou seja, quando aquilo que
+   ele explica é coisa de que eu dependo. Derivado, não escrito, e
+   assimétrico de graça. */
+function prerequisitos(g, mecanismoId){
+  const sg = subgrafo(g, mecanismoId);
+  if(!sg) return [];
+  return Object.keys(g.mecanismos).filter(id=>
+    id !== mecanismoId && sg.nos.has(g.mecanismos[id].terminal));
+}
+
+/* Um nó "cruza arquivos" quando as transições que o tocam vêm de arquivos
+   diferentes — é a assinatura da composição sem costura. */
+function arquivosDoCaminho(caminho){
+  return [...new Set(caminho.map(t=>t._arquivo))];
+}
+
+/* ---------- perturbação ----------
+   Remove uma entidade ou uma transição e DERIVA o que deixa de acontecer.
+   Nada aqui é escrito à mão: a consequência é o que some da alcançabilidade.
+   É isto que substitui os contrafactuais autorados do NeuroLab. */
+function perturbar(g, alvo, entradaId){
+  const mortas = g.transicoes.filter(t=>{
+    if(alvo.entidade) return (t.requer||[]).includes(alvo.entidade);
+    if(alvo.transicao) return t === alvo.transicao;
+    return false;
+  });
+  const vivas = g.transicoes.filter(t=>!mortas.includes(t));
+  const antes = aJusante(g, entradaId);
+  const depois = aJusante(Object.assign({}, g, {transicoes:vivas}), entradaId);
+  const perdidos = [...antes].filter(n=>!depois.has(n));
+  return { mortas, perdidos, restantes: depois };
+}
+
+/* Transições que dependem de uma entidade — para saber o que dá para perturbar */
+function transicoesQueDependemDe(g, entidadeId){
+  return g.transicoes.filter(t=>(t.requer||[]).includes(entidadeId));
+}
+
+/* ---------- explicação ----------
+   A pergunta e a resposta saem da própria transição: não existe banco de
+   perguntas escrito à mão. E `certeza` tem consequência didática — nada
+   fora de `consolidado` chega ao estudo sem ressalva junto. */
+const RESSALVA = {
+  debatido: 'Há disputa na literatura sobre esta etapa. Trate como leitura provável, não como fato fechado.',
+  hipotese: 'Isto é hipótese. Não estude como mecanismo estabelecido.'
+};
+function explicar(g, t){
+  const de = g.nos[t.de], para = g.nos[t.para];
+  const nome = id => (g.nos[id] && g.nos[id].descricao) || id;
+  return {
+    pergunta: `Por que "${nome(t.de)}" leva a "${nome(t.para)}"?`,
+    resposta: t.porque,
+    tipo: t.tipo,
+    condicao: t.condicao || null,
+    requer: (t.requer||[]).map(id=> (g.entidades[id] && g.entidades[id].nome) || id),
+    certeza: t.certeza,
+    ressalva: t.certeza === 'consolidado' ? null
+            : (RESSALVA[t.certeza] || 'Certeza fora de `consolidado`: não apresente como fato.'),
+    _de: de, _para: para
+  };
+}
+
+/* ---------- reconstrução nos dois sentidos ----------
+   Para frente parte das raízes do recorte e pergunta "o que isto causa?".
+   Para trás parte do terminal e pergunta "o que precisava ter acontecido?".
+   Os dois percursos cobrem exatamente o mesmo conjunto de transições — é
+   isso que significa o mecanismo ser reconstruível nas duas direções. */
+function reconstruir(g, mecanismoId, sentido){
+  const sg = subgrafo(g, mecanismoId);
+  if(!sg) return null;
+  const paraFrente = sentido !== 'tras';
+  const vizinhas = no => sg.transicoes.filter(t => (paraFrente ? t.de : t.para) === no);
+  const outroLado = t => paraFrente ? t.para : t.de;
+  const nome = id => (g.nos[id] && g.nos[id].descricao) || id;
+
+  const inicio = paraFrente ? sg.raizes.slice() : [sg.mecanismo.terminal];
+  const passos = [], vistos = new Set(inicio), fila = inicio.slice();
+  while(fila.length){
+    const no = fila.shift();
+    const ts = vizinhas(no);
+    if(ts.length){
+      passos.push({
+        no,
+        pergunta: paraFrente
+          ? `Dado "${nome(no)}", o que acontece em seguida — e por quê?`
+          : `Para chegar em "${nome(no)}", o que precisava ter acontecido — e por quê?`,
+        resposta: ts.map(t=>({ no: outroLado(t), explicacao: explicar(g, t) })),
+        transicoes: ts
+      });
+    }
+    for(const t of ts){
+      const prox = outroLado(t);
+      if(vistos.has(prox)) continue;
+      vistos.add(prox); fila.push(prox);
+    }
+  }
+  return { mecanismo: sg.mecanismo, sentido: paraFrente ? 'frente' : 'tras',
+           passos, alcancados: vistos,
+           transicoesCobertas: new Set(passos.flatMap(p=>p.transicoes)) };
+}
+
+module.exports = {
+  carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
+  prerequisitos, arquivosDoCaminho, perturbar, transicoesQueDependemDe,
+  explicar, reconstruir, RESSALVA, VERBO,
+  TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
+};
+
+__mods["grafo"] = module.exports;
+})();
+
+/* ===== src/estudo.js ===== */
+(function(){
+var module = { exports: {} }, exports = module.exports;
+/* =====================================================================
+   NeuroLab Profundo · o cronograma
+
+   O que se agenda aqui não é "aula" nem "tópico": é o par
+   TRANSIÇÃO × OPERAÇÃO. Saber reconstruir um elo não é o mesmo que saber
+   o que acontece quando ele quebra, e as duas coisas se esquecem em
+   ritmos diferentes — então são duas caixas de revisão distintas.
+
+   O endereço da caixa é `de>para#operacao`. A transição não tem `id` de
+   propósito: id é coisa que se digita errado, e o par de nós já identifica
+   a transição sem ninguém precisar inventar nome. O validador garante que
+   o par é único e que nenhum id de nó contém os separadores.
+
+   Quais operações valem para cada transição é DERIVADO do grafo, nunca
+   declarado no conteúdo — pela mesma razão que as perguntas são derivadas.
+   Se coubesse escrever "esta transição serve para perturbar", alguém
+   escreveria, e o conteúdo voltaria a mandar no estudo.
+
+   Três diferenças deliberadas em relação ao SRS do NeuroLab v2, todas por
+   causa de teste:
+     · o lote de evidências é um OBJETO que se passa adiante, não um global
+       de módulo (`_evidenceBatch`) — dois lotes simultâneos não se comem;
+     · `agora` é PARÂMETRO em tudo. O v2 chama `Date.now()` por dentro, o
+       que amarra o teste ao relógio de parede;
+     · a folga do vencimento é determinística a partir do endereço, não
+       `Math.random()` — senão o portão fica intermitente.
+   ===================================================================== */
+const G = require('./grafo.js');
+
+/* As quatro operações. São as dimensões do SRS: a mesma transição tem uma
+   caixa por operação. */
+const OPERACOES = ['construir', 'reconstruir', 'perturbar', 'depurar'];
+
+const INTERVALOS = [1, 3, 7, 14, 30, 60, 120, 240];  // dias, por caixa de Leitner
+const PASSA = 0.8;          // nota mínima para promover
+const TETO_RECAIDA = 2;     // errar não devolve à caixa 0 se já havia estrada andada
+const TETO_SESSAO = 16;     // piso de parada da sessão, em caixas
+const DIA = 86400000;
+const FOLGA = 0.12;         // ±12% no vencimento, para o lote semeado junto não vencer junto para sempre
+const MIN_NOS_PARA_ORDENAR = 3;  // com 2 nós a ordem é trivial e a operação não mede nada
+const MIN_SOBREVIVENTES = 2;     // sem sobrevivente não há distrator, e "marcar tudo" acerta
+
+/* ---------- o endereço ---------- */
+function chaveDaTransicao(t){ return t.de + '>' + t.para; }
+function chaveDaCaixa(t, operacao){ return chaveDaTransicao(t) + '#' + operacao; }
+function lerChave(chave){
+  const [par, operacao] = chave.split('#');
+  const [de, para] = par.split('>');
+  return { de, para, operacao };
+}
+
+/* Um índice dos recortes, para não recalcular subgrafo a cada transição. */
+function indexar(g){
+  const idx = {};
+  Object.keys(g.mecanismos).forEach(id=>{ idx[id] = G.subgrafo(g, id); });
+  return idx;
+}
+
+/* ---------- o que dá para medir ----------
+   Uma operação só vira caixa de revisão se ela tem resposta certa NESTE
+   grafo. Não é preferência de autor: é a pergunta "esta operação chega a
+   perguntar alguma coisa aqui?".
+
+   · construir/reconstruir — precisam de um mecanismo onde morar, e de
+     ordem não trivial. Num recorte de dois nós não há o que ordenar.
+   · perturbar — precisa de uma entidade cuja remoção realmente derrube
+     alcance. Entidade cujo sumiço não muda nada gera pergunta sem resposta.
+   · depurar — a operação inverte a transição e pergunta o que está errado.
+     Se o inverso TAMBÉM existe no grafo (retroalimentação real), a
+     afirmação invertida é verdadeira e a pergunta não tem gabarito.
+
+   Transição fora de todo mecanismo não é estudável: o estudo acontece
+   dentro de um recorte, e sem recorte não há contexto para nenhuma das
+   quatro. */
+/* A mensurabilidade é DENTRO DE UM RECORTE, não no grafo inteiro: a mesma
+   transição pode dar uma boa pergunta de reconstrução num mecanismo e
+   nenhuma noutro, porque quem decide é o recorte em volta dela. */
+function operacoesMensuraveisEm(g, t, mecanismoId, idx){
+  idx = idx || indexar(g);
+  const sg = idx[mecanismoId];
+  if(!sg || !sg.transicoes.includes(t)) return [];
+
+  const ops = [];
+  if(sg.nos.size >= MIN_NOS_PARA_ORDENAR){ ops.push('construir'); ops.push('reconstruir'); }
+
+  /* Perturbar precisa de perda REAL e de sobreviventes. Entidade cuja
+     remoção não derruba nada gera pergunta sem resposta; entidade que
+     derruba o recorte inteiro gera pergunta sem distrator, e aí "marcar
+     tudo" acerta. As duas degeneram para o mesmo lugar: item decorável. */
+  const perturbavel = (t.requer||[]).some(entidade=>{
+    const perdidos = G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos
+      .filter(n=>sg.nos.has(n));
+    if(!perdidos.length) return false;
+    return (sg.nos.size - perdidos.length) >= MIN_SOBREVIVENTES;
+  });
+  if(perturbavel) ops.push('perturbar');
+
+  // `depurar` é a única que não depende do recorte: se a inversa existe no
+  // grafo, inverter é verdade em qualquer contexto.
+  if(!g.transicoes.some(o=>o.de === t.para && o.para === t.de)) ops.push('depurar');
+
+  return ops;
+}
+
+/* No grafo inteiro, a transição mede o que qualquer recorte dela medir. */
+function mecanismosDe(g, t, idx){
+  return Object.keys(idx).sort().filter(id=>idx[id] && idx[id].transicoes.includes(t));
+}
+function operacoesMensuraveis(g, t, idx){
+  idx = idx || indexar(g);
+  const vistas = new Set();
+  mecanismosDe(g, t, idx).forEach(id=>
+    operacoesMensuraveisEm(g, t, id, idx).forEach(op=>vistas.add(op)));
+  return OPERACOES.filter(op=>vistas.has(op));
+}
+
+/* ---------- de quem é a caixa ----------
+   Recortes se sobrepõem — é o que significa um mecanismo depender de outro.
+   Sem uma regra de posse, a mesma caixa seria contada duas vezes no
+   progresso e cobrada duas vezes na mesma sessão.
+
+   A caixa é do MENOR recorte em que aquela operação mede: é onde ela é
+   exercitada com menos ruído em volta. Empate desempata por id, para o
+   resultado ser reproduzível. */
+function donoDaCaixa(g, t, operacao, idx){
+  idx = idx || indexar(g);
+  const candidatos = mecanismosDe(g, t, idx)
+    .filter(id=>operacoesMensuraveisEm(g, t, id, idx).includes(operacao));
+  if(!candidatos.length) return null;
+  return candidatos.sort((a, b)=>
+    (idx[a].nos.size - idx[b].nos.size) || (a < b ? -1 : 1))[0];
+}
+
+/* ---------- estado ----------
+   Projeto novo, estado zero: não existe migração e não vai existir. */
+function novoEstado(){ return { versao: 1, caixas: {} }; }
+
+/* `caixa` é onde a revisão está HOJE; `recorde` é o mais longe que ela já
+   chegou, e nunca desce. São duas coisas diferentes de propósito: o
+   cronograma precisa da verdade de hoje para saber o que cobrar, e o
+   percurso precisa da conquista para não desfazer o que já foi conquistado.
+   Misturar as duas é o que faz uma barra de progresso ou mentir sobre
+   retenção, ou desmanchar um trecho já vencido. */
+function caixaNova(agora){
+  return { caixa: 0, recorde: 0, vencimento: agora, tentativas: 0, evidencias: 0,
+           ultimaNota: null, ultimoEstudo: null };
+}
+
+/* Semear um mecanismo abre uma caixa por transição × operação mensurável —
+   e só essas. */
+function semear(g, estado, mecanismoId, agora, idx){
+  idx = idx || indexar(g);
+  const sg = idx[mecanismoId];
+  const criadas = [], jaExistiam = [];
+  if(!sg) return { criadas, jaExistiam };
+  sg.transicoes.forEach(t=>{
+    operacoesMensuraveis(g, t, idx).forEach(op=>{
+      const chave = chaveDaCaixa(t, op);
+      if(estado.caixas[chave]){ jaExistiam.push(chave); return; }
+      estado.caixas[chave] = caixaNova(agora);
+      criadas.push(chave);
+    });
+  });
+  return { criadas, jaExistiam };
+}
+
+/* ---------- o lote ----------
+   Uma atividade responde a mesma caixa várias vezes (a reconstrução passa
+   por dezessete transições). Isso é UMA decisão de intervalo por caixa, com
+   a média das respostas — não dezessete promoções em cadeia. */
+function iniciarLote(){ return { notas: {}, aberto: true }; }
+
+function normalizar(nota){
+  if(nota === true) return 1;
+  if(nota === false) return 0;
+  if(typeof nota === 'number' && Number.isFinite(nota) && nota >= 0 && nota <= 1) return nota;
+  throw new Error(`nota inválida: ${JSON.stringify(nota)} — use true/false ou um número de 0 a 1`);
+}
+
+function anotar(lote, t, operacao, nota){
+  if(!lote || !lote.aberto) throw new Error('lote inexistente ou já fechado');
+  if(!OPERACOES.includes(operacao)) throw new Error(`operação desconhecida: ${operacao}`);
+  const chave = chaveDaCaixa(t, operacao);
+  (lote.notas[chave] = lote.notas[chave] || []).push(normalizar(nota));
+  return chave;
+}
+
+/* Fechar o lote é o único lugar que mexe no cronograma. Caixa que não foi
+   semeada não é criada aqui de contrabando: ela volta em `ignoradas`, para
+   o chamador descobrir que pediu uma operação que este grafo não mede. */
+function fecharLote(g, estado, lote, agora){
+  if(!lote || !lote.aberto) throw new Error('lote inexistente ou já fechado');
+  lote.aberto = false;
+  const decididas = [], ignoradas = [];
+  Object.keys(lote.notas).sort().forEach(chave=>{
+    const notas = lote.notas[chave];
+    if(!estado.caixas[chave]){ ignoradas.push(chave); return; }
+    const media = notas.reduce((a, b)=>a + b, 0) / notas.length;
+    decididas.push(agendar(estado, chave, media, agora, notas.length));
+  });
+  return { decididas, ignoradas };
+}
+
+/* Folga determinística: mesma caixa, mesmo desvio, sempre. Sessenta caixas
+   semeadas no mesmo minuto venceriam no mesmo minuto para sempre; ±12% de
+   um intervalo de 30 dias são ±3,6 dias, o bastante para o bloco se
+   desmanchar sozinho ao longo das revisões. */
+function embaralho(chave){
+  let h = 2166136261;
+  for(let i = 0; i < chave.length; i++){ h ^= chave.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0) / 4294967296;
+}
+function desvio(chave){ return (embaralho(chave) - 0.5) * 2 * FOLGA; }
+
+/* Leitner. Duas regras que não são óbvias e vieram do v2:
+   · acertar SEM estar vencida não promove — senão dá para subir de caixa
+     repetindo a mesma coisa no mesmo dia, e o intervalo deixa de medir
+     retenção;
+   · errar não devolve à caixa 0. Cai no máximo para `TETO_RECAIDA`, porque
+     um tropeço não apaga meses de estrada. */
+function agendar(estado, chave, nota, agora, evidencias){
+  const c = estado.caixas[chave];
+  if(!c) throw new Error(`caixa inexistente: ${chave}`);
+  const estavaVencida = c.vencimento == null || c.vencimento <= agora;
+  const anterior = c.caixa;
+  if(nota >= PASSA){
+    if(estavaVencida) c.caixa = Math.min(c.caixa + 1, INTERVALOS.length - 1);
+  } else {
+    c.caixa = Math.max(0, Math.min(c.caixa - 1, TETO_RECAIDA));
+  }
+  c.recorde = Math.max(c.recorde || 0, c.caixa);   // monótono, por definição
+  c.tentativas += 1;
+  c.evidencias += (evidencias || 1);
+  c.ultimaNota = nota;
+  c.ultimoEstudo = agora;
+  c.vencimento = agora + Math.round(INTERVALOS[c.caixa] * DIA * (1 + desvio(chave)));
+  return { chave, nota, de: anterior, para: c.caixa, estavaVencida,
+           vencimento: c.vencimento, evidencias: evidencias || 1 };
+}
+
+/* ---------- o que está vencido ---------- */
+function devidas(estado, agora){
+  return Object.keys(estado.caixas)
+    .filter(k=>estado.caixas[k].vencimento <= agora)
+    .sort((a, b)=>
+      (estado.caixas[a].vencimento - estado.caixas[b].vencimento) || (a < b ? -1 : a > b ? 1 : 0));
+}
+
+/* ---------- o plano da sessão ----------
+   A atividade é MECANISMO × OPERAÇÃO, não caixa avulsa: reconstruir o
+   potencial de repouso é uma passada só que liquida as caixas de
+   `reconstruir` de todas as transições daquele recorte. É daí que vem o
+   ganho do lote — dezessete evidências, dezessete decisões de intervalo,
+   uma atividade.
+
+   Quem é o dono de cada caixa é `donoDaCaixa`, a mesma regra que o percurso
+   usa para contar progresso. Tem de ser a mesma: se a sessão cobrasse a
+   caixa num mecanismo e o progresso a creditasse noutro, o estudo andaria
+   sem a barra andar. */
+function planoDeSessao(g, estado, agora, teto, idx){
+  idx = idx || indexar(g);
+  teto = (teto == null) ? TETO_SESSAO : teto;
+
+  const porTransicao = {};
+  g.transicoes.forEach(t=>{ porTransicao[chaveDaTransicao(t)] = t; });
+
+  const grupos = new Map();
+  devidas(estado, agora).forEach(chave=>{
+    const { de, para, operacao } = lerChave(chave);
+    const t = porTransicao[de + '>' + para];
+    if(!t) return;                       // o conteúdo mudou debaixo do estado
+    const mecanismo = donoDaCaixa(g, t, operacao, idx);
+    if(!mecanismo) return;               // deixou de ser estudável
+    const id = mecanismo + '#' + operacao;
+    if(!grupos.has(id)){
+      grupos.set(id, { id, mecanismo, operacao, caixas: [], transicoes: [],
+                       ressalvas: [], prioridade: Infinity });
+    }
+    const a = grupos.get(id);
+    a.caixas.push(chave);
+    a.transicoes.push(t);
+    a.prioridade = Math.min(a.prioridade, estado.caixas[chave].vencimento);
+  });
+
+  /* A ressalva de certeza viaja junto com a atividade. `explicar` é a única
+     fonte do texto: se a tela esquecer de mostrar, some do plano também, e
+     o portão pega. */
+  grupos.forEach(a=>{
+    a.ressalvas = a.transicoes
+      .filter(t=>t.certeza !== 'consolidado')
+      .map(t=>{
+        const e = G.explicar(g, t);
+        return { chave: chaveDaTransicao(t), certeza: e.certeza, ressalva: e.ressalva };
+      });
+  });
+
+  const ordenadas = [...grupos.values()].sort((a, b)=>
+    (a.prioridade - b.prioridade) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+  /* O teto é piso de parada, não tesoura: uma atividade entra inteira ou
+     não entra. Reconstruir metade de um mecanismo não é reconstruí-lo. */
+  const atividades = [], adiadas = [];
+  let caixas = 0;
+  ordenadas.forEach(a=>{
+    if(caixas >= teto){ adiadas.push(a); return; }
+    atividades.push(a);
+    caixas += a.caixas.length;
+  });
+
+  return { agora, teto, atividades, caixas,
+           vencidas: ordenadas.reduce((n, a)=>n + a.caixas.length, 0),
+           adiadas: adiadas.length,
+           adiadasCaixas: adiadas.reduce((n, a)=>n + a.caixas.length, 0) };
+}
+
+/* ---------- progresso ---------- */
+function resumo(estado, agora){
+  const caixas = Object.values(estado.caixas);
+  const porCaixa = INTERVALOS.map(()=>0);
+  caixas.forEach(c=>{ porCaixa[c.caixa]++; });
+  return {
+    total: caixas.length,
+    novas: caixas.filter(c=>c.tentativas === 0).length,
+    vencidas: devidas(estado, agora).length,
+    porCaixa
+  };
+}
+
+module.exports = {
+  OPERACOES, INTERVALOS, PASSA, TETO_RECAIDA, TETO_SESSAO, DIA, FOLGA,
+  MIN_NOS_PARA_ORDENAR, MIN_SOBREVIVENTES,
+  chaveDaTransicao, chaveDaCaixa, lerChave, indexar,
+  operacoesMensuraveis, operacoesMensuraveisEm, mecanismosDe, donoDaCaixa,
+  novoEstado, semear, iniciarLote, anotar, fecharLote, agendar,
+  devidas, planoDeSessao, resumo
+};
+
+__mods["estudo"] = module.exports;
+})();
+
+/* ===== src/percurso.js ===== */
+(function(){
+var module = { exports: {} }, exports = module.exports;
+/* =====================================================================
+   NeuroLab Profundo · o percurso
+
+   O que o NeuroLab v2 chamava de módulo, aqui é ETAPA — e a diferença é a
+   tese inteira do projeto.
+
+   No v2 o módulo era o DONO do conteúdo: existia a grade 16×4, e o material
+   tinha de caber nela. Quando o container manda, o conteúdo é escrito para
+   preencher slot, e o banco de perguntas acaba finito e decorável.
+
+   Aqui a etapa é CALCULADA. Um mecanismo é pré-requisito de outro quando o
+   TERMINAL dele mora dentro do recorte do outro (`grafo.prerequisitos`) —
+   isso já é derivado desde a Fase A. A etapa é uma camada topológica desse
+   DAG: etapa 1 é o que não depende de nada, etapa n+1 é o que só depende
+   das etapas até n.
+
+   Consequência prática: a ordem do percurso é a ordem em que a matéria
+   realmente depende de si mesma, e não a ordem em que alguém listou os
+   arquivos. Não existe campo `modulo:` em lugar nenhum, e não pode passar a
+   existir — pela mesma razão da lista branca fechada do validador.
+
+   E há um diagnóstico de brinde que a grade nunca pôde dar: mecanismo que
+   cai sozinho numa camada, sem ninguém depender dele, está SOLTO do resto do
+   corpo de conhecimento.
+
+   ---------------------------------------------------------------------
+   Sobre a conquista: decisão do Weverton, tomada em 16/08/2026 contra as
+   alternativas. A barra é TROFÉU — sobe e não desce. A revisão continua
+   chegando por fora, sem desfazer etapa conquistada.
+
+   Por isso a conquista lê `recorde` (o mais longe que a caixa já chegou) e
+   nunca `caixa` (onde ela está hoje). São dois números diferentes de
+   propósito: quem mistura os dois ou mente sobre retenção, ou desmancha um
+   trecho já vencido — e ele quer as duas coisas separadas.
+   ===================================================================== */
+const G = require('./grafo.js');
+const E = require('./estudo.js');
+
+/* Intervalo a partir do qual a caixa conta como conquistada. 4 = 30 dias:
+   para chegar aqui foi preciso acertar numa revisão marcada para 14 dias
+   depois da anterior. Antes disso é reconhecimento recente, não retenção. */
+const CAIXA_FIRME = 4;
+
+/* ---------- as etapas ----------
+   Camadas topológicas do DAG de pré-requisitos. Se dois mecanismos
+   dependerem um do outro, nenhum dos dois entra em camada nenhuma: eles
+   voltam em `ciclicos`, para o portão gritar em vez de sumir com eles. */
+function etapas(g){
+  const pre = {};
+  Object.keys(g.mecanismos).forEach(id=>{ pre[id] = G.prerequisitos(g, id); });
+
+  const camadaDe = {}, camadas = [];
+  let restantes = Object.keys(g.mecanismos).sort();
+  while(restantes.length){
+    const prontos = restantes.filter(id=>pre[id].every(p=>camadaDe[p] !== undefined));
+    if(!prontos.length) break;                    // o que sobrou é cíclico
+    prontos.forEach(id=>{ camadaDe[id] = camadas.length; });
+    camadas.push(prontos);
+    restantes = restantes.filter(id=>!prontos.includes(id));
+  }
+  return { camadas, camadaDe, pre, ciclicos: restantes };
+}
+
+/* ---------- conquista ----------
+   Uma caixa está conquistada quando o RECORDE dela alcançou `CAIXA_FIRME`.
+   Nunca `caixa`: ela desce quando se esquece, e a conquista não desce. */
+/* As caixas de que este mecanismo é DONO — não todas as que passam pelo
+   recorte dele. Recortes se sobrepõem (é o que significa um depender do
+   outro), e sem a regra de posse as caixas do gradiente seriam contadas de
+   novo dentro do potencial de membrana: o progresso somaria 85 de 58.
+
+   A regra é a mesma que a sessão usa para montar atividade — tem de ser,
+   senão o estudo anda num mecanismo e a barra anda noutro. */
+function caixasDoMecanismo(g, mecanismoId, idx){
+  idx = idx || E.indexar(g);
+  const sg = idx[mecanismoId];
+  if(!sg) return [];
+  return sg.transicoes.flatMap(t=>
+    E.operacoesMensuraveisEm(g, t, mecanismoId, idx)
+      .filter(op=>E.donoDaCaixa(g, t, op, idx) === mecanismoId)
+      .map(op=>E.chaveDaCaixa(t, op)));
+}
+
+function conquistaDoMecanismo(g, estado, mecanismoId, idx){
+  const chaves = caixasDoMecanismo(g, mecanismoId, idx);
+  const abertas = chaves.filter(k=>estado.caixas[k]);
+  const conquistadas = abertas.filter(k=>(estado.caixas[k].recorde || 0) >= CAIXA_FIRME);
+  return {
+    mecanismo: mecanismoId,
+    total: chaves.length,
+    semeadas: abertas.length,
+    conquistadas: conquistadas.length,
+    fracao: chaves.length ? conquistadas.length / chaves.length : 0,
+    concluido: chaves.length > 0 && conquistadas.length === chaves.length,
+    iniciado: abertas.some(k=>estado.caixas[k].tentativas > 0)
+  };
+}
+
+/* ---------- o percurso inteiro ----------
+   Devolve TODAS as etapas, inclusive as que ainda não foram semeadas: ver o
+   fim desde o começo é metade do que uma barra de progresso serve para
+   fazer. `revisoesHoje` viaja ao lado, nunca dentro da conquista — é a
+   separação que o Weverton pediu entre o troféu e a manutenção. */
+function percurso(g, estado, agora, idx){
+  idx = idx || E.indexar(g);
+  const { camadas, pre, ciclicos } = etapas(g);
+
+  const lista = camadas.map((ids, i)=>{
+    const mecanismos = ids.map(id=>Object.assign(
+      conquistaDoMecanismo(g, estado, id, idx),
+      { fenomeno: g.mecanismos[id].fenomeno,
+        prerequisitos: pre[id],
+        soltinho: pre[id].length === 0 && !Object.keys(g.mecanismos)
+          .some(outro=>G.prerequisitos(g, outro).includes(id)) }));
+    const total = mecanismos.reduce((n, m)=>n + m.total, 0);
+    const conquistadas = mecanismos.reduce((n, m)=>n + m.conquistadas, 0);
+    return {
+      numero: i + 1, mecanismos, total, conquistadas,
+      fracao: total ? conquistadas / total : 0,
+      concluida: mecanismos.length > 0 && mecanismos.every(m=>m.concluido),
+      iniciada: mecanismos.some(m=>m.iniciado)
+    };
+  });
+
+  /* O PESO de cada etapa: que fração do percurso inteiro ela representa.
+     Sem isto a trilha mente. Hoje a etapa 3 tem 142 das 200 caixas, e
+     `[✓]──[✓]──[◐]` desenha três degraus do mesmo tamanho: fechar as duas
+     primeiras parece "2 de 3 feito" e são 29% do trabalho. Contar etapa não
+     é contar progresso, e a barra que ele pediu não pode mentir sobre
+     quanto falta. */
+  const total = lista.reduce((n, e)=>n + e.total, 0);
+  lista.forEach(e=>{ e.peso = total ? e.total / total : 0; });
+
+  return {
+    agora,
+    etapas: lista,
+    ciclicos,
+    revisoesHoje: E.devidas(estado, agora).length,   // ao lado, não dentro
+    conquistadas: lista.reduce((n, e)=>n + e.conquistadas, 0),
+    total,
+    etapasConcluidas: lista.filter(e=>e.concluida).length
+  };
+}
+
+/* A régua de uma linha só: [✓]──[✓]──[◐]──[ ] */
+function trilha(p){
+  return p.etapas.map(e=>e.concluida ? '[✓]' : (e.iniciada ? '[◐]' : '[ ]')).join('──');
+}
+
+module.exports = { CAIXA_FIRME, etapas, caixasDoMecanismo, conquistaDoMecanismo, percurso, trilha };
+
+__mods["percurso"] = module.exports;
+})();
+
+/* ===== src/perguntas.js ===== */
+(function(){
+var module = { exports: {} }, exports = module.exports;
+/* =====================================================================
+   NeuroLab Profundo · as perguntas
+
+   Aqui a operação vira pergunta respondível, com alternativas e gabarito.
+   Continua valendo a regra que originou o projeto: NADA aqui é texto
+   escrito por pergunta. O enunciado sai da travessia, o gabarito sai da
+   alcançabilidade, e os distratores saem do próprio recorte — que é o que
+   os torna plausíveis sem ninguém ter escrito uma armadilha.
+
+   Este módulo é PURO: não conhece DOM, não conhece armazenamento, e recebe
+   o sorteio de fora. Se ele dependesse de `Math.random`, o portão ficaria
+   intermitente e pararia de valer como portão.
+   ===================================================================== */
+const G = require('./grafo.js');
+const E = require('./estudo.js');
+
+const MAX_ALTERNATIVAS = 8;
+
+/* ---------- sorteio determinístico ----------
+   Um gerador congruente linear semeado por número. Duas sessões com a mesma
+   semente produzem a mesma pergunta — é isso que torna um defeito
+   reproduzível em vez de folclore. */
+function sorteador(semente){
+  let s = (semente >>> 0) || 1;
+  return ()=>{ s = (Math.imul(s, 1103515245) + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+}
+function embaralhar(lista, sorteio){
+  const a = lista.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(sorteio() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function escolher(lista, sorteio){ return lista[Math.floor(sorteio() * lista.length)]; }
+
+const nomeDoNo = (g, id) => (g.nos[id] && g.nos[id].descricao) || id;
+
+/* ---------- o slate de alternativas ----------
+   Distratores vêm de DENTRO do recorte: nó do mesmo mecanismo que não é
+   resposta. Nó de outro assunto seria descartável de graça, e a pergunta
+   viraria reconhecimento em vez de reconstrução.
+
+   O slate SEMPRE reserva ao menos `MIN_ERRADAS` alternativas erradas. Sem
+   isso aparece uma degeneração que o primeiro teste de fumaça pegou:
+   quando a entidade derruba o recorte inteiro, todas as alternativas são
+   corretas e "marcar tudo" tira nota cheia. Com a reserva, marcar tudo dá
+   no máximo (n − MIN_ERRADAS)/n, que fica abaixo da nota de corte — quem
+   marca tudo reprova, como tem de ser.
+
+   Quando as corretas não cabem no slate, ele vira uma AMOSTRA das duas
+   classes, e o gabarito é a interseção com o que foi mostrado. É amostra do
+   conjunto derivado, não truncamento dele: continua sendo verdade sobre o
+   grafo, só perguntada sobre menos itens. */
+const MIN_ERRADAS = 2;
+
+function montarSlate(g, sg, corretas, sorteio){
+  const universo = [...sg.nos];
+  const certas  = universo.filter(n=>corretas.includes(n));
+  const erradas = universo.filter(n=>!corretas.includes(n));
+  if(!certas.length || erradas.length < MIN_ERRADAS) return null;
+
+  const n = Math.min(MAX_ALTERNATIVAS, universo.length);
+  const quantasCertas = Math.min(certas.length, n - MIN_ERRADAS);
+  const escolhidasCertas = embaralhar(certas, sorteio).slice(0, quantasCertas);
+  const escolhidasErradas = embaralhar(erradas, sorteio).slice(0, n - escolhidasCertas.length);
+
+  const ids = embaralhar(escolhidasCertas.concat(escolhidasErradas), sorteio);
+  return {
+    alternativas: ids.map(id=>({ id, texto: nomeDoNo(g, id) })),
+    corretas: escolhidasCertas
+  };
+}
+
+/* A revelação é o `porque` das próprias transições, com a ressalva de
+   certeza junto. É o momento em que a pergunta ensina, e é por isso que ela
+   nunca pode ser texto separado do conteúdo. */
+function revelar(g, transicoes){
+  return transicoes.map(t=>{
+    const ex = G.explicar(g, t);
+    return { de: nomeDoNo(g, t.de), para: nomeDoNo(g, t.para), tipo: t.tipo,
+             verbo: G.VERBO[t.tipo] || t.tipo, porque: ex.resposta,
+             condicao: ex.condicao, requer: ex.requer,
+             certeza: ex.certeza, ressalva: ex.ressalva,
+             chave: E.chaveDaTransicao(t) };
+  });
+}
+
+/* ---------- construir e reconstruir ----------
+   São a mesma travessia em sentidos opostos, e por isso são um gerador só.
+   Para frente pergunta "o que isto causa"; para trás, "o que precisava ter
+   acontecido". A resposta é um CONJUNTO de nós, porque um passo pode ter
+   várias saídas — e é justamente aí que a pergunta deixa de ser decorável
+   como fila. */
+function gerarTravessia(g, mecanismoId, operacao, sorteio, idx){
+  idx = idx || E.indexar(g);
+  const sg = idx[mecanismoId];
+  if(!sg) return null;
+  const r = G.reconstruir(g, mecanismoId, operacao === 'construir' ? 'frente' : 'tras');
+  if(!r || !r.passos.length) return null;
+
+  const passo = escolher(r.passos, sorteio);
+  const slate = montarSlate(g, sg, passo.resposta.map(x=>x.no), sorteio);
+  if(!slate) return null;
+  // só entram as transições cuja saída ficou no slate: a evidência tem de
+  // corresponder ao que foi de fato perguntado
+  const transicoes = passo.transicoes.filter(t=>
+    slate.corretas.includes(operacao === 'construir' ? t.para : t.de));
+  if(!transicoes.length) return null;
+  return {
+    operacao, mecanismo: mecanismoId,
+    enunciado: passo.pergunta,
+    tipoDeResposta: 'conjunto',
+    alternativas: slate.alternativas,
+    corretas: slate.corretas,
+    transicoes,
+    revelacao: revelar(g, transicoes)
+  };
+}
+
+/* ---------- perturbar ----------
+   O gabarito é o que SOME da alcançabilidade quando a entidade desaparece.
+   Ninguém escreveu essa lista: ela é recalculada a cada pergunta, e muda
+   sozinha quando o conteúdo muda. É a resposta direta ao banco finito de
+   contrafactuais escritos à mão. */
+function gerarPerturbar(g, mecanismoId, sorteio, idx){
+  idx = idx || E.indexar(g);
+  const sg = idx[mecanismoId];
+  if(!sg) return null;
+
+  /* As candidatas são exatamente as que `operacoesMensuraveisEm` aceita:
+     perda real e sobreviventes suficientes. Se o gerador aceitasse mais que
+     o cronograma, apareceria pergunta sem caixa para receber a evidência. */
+  const candidatas = [...new Set(sg.transicoes.flatMap(t=>t.requer || []))].sort()
+    .filter(ent=>{
+      const perdidos = G.perturbar(g, { entidade: ent }, sg.mecanismo.entrada).perdidos
+        .filter(n=>sg.nos.has(n));
+      return perdidos.length > 0 && (sg.nos.size - perdidos.length) >= E.MIN_SOBREVIVENTES;
+    });
+  if(!candidatas.length) return null;
+
+  const entidade = escolher(candidatas, sorteio);
+  const r = G.perturbar(g, { entidade }, sg.mecanismo.entrada);
+  const slate = montarSlate(g, sg, r.perdidos.filter(n=>sg.nos.has(n)), sorteio);
+  if(!slate) return null;
+  const alvo = g.entidades[entidade] || { nome: entidade };
+  const mortas = r.mortas.filter(t=>sg.transicoes.includes(t));
+
+  return {
+    operacao: 'perturbar', mecanismo: mecanismoId, entidade,
+    enunciado: `Se ${alvo.nome} deixar de existir, o que deixa de acontecer?`,
+    tipoDeResposta: 'conjunto',
+    alternativas: slate.alternativas,
+    corretas: slate.corretas,
+    transicoes: mortas,
+    revelacao: revelar(g, mortas),
+    seFalhar: alvo.se_falhar || null
+  };
+}
+
+/* ---------- depurar ----------
+   O sistema INVERTE uma transição e apresenta a cadeia como prosa. A
+   afirmação invertida é a errada, e é por isso que `operacoesMensuraveisEm`
+   exige que a inversa não exista de verdade no grafo: se existisse, a
+   afirmação invertida seria verdadeira e a pergunta não teria gabarito. */
+function gerarDepurar(g, mecanismoId, sorteio, idx){
+  idx = idx || E.indexar(g);
+  const sg = idx[mecanismoId];
+  if(!sg) return null;
+
+  const podem = sg.transicoes.filter(t=>
+    E.operacoesMensuraveisEm(g, t, mecanismoId, idx).includes('depurar'));
+  if(!podem.length) return null;
+
+  const errada = escolher(podem, sorteio);
+  const outras = embaralhar(sg.transicoes.filter(t=>t !== errada), sorteio).slice(0, 3);
+  const frase = (de, verbo, para) => `${nomeDoNo(g, de)} ${verbo} ${nomeDoNo(g, para)}`;
+
+  const itens = embaralhar(outras.map(t=>({
+    id: E.chaveDaTransicao(t),
+    texto: frase(t.de, G.VERBO[t.tipo] || t.tipo, t.para),
+    certa: true, transicao: t
+  })).concat([{
+    id: E.chaveDaTransicao(errada),
+    texto: frase(errada.para, G.VERBO[errada.tipo] || errada.tipo, errada.de),  // invertida
+    certa: false, transicao: errada
+  }]), sorteio);
+
+  /* A revelação cobre TODAS as afirmações mostradas, não só a invertida.
+     A evidência também vai para todas — julgar as quatro é o trabalho —, e
+     o que foi avaliado tem de ser explicado. `chaveErrada` diz à tela qual
+     destacar. */
+  return {
+    operacao: 'depurar', mecanismo: mecanismoId,
+    enunciado: 'Uma destas afirmações está invertida. Qual?',
+    tipoDeResposta: 'unica',
+    alternativas: itens.map(i=>({ id: i.id, texto: i.texto })),
+    corretas: [E.chaveDaTransicao(errada)],
+    chaveErrada: E.chaveDaTransicao(errada),
+    transicoes: itens.map(i=>i.transicao),
+    revelacao: revelar(g, itens.map(i=>i.transicao)),
+    correcao: frase(errada.de, G.VERBO[errada.tipo] || errada.tipo, errada.para)
+  };
+}
+
+function gerar(g, mecanismoId, operacao, semente, idx){
+  const sorteio = sorteador(semente);
+  if(operacao === 'construir' || operacao === 'reconstruir')
+    return gerarTravessia(g, mecanismoId, operacao, sorteio, idx);
+  if(operacao === 'perturbar') return gerarPerturbar(g, mecanismoId, sorteio, idx);
+  if(operacao === 'depurar')   return gerarDepurar(g, mecanismoId, sorteio, idx);
+  throw new Error(`operação desconhecida: ${operacao}`);
+}
+
+/* ---------- correção ----------
+   Conjunto usa Jaccard, e não "quantas acertou": marcar tudo tem de ser
+   ruim. Quem seleciona as dez alternativas para garantir as três certas não
+   demonstrou saber nada, e uma nota que premiasse isso corromperia o
+   cronograma inteiro — as caixas subiriam sem retenção por trás. */
+function corrigir(pergunta, escolhidas){
+  const esc = [...new Set(escolhidas || [])];
+  const cor = [...new Set(pergunta.corretas)];
+  let nota;
+  if(pergunta.tipoDeResposta === 'unica'){
+    nota = (esc.length === 1 && cor.includes(esc[0])) ? 1 : 0;
+  } else {
+    const inter = esc.filter(x=>cor.includes(x)).length;
+    const uniao = new Set(esc.concat(cor)).size;
+    nota = uniao ? inter / uniao : 0;
+  }
+  return {
+    nota,
+    acertou: nota >= E.PASSA,
+    faltaram: cor.filter(x=>!esc.includes(x)),
+    sobraram: esc.filter(x=>!cor.includes(x)),
+    /* A mesma nota vai para todas as transições que a pergunta exercitou:
+       é isso que o lote consome, e é uma decisão de intervalo por caixa. */
+    porTransicao: pergunta.transicoes.map(t=>({ transicao: t, nota }))
+  };
+}
+
+/* Anota uma pergunta corrigida no lote do cronograma. */
+function anotarNoLote(lote, pergunta, correcao){
+  correcao.porTransicao.forEach(x=>E.anotar(lote, x.transicao, pergunta.operacao, x.nota));
+  return correcao.porTransicao.length;
+}
+
+/* ---------- a sessão ----------
+   O plano do cronograma diz QUE atividades estão vencidas; aqui elas viram
+   perguntas, uma por atividade em cada volta — rodízio, não fila.
+
+   O plano é pedido SEM TETO de propósito. O teto de `planoDeSessao` conta
+   CAIXAS, e foi desenhado quando eu supunha que uma atividade liquidava o
+   recorte inteiro de uma vez. Não liquida: uma pergunta cobre uma a três
+   transições. Usar o teto de caixas aqui admitiria uma atividade só (a
+   primeira já estoura 42 caixas) e a sessão inteira viraria a mesma
+   operação no mesmo mecanismo, quatro vezes seguidas — sem intercalação,
+   que é justamente o que faz revisão espaçada funcionar. Quem limita a
+   sessão aqui é o número de PERGUNTAS.
+
+   Atividade que não rende pergunta (o sorteio caiu num passo sem slate
+   possível) é pulada em silêncio, e as caixas dela seguem vencidas. Nada é
+   inventado para encher sessão. */
+function montarSessao(g, estado, agora, opcoes){
+  opcoes = opcoes || {};
+  const idx = opcoes.idx || E.indexar(g);
+  const max = opcoes.maxPerguntas || 10;
+  const semente = (opcoes.semente || 1) >>> 0;
+  const plano = E.planoDeSessao(g, estado, agora,
+    opcoes.teto === undefined ? Infinity : opcoes.teto, idx);
+
+  const perguntas = [];
+  for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
+    const antes = perguntas.length;
+    for(const a of plano.atividades){
+      if(perguntas.length >= max) break;
+      const p = gerar(g, a.mecanismo, a.operacao, semente + volta * 7919 + perguntas.length * 31, idx);
+      if(p) perguntas.push(p);
+    }
+    if(perguntas.length === antes) break;   // nenhuma atividade rende: para
+  }
+  return { plano, perguntas };
+}
+
+module.exports = {
+  MAX_ALTERNATIVAS, MIN_ERRADAS, sorteador, embaralhar, montarSlate, montarSessao,
+  gerar, gerarTravessia, gerarPerturbar, gerarDepurar,
+  corrigir, anotarNoLote, revelar
+};
+
+__mods["perguntas"] = module.exports;
+})();
+</script>
+<script>
+/* =====================================================================
+   NeuroLab Profundo · a tela
+
+   Esta camada é fina de propósito. Ela NÃO decide nada sobre estudo: não
+   escolhe pergunta, não corrige, não calcula intervalo, não sabe o que é
+   uma caixa de revisão. Tudo isso vem de `src/`, que roda igual no Node e
+   é provado por cinco portões com mutantes.
+
+   Se uma regra de estudo aparecer aqui dentro, ela é uma regra que nenhum
+   portão vigia — e este projeto já provou, em quatro ocasiões, que regra
+   sem portão é regra errada.
+   ===================================================================== */
+(function(){
+'use strict';
+var G = require('./grafo.js');
+var E = require('./estudo.js');
+var P = require('./percurso.js');
+var Q = require('./perguntas.js');
+
+var CHAVE_ESTADO = 'neurolab-profundo/estado/v1';
+var app = document.getElementById('app');
+var rodape = document.getElementById('rodape');
+var acao = document.getElementById('acao');
+
+var g = G.carregar();
+var idx = E.indexar(g);
+var estado = carregarEstado();
+var sessao = null;
+
+/* ---------- estado ---------- */
+function carregarEstado(){
+  var bruto = null;
+  try { bruto = localStorage.getItem(CHAVE_ESTADO); } catch(e){ /* modo privado */ }
+  var st = bruto ? JSON.parse(bruto) : E.novoEstado();
+  /* Semear é idempotente: mecanismo novo abre caixa nova sem tocar no que
+     já foi estudado. É o que faz conteúdo novo aparecer sem migração. */
+  Object.keys(g.mecanismos).sort().forEach(function(id){ E.semear(g, st, id, Date.now(), idx); });
+  return st;
+}
+function salvarEstado(){
+  try { localStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado)); } catch(e){ /* ignora */ }
+}
+
+/* ---------- utilidades de DOM ---------- */
+function el(tag, attrs, filhos){
+  var n = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(function(k){
+    if(k === 'texto') n.textContent = attrs[k];
+    else if(k === 'html') n.innerHTML = attrs[k];
+    else n.setAttribute(k, attrs[k]);
+  });
+  (filhos || []).forEach(function(f){ if(f) n.appendChild(f); });
+  return n;
+}
+function limpar(){ app.innerHTML = ''; }
+function pct(f){ return Math.round(f * 100) + '%'; }
+function botao(rotulo, aoClicar){
+  rodape.classList.remove('oculto');
+  acao.textContent = rotulo;
+  acao.disabled = false;
+  acao.onclick = aoClicar;
+}
+function semBotao(){ rodape.classList.add('oculto'); acao.onclick = null; }
+
+/* ---------- tela do percurso ---------- */
+function telaPercurso(){
+  sessao = null;
+  limpar();
+  var p = P.percurso(g, estado, Date.now(), idx);
+
+  app.appendChild(el('h1', { texto: 'NeuroLab Profundo' }));
+  app.appendChild(el('p', { class: 'sub',
+    texto: p.total + ' caixas de revisão · ' + g.transicoes.length + ' transições causais' }));
+
+  /* a trilha, com os degraus coloridos por estado */
+  var trilha = el('div', { class: 'trilha' });
+  p.etapas.forEach(function(e, i){
+    if(i) trilha.appendChild(document.createTextNode('──'));
+    trilha.appendChild(el('span', {
+      class: e.concluida ? 'feito' : (e.iniciada ? 'curso' : ''),
+      texto: e.concluida ? '[✓]' : (e.iniciada ? '[◐]' : '[ ]')
+    }));
+  });
+  app.appendChild(trilha);
+
+  p.etapas.forEach(function(e){
+    var cartao = el('div', { class: 'cartao' });
+    cartao.appendChild(el('div', { class: 'linha' }, [
+      el('h2', { texto: 'Etapa ' + e.numero }),
+      el('span', {
+        class: 'selo' + (e.concluida ? ' ok' : (e.iniciada ? ' curso' : '')),
+        texto: e.concluida ? 'concluída' : (e.iniciada ? 'em curso' : 'não começada')
+      })
+    ]));
+    cartao.appendChild(el('div', { class: 'rotulo',
+      texto: e.total + ' caixas · ' + pct(e.peso) + ' do percurso' }));
+
+    e.mecanismos.forEach(function(m){
+      cartao.appendChild(el('div', { class: 'fenomeno', texto: m.fenomeno }));
+      var barra = el('div', { class: 'barra' });
+      barra.appendChild(el('i', { style: 'width:' + pct(m.fracao) }));
+      cartao.appendChild(barra);
+      cartao.appendChild(el('div', { class: 'rotulo',
+        texto: m.conquistadas + ' de ' + m.total + ' conquistadas' }));
+      if(m.prerequisitos.length){
+        cartao.appendChild(el('div', { class: 'dep', texto: 'depende de: ' + m.prerequisitos.join(', ') }));
+      }
+    });
+    app.appendChild(cartao);
+  });
+
+  /* Os dois números lado a lado: contar etapa não é contar progresso. */
+  var porEtapa = p.etapas.length ? p.etapasConcluidas / p.etapas.length : 0;
+  var porCaixa = p.total ? p.conquistadas / p.total : 0;
+  var resumo = el('div', { class: 'cartao' });
+  var dois = el('div', { class: 'dois' });
+  dois.appendChild(el('div', {}, [
+    el('div', { class: 'rotulo', texto: 'Etapas concluídas' }),
+    el('div', { class: 'numero', texto: p.etapasConcluidas + ' de ' + p.etapas.length + '  (' + pct(porEtapa) + ')' })
+  ]));
+  dois.appendChild(el('div', {}, [
+    el('div', { class: 'rotulo', texto: 'Caixas conquistadas' }),
+    el('div', { class: 'numero', texto: p.conquistadas + ' de ' + p.total + '  (' + pct(porCaixa) + ')' })
+  ]));
+  resumo.appendChild(dois);
+  if(Math.abs(porEtapa - porCaixa) > 0.1){
+    resumo.appendChild(el('div', { class: 'discorda',
+      texto: 'Os dois discordam em ' + pct(Math.abs(porEtapa - porCaixa)) +
+             '. As etapas não têm o mesmo tamanho — o número da direita é o que vale.' }));
+  }
+  app.appendChild(resumo);
+
+  app.appendChild(el('p', { class: 'aviso',
+    texto: 'A conquista não desce: esquecer devolve a caixa à revisão e não reabre etapa fechada. ' +
+           'As revisões vêm por fora, e continuam vindo mesmo com o percurso inteiro fechado — ' +
+           'é assim que ele fica fechado.' }));
+
+  if(p.revisoesHoje > 0) botao('Estudar (' + p.revisoesHoje + ' vencidas)', comecarSessao);
+  else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
+}
+
+/* ---------- sessão ---------- */
+function comecarSessao(){
+  var agora = Date.now();
+  var montada = Q.montarSessao(g, estado, agora, { idx: idx, semente: (agora / 60000) | 0 });
+  if(!montada.perguntas.length) return telaPercurso();
+  sessao = {
+    perguntas: montada.perguntas, i: 0, agora: agora,
+    lote: E.iniciarLote(), resultados: [], caixas: 0
+  };
+  telaPergunta();
+}
+
+function telaPergunta(){
+  limpar();
+  var s = sessao, p = s.perguntas[s.i];
+  var escolhidas = [];
+
+  var prog = el('div', { class: 'progresso' });
+  s.perguntas.forEach(function(_, i){
+    var r = s.resultados[i];
+    prog.appendChild(el('i', { class: i === s.i ? 'atual' : (r ? (r.acertou ? 'feita' : 'falha') : '') }));
+  });
+  app.appendChild(prog);
+
+  app.appendChild(el('div', { class: 'linha' }, [
+    el('span', { class: 'selo curso', texto: p.operacao }),
+    el('span', { class: 'rotulo', texto: (s.i + 1) + ' de ' + s.perguntas.length })
+  ]));
+  app.appendChild(el('h2', { texto: p.enunciado }));
+  app.appendChild(el('p', { class: 'sub',
+    texto: p.tipoDeResposta === 'unica' ? 'Escolha uma.' : 'Pode haver mais de uma. Marcar tudo não passa.' }));
+
+  var botoes = {};
+  p.alternativas.forEach(function(a){
+    var b = el('button', { class: 'alt' + (p.tipoDeResposta === 'unica' ? ' unica' : ''),
+                           'aria-pressed': 'false', type: 'button' }, [
+      el('span', { class: 'marca', texto: '✓' }),
+      el('span', { texto: a.texto })
+    ]);
+    b.onclick = function(){
+      if(p.tipoDeResposta === 'unica'){
+        escolhidas = [a.id];
+        Object.keys(botoes).forEach(function(k){ botoes[k].setAttribute('aria-pressed', String(k === a.id)); });
+      } else {
+        var j = escolhidas.indexOf(a.id);
+        if(j >= 0) escolhidas.splice(j, 1); else escolhidas.push(a.id);
+        b.setAttribute('aria-pressed', escolhidas.indexOf(a.id) >= 0 ? 'true' : 'false');
+      }
+      acao.disabled = escolhidas.length === 0;
+    };
+    botoes[a.id] = b;
+    app.appendChild(b);
+  });
+
+  botao('Responder', function(){ responder(p, escolhidas, botoes); });
+  acao.disabled = true;
+}
+
+function responder(p, escolhidas, botoes){
+  var s = sessao;
+  var c = Q.corrigir(p, escolhidas);
+  s.caixas += Q.anotarNoLote(s.lote, p, c);
+  s.resultados[s.i] = c;
+
+  /* marca as alternativas: o que estava certo, o que faltou, o que sobrou */
+  Object.keys(botoes).forEach(function(id){
+    var b = botoes[id];
+    b.onclick = null;
+    b.disabled = true;
+    var era = p.corretas.indexOf(id) >= 0;
+    var marcou = escolhidas.indexOf(id) >= 0;
+    if(era && marcou) b.className += ' certa';
+    else if(era && !marcou) b.className += ' perdida';
+    else if(!era && marcou) b.className += ' errada';
+  });
+
+  var caixa = el('div', { class: 'cartao' });
+  caixa.appendChild(el('div', { class: 'linha' }, [
+    el('h2', { texto: c.acertou ? 'Certo' : (c.nota > 0 ? 'Quase' : 'Errado') }),
+    el('span', { class: 'selo' + (c.acertou ? ' ok' : ''), texto: 'nota ' + c.nota.toFixed(2) })
+  ]));
+  if(p.operacao === 'depurar' && p.correcao){
+    caixa.appendChild(el('p', { class: 'sub', texto: 'O certo seria: ' + p.correcao }));
+  }
+  if(p.seFalhar){
+    caixa.appendChild(el('p', { class: 'sub', texto: 'Se falhar: ' + p.seFalhar }));
+  }
+
+  /* A revelação é o `porque` da própria transição. É o momento em que a
+     pergunta ensina, e por isso ela nunca é texto separado do conteúdo. */
+  p.revelacao.forEach(function(r){
+    var destaque = (p.chaveErrada && r.chave === p.chaveErrada) ? ' destaque' : '';
+    var bloco = el('div', { class: 'rev' + destaque });
+    var rel = el('div', { class: 'rel' });
+    rel.appendChild(document.createTextNode(r.de + ' '));
+    rel.appendChild(el('span', { class: 'verbo', texto: r.verbo }));
+    rel.appendChild(document.createTextNode(' ' + r.para));
+    bloco.appendChild(rel);
+    bloco.appendChild(el('p', { texto: r.porque }));
+    var meta = [];
+    if(r.condicao) meta.push('condição: ' + r.condicao);
+    if(r.requer && r.requer.length) meta.push('depende de: ' + r.requer.join(' · '));
+    if(meta.length) bloco.appendChild(el('div', { class: 'meta', texto: meta.join('   ') }));
+    if(r.ressalva) bloco.appendChild(el('div', { class: 'ressalva', texto: r.ressalva }));
+    caixa.appendChild(bloco);
+  });
+  app.appendChild(caixa);
+  window.scrollTo(0, document.body.scrollHeight);
+
+  botao(s.i + 1 < s.perguntas.length ? 'Próxima' : 'Terminar', function(){
+    s.i++;
+    if(s.i < s.perguntas.length) telaPergunta();
+    else fecharSessao();
+  });
+}
+
+function fecharSessao(){
+  var s = sessao;
+  var r = E.fecharLote(g, estado, s.lote, s.agora);
+  salvarEstado();
+
+  limpar();
+  semBotao();
+  var acertos = s.resultados.filter(function(x){ return x.acertou; }).length;
+  var subiram = r.decididas.filter(function(d){ return d.para > d.de; }).length;
+  var cairam = r.decididas.filter(function(d){ return d.para < d.de; }).length;
+
+  app.appendChild(el('h1', { texto: 'Sessão fechada' }));
+  app.appendChild(el('p', { class: 'sub',
+    texto: acertos + ' de ' + s.perguntas.length + ' perguntas · ' +
+           r.decididas.length + ' caixas decididas' }));
+
+  var cartao = el('div', { class: 'cartao' });
+  var dois = el('div', { class: 'dois' });
+  dois.appendChild(el('div', {}, [
+    el('div', { class: 'rotulo', texto: 'Intervalos que subiram' }),
+    el('div', { class: 'numero', texto: String(subiram) })
+  ]));
+  dois.appendChild(el('div', {}, [
+    el('div', { class: 'rotulo', texto: 'Que voltaram atrás' }),
+    el('div', { class: 'numero', texto: String(cairam) })
+  ]));
+  cartao.appendChild(dois);
+  cartao.appendChild(el('p', { class: 'aviso',
+    texto: 'Cada caixa tomou UMA decisão de intervalo, pela média das respostas que a ' +
+           'exercitaram — não uma promoção por resposta. Acertar antes do vencimento ' +
+           'não promove, e errar não zera a estrada andada.' }));
+  app.appendChild(cartao);
+
+  botao('Voltar ao percurso', telaPercurso);
+}
+
+telaPercurso();
+})();
+
+</script>
+</body>
+</html>

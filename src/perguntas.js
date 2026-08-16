@@ -245,8 +245,45 @@ function anotarNoLote(lote, pergunta, correcao){
   return correcao.porTransicao.length;
 }
 
+/* ---------- a sessão ----------
+   O plano do cronograma diz QUE atividades estão vencidas; aqui elas viram
+   perguntas, uma por atividade em cada volta — rodízio, não fila.
+
+   O plano é pedido SEM TETO de propósito. O teto de `planoDeSessao` conta
+   CAIXAS, e foi desenhado quando eu supunha que uma atividade liquidava o
+   recorte inteiro de uma vez. Não liquida: uma pergunta cobre uma a três
+   transições. Usar o teto de caixas aqui admitiria uma atividade só (a
+   primeira já estoura 42 caixas) e a sessão inteira viraria a mesma
+   operação no mesmo mecanismo, quatro vezes seguidas — sem intercalação,
+   que é justamente o que faz revisão espaçada funcionar. Quem limita a
+   sessão aqui é o número de PERGUNTAS.
+
+   Atividade que não rende pergunta (o sorteio caiu num passo sem slate
+   possível) é pulada em silêncio, e as caixas dela seguem vencidas. Nada é
+   inventado para encher sessão. */
+function montarSessao(g, estado, agora, opcoes){
+  opcoes = opcoes || {};
+  const idx = opcoes.idx || E.indexar(g);
+  const max = opcoes.maxPerguntas || 10;
+  const semente = (opcoes.semente || 1) >>> 0;
+  const plano = E.planoDeSessao(g, estado, agora,
+    opcoes.teto === undefined ? Infinity : opcoes.teto, idx);
+
+  const perguntas = [];
+  for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
+    const antes = perguntas.length;
+    for(const a of plano.atividades){
+      if(perguntas.length >= max) break;
+      const p = gerar(g, a.mecanismo, a.operacao, semente + volta * 7919 + perguntas.length * 31, idx);
+      if(p) perguntas.push(p);
+    }
+    if(perguntas.length === antes) break;   // nenhuma atividade rende: para
+  }
+  return { plano, perguntas };
+}
+
 module.exports = {
-  MAX_ALTERNATIVAS, MIN_ERRADAS, sorteador, embaralhar, montarSlate,
+  MAX_ALTERNATIVAS, MIN_ERRADAS, sorteador, embaralhar, montarSlate, montarSessao,
   gerar, gerarTravessia, gerarPerturbar, gerarDepurar,
   corrigir, anotarNoLote, revelar
 };

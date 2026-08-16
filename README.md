@@ -168,6 +168,30 @@ node tools/percurso.js       # o mapa a partir do estado zero
 node tools/percurso.js 200   # simula 200 dias e mostra o percurso preenchendo
 ```
 
+## O app
+
+```sh
+node tools/build-app.js      # gera app.html
+```
+
+Um arquivo só, ~100 KB, **sem servidor e sem rede**: abre direto no
+navegador, e dá para mandar para o celular por qualquer meio. O estado fica
+no `localStorage` do aparelho.
+
+A regra que sustenta isso: `src/` **não é adaptado** para o navegador. Os
+módulos entram no pacote byte a byte como o Node os executa, e o que muda é
+o ambiente em volta — um `require` mínimo e um `node:fs` falso servindo o
+conteúdo já embutido. Se houvesse uma versão de navegador separada, o app
+rodaria um motor que portão nenhum vigia. `tools/test-app.js` confere que a
+fonte inteira de cada módulo está lá dentro e que o `app.html` commitado é o
+que as fontes geram hoje.
+
+A tela é **burra de propósito**: não escolhe pergunta, não corrige, não
+calcula intervalo, não sabe o que é caixa de revisão. Uma das provas do
+portão lê `app/ui.js` procurando constante de estudo (nota de corte,
+intervalos) e falha se encontrar — regra que mora na tela é regra que
+nenhum portão vigia.
+
 ## Como testar
 
 Quatro coisas diferentes, em ordem de custo.
@@ -175,11 +199,12 @@ Quatro coisas diferentes, em ordem de custo.
 ### 1. O sistema está íntegro? (30 segundos)
 
 ```sh
-node tools/valida-grafo.js && node tools/test-motor.js && \
-node tools/test-estudo.js && node tools/test-percurso.js
+for t in valida-grafo test-motor test-estudo test-percurso test-perguntas test-app; do
+  node tools/$t.js | tail -1
+done
 ```
 
-Tem de terminar com quatro linhas `ok`. Qualquer `✕` diz exatamente qual
+Tem de terminar com seis linhas `ok`. Qualquer `✕` diz exatamente qual
 propriedade quebrou e onde.
 
 ### 2. Os portões mordem? (2 minutos — o teste mais importante)
@@ -260,11 +285,25 @@ Olhe a coluna de respostas por sessão em `agenda.js 180`. Se a mediana for
 1 ou 2, a sessão está fragmentada demais para valer a pena abrir o app — é
 sintoma de corpus pequeno, e some conforme os mecanismos entram.
 
-### O que ainda NÃO dá para testar
+### 5. Estudar de verdade
 
-**Não dá para estudar.** Não existe tela: você consegue ver as perguntas
-geradas (`mostrar.js`) e o cronograma decidindo (`agenda.js`), mas não
-consegue responder nenhuma e ver a caixa subir. Isso é a Fase C.
+```sh
+node tools/build-app.js
+```
+
+Abra o `app.html` no navegador (ou mande para o celular). Você vê o
+percurso, aperta Estudar, responde as quatro operações intercaladas e vê a
+revelação com o `porque` de cada transição que a pergunta cobrou. Ao fechar
+a sessão, o cronograma decide um intervalo por caixa e o progresso fica
+salvo no aparelho.
+
+Duas coisas para conferir com olho crítico:
+
+- **Marque TODAS as alternativas de propósito.** Tem de reprovar. Item que
+  se acerta sem saber nada corrompe o cronograma inteiro, e essa
+  degeneração já apareceu uma vez neste projeto.
+- **Erre de propósito e volte ao percurso.** A barra de conquista NÃO pode
+  descer. O que desce é a caixa, que volta para a revisão.
 
 ## Os portões
 
@@ -273,9 +312,11 @@ node tools/valida-grafo.js   # estrutura do conteúdo
 node tools/test-motor.js     # as quatro propriedades do motor
 node tools/test-estudo.js    # as cinco propriedades do cronograma
 node tools/test-percurso.js  # as cinco propriedades do percurso
+node tools/test-perguntas.js # as cinco propriedades do gerador de perguntas
+node tools/test-app.js       # o app montado, num DOM stubado (~1s, sem navegador)
 ```
 
-Os três portões de teste rodam cada propriedade duas vezes: no grafo real
+Os cinco portões de teste rodam cada propriedade duas vezes: no grafo real
 (tem de passar) e em **mutantes** — versões deliberadamente quebradas do
 grafo ou do módulo (têm de falhar). Um mutante que sobrevive não acusa
 conteúdo errado: acusa **teste decorativo**, e o portão fecha do mesmo jeito.
@@ -293,7 +334,11 @@ Fase A fechada: formato, portões, vista humana e dois mecanismos
 
 Fase B fechada: o cronograma — caixa por transição × operação,
 mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
-percurso: etapas calculadas, conquista como troféu. Sem UI ainda.
+percurso: etapas calculadas, conquista como troféu.
+
+Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
+`app.html` é o protótipo jogável — arquivo único, sem servidor. Falta o
+deslizador de escala.
 
 Fase D em curso: **4 mecanismos** (gradiente eletroquímico, potencial de
 membrana, potencial de ação, condução saltatória), **3 etapas** calculadas,
