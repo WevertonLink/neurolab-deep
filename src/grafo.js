@@ -114,9 +114,23 @@ function subgrafo(g, mecanismoId){
 }
 
 /* Pré-requisitos SEM bloqueio: outro mecanismo é pré-requisito deste quando
-   o TERMINAL dele mora dentro do meu recorte — ou seja, quando aquilo que
-   ele explica é coisa de que eu dependo. Derivado, não escrito, e
-   assimétrico de graça. */
+   o TERMINAL dele mora dentro do meu recorte — quando aquilo que ele explica
+   é coisa de que eu dependo. Derivado, não escrito, e assimétrico de graça.
+
+   Já tentei trocar isto por posse ("quem usa material de outro depende
+   dele") e o resultado foi PIOR: o recorte da LTP tem 45 nós e o da
+   transmissão sináptica tem 51, porque a LTP não alcança os ramos tardios
+   da sinapse. Pela posse, a LTP virava dona do material da transmissão e a
+   transmissão passava a depender da LTP — invertido. "Menor recorte" não
+   serve como dono quando dois recortes se sobrepõem sem que um contenha o
+   outro, e nenhuma variação simples disso é assimétrica, porque recorte é
+   fecho a montante e os dois contêm a entrada um do outro.
+
+   Fica o terminal, que nunca produziu dependência invertida: ele só produz
+   dependência FALTANDO, e falta se conserta no conteúdo. Se um mecanismo
+   deveria depender de outro e não depende, é porque a conclusão do primeiro
+   não é usada pelo segundo — e ou existe uma afirmação verdadeira ligando
+   os dois, ou a dependência que eu imaginava não existe. */
 function prerequisitos(g, mecanismoId){
   const sg = subgrafo(g, mecanismoId);
   if(!sg) return [];

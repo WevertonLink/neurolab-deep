@@ -118,9 +118,9 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 285 caixas para os cinco mecanismos: 83 construir, 83
-reconstruir, 83 depurar e **36 perturbar** — a assimetria é o sinal de que a
-regra está derivando, não carimbando.
+Hoje isso dá 354 caixas para os seis mecanismos: 103 construir, 103
+reconstruir, 103 depurar e **45 perturbar** — a assimetria é o sinal de que
+a regra está derivando, não carimbando.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
 uma passada só que liquida as caixas de `reconstruir` de todo o recorte. As
@@ -141,7 +141,11 @@ e decorável. É metade do problema que este projeto existe para resolver.
 
 Aqui a **etapa é calculada**: uma camada topológica do DAG de pré-requisitos,
 que por sua vez já é derivado (`A` é pré-requisito de `B` quando o *terminal*
-de `A` mora dentro do recorte de `B`). Ninguém escreve a que etapa um
+de `A` mora dentro do recorte de `B`). A regra é de propósito conservadora —
+ela erra por FALTA, nunca por inversão, e falta se conserta no conteúdo. Já
+tentei trocá-la por posse de material e o resultado foi pior: a LTP virava
+pré-requisito da transmissão sináptica, porque o recorte dela é menor. O
+raciocínio inteiro está em `src/grafo.js`. Ninguém escreve a que etapa um
 mecanismo pertence, e **não existe campo `modulo:`** — nem pode passar a
 existir, pela mesma razão da lista branca fechada.
 
@@ -352,16 +356,15 @@ Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
 `app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
 de estudo, leitura do mecanismo e deslizador de escala.
 
-Fase D em curso: **5 mecanismos** (gradiente eletroquímico, potencial de
-membrana, potencial de ação, condução saltatória, transmissão sináptica),
-**4 etapas** calculadas, 83 transições. Nenhum arquivo declara ligação com
-outro, e o caminho do ATP até o terminal do quinto atravessa 4 arquivos em
-16 transições.
+Fase D em curso: **6 mecanismos** (gradiente eletroquímico, potencial de
+membrana, potencial de ação, condução saltatória, transmissão sináptica, LTP
+dependente de NMDA), **5 etapas** calculadas, 103 transições. Nenhum arquivo
+declara ligação com outro.
 
 A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha: o
 terminal do potencial de ação (o código de frequência) não fica a montante
 da velocidade de condução, então os dois são irmãos e não sequência. A
 grade 16×4 do v2 nunca poderia ter dito isso.
 
-Restam: LTP, LTD, consolidação sistêmica, erro de previsão, acúmulo de
-evidência, controle top-down, eixo HPA.
+Restam: LTD e metaplasticidade, consolidação sistêmica, erro de previsão,
+acúmulo de evidência, controle top-down, eixo HPA.

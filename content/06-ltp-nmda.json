@@ -1,0 +1,171 @@
+{
+  "arquivo": "LTP dependente de NMDA",
+  "nota_de_autoria": "Sem aresta declarada para arquivo nenhum: entra por `transmissor-na-fenda` e usa `sinal-vira-analogico` (ambos do 05) e `potencial-de-repouso` (do 02). A pergunta não é como a LTP funciona: é como uma sinapse consegue REGISTRAR que participou de uma coincidência, se nenhuma molécula ali tem acesso ao que a célula inteira fez. A resposta é que ninguém compara nada — o receptor NMDA implementa uma porta lógica E numa molécula só, e o espinho impede o resultado de vazar. O `debatido` daqui é a manutenção: que a autofosforilação da CaMKII prolongue a atividade é medido, que ela seja o que SUSTENTA a potenciação por horas é disputado.",
+
+  "entidades": [
+    { "id": "receptor-nmda", "nome": "Receptor NMDA", "escala": "molecular",
+      "funcao": "canal de glutamato que exige ligante E despolarização ao mesmo tempo, e que deixa passar Ca²⁺ além de Na⁺",
+      "se_falhar": "a transmissão continua normal e a sinapse deixa de aprender: o sinal passa e não fica registro nenhum" },
+
+    { "id": "mg", "nome": "Íon magnésio (Mg²⁺)", "escala": "molecular",
+      "funcao": "cátion divalente que encalha dentro do poro do NMDA quando a membrana está polarizada",
+      "se_falhar": "o NMDA passa a conduzir com glutamato apenas, a porta lógica E vira porta simples, e a sinapse perde a capacidade de distinguir coincidência de atividade isolada" },
+
+    { "id": "receptor-ampa", "nome": "Receptor AMPA", "escala": "molecular",
+      "funcao": "canal de glutamato que faz o trabalho comum da transmissão rápida; a quantidade dele na membrana é o que muda na potenciação",
+      "se_falhar": "não há corrente para potenciar: a sinapse fica muda mesmo com toda a maquinaria de detecção intacta" },
+
+    { "id": "camkii", "nome": "CaMKII", "escala": "molecular",
+      "funcao": "quinase de doze subunidades, ativada por Ca²⁺ e calmodulina, cujas subunidades fosforilam umas às outras",
+      "se_falhar": "o Ca²⁺ entra, a coincidência é detectada, e nada é feito a respeito" },
+
+    { "id": "espinho-dendritico", "nome": "Espinho dendrítico", "escala": "celular",
+      "funcao": "bulbo de volume ínfimo preso ao dendrito por um pescoço fino, que segura o Ca²⁺ dentro dele",
+      "se_falhar": "o Ca²⁺ se dilui no dendrito e a mudança deixa de ser específica daquela sinapse: aprender uma coisa alteraria todas as outras conexões vizinhas" }
+  ],
+
+  "nos": [
+    { "id": "mg-tampa-o-poro", "entidade": "mg", "escala": "molecular",
+      "descricao": "O Mg²⁺ está encalhado dentro do poro do NMDA, obstruindo-o" },
+
+    { "id": "nmda-liga-glutamato", "entidade": "receptor-nmda", "escala": "molecular",
+      "descricao": "O NMDA liga glutamato, e mesmo assim não passa corrente" },
+
+    { "id": "somacao-despolariza-o-espinho", "escala": "celular",
+      "descricao": "Muitas entradas somadas levantam a voltagem local do espinho" },
+
+    { "id": "mg-sai-do-poro", "entidade": "mg", "escala": "molecular",
+      "descricao": "O Mg²⁺ é expelido e o poro fica desobstruído" },
+
+    { "id": "as-duas-condicoes-juntas", "entidade": "receptor-nmda", "escala": "molecular",
+      "descricao": "Ligante presente E poro desobstruído, ao mesmo tempo, no mesmo receptor" },
+
+    { "id": "ca-entra-no-espinho", "entidade": "ca", "escala": "molecular",
+      "descricao": "Ca²⁺ atravessa o NMDA aberto e entra no espinho" },
+
+    { "id": "espinho-isola-o-calcio", "entidade": "espinho-dendritico", "escala": "celular",
+      "descricao": "O pescoço fino do espinho atrasa a saída de íons para o dendrito",
+      "quant": { "volume_do_espinho": "da ordem de femtolitros" } },
+
+    { "id": "ca-sobe-so-nesta-sinapse", "entidade": "ca", "escala": "molecular",
+      "descricao": "A concentração de Ca²⁺ sobe muito dentro deste espinho e em nenhum outro" },
+
+    { "id": "camkii-ativa", "entidade": "camkii", "escala": "molecular",
+      "descricao": "A CaMKII daquele espinho é ativada por Ca²⁺ e calmodulina" },
+
+    { "id": "camkii-se-autofosforila", "entidade": "camkii", "escala": "molecular",
+      "descricao": "Subunidades vizinhas fosforilam umas às outras dentro do complexo" },
+
+    { "id": "atividade-persiste-sem-o-sinal", "entidade": "camkii", "escala": "molecular",
+      "descricao": "A enzima continua ativa depois que o Ca²⁺ já voltou ao normal" },
+
+    { "id": "ampa-inserido-na-membrana", "entidade": "receptor-ampa", "escala": "molecular",
+      "descricao": "Mais receptores AMPA passam a ficar fixados na membrana do espinho" },
+
+    { "id": "mesma-liberacao-da-mais-corrente", "escala": "celular",
+      "descricao": "A mesma quantidade de glutamato passa a produzir uma corrente maior" },
+
+    { "id": "so-a-sinapse-coincidente-fica-mais-forte", "escala": "celular",
+      "descricao": "A sinapse que participou da coincidência fica mais forte, e só ela, usando apenas informação local" }
+  ],
+
+  "transicoes": [
+    { "de": "potencial-de-repouso", "para": "mg-tampa-o-poro",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-nmda", "mg", "membrana"],
+      "porque": "O Mg²⁺ é um cátion e o interior negativo da célula em repouso o puxa para dentro do poro, onde ele encalha por ser grande demais para atravessar. O bloqueio não é uma tampa construída pela célula: é eletrostática pura, e é por isso que ele se desfaz sozinho quando a voltagem muda." },
+
+    { "de": "mg-tampa-o-poro", "para": "mg-sai-do-poro",
+      "tipo": "modula", "certeza": "consolidado",
+      "porque": "A saída do Mg²⁺ só é um evento porque ele estava lá. O bloqueio em repouso é a condição de partida que torna a despolarização informativa: num receptor sem bloqueio prévio, despolarizar não mudaria nada." },
+
+    { "de": "transmissor-na-fenda", "para": "nmda-liga-glutamato",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-nmda", "neurotransmissor"],
+      "porque": "O NMDA liga glutamato como qualquer receptor de glutamato liga. A diferença está no que acontece depois: o poro continua obstruído, e a ligação sozinha não deixa passar corrente nenhuma." },
+
+    { "de": "sinal-vira-analogico", "para": "somacao-despolariza-o-espinho",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Um único potencial pós-sináptico não despolariza o bastante para nada. É porque as respostas voltaram a ser contínuas que muitas entradas próximas no tempo podem se somar, e é a soma delas, nunca uma isolada, que levanta a voltagem local." },
+
+    { "de": "somacao-despolariza-o-espinho", "para": "mg-sai-do-poro",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["mg", "receptor-nmda"],
+      "porque": "Com o interior menos negativo, a força que segurava o Mg²⁺ afrouxa e ele é expelido do poro. Repare que o receptor não foi ABERTO pela voltagem: ele foi desobstruído por ela, e é essa distinção que obriga as duas condições a valerem juntas." },
+
+    { "de": "nmda-liga-glutamato", "para": "as-duas-condicoes-juntas",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O glutamato só está ali se a célula que envia disparou. Esta é a metade pré-sináptica da coincidência, e sozinha ela não abre nada — é o que separa a detecção de coincidência de uma simples resposta a estímulo." },
+
+    { "de": "mg-sai-do-poro", "para": "as-duas-condicoes-juntas",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A despolarização só existe se a célula que recebe já estava sendo ativada por outras entradas. Esta é a metade pós-sináptica, e sozinha ela também não abre nada, porque sem glutamato ligado o poro está fechado de qualquer modo." },
+
+    { "de": "as-duas-condicoes-juntas", "para": "ca-entra-no-espinho",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-nmda", "ca", "membrana"],
+      "porque": "Com ligante presente e poro desobstruído ao mesmo tempo, o NMDA conduz — e, ao contrário do AMPA, deixa passar Ca²⁺. A porta lógica E está implementada dentro de uma única molécula, sem que nenhuma instância precise comparar os dois eventos." },
+
+    { "de": "espinho-isola-o-calcio", "para": "ca-sobe-so-nesta-sinapse",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["espinho-dendritico"],
+      "porque": "O espinho é um bulbo preso ao dendrito por um pescoço fino e comprido, que atrasa muito a difusão de íons para fora. Sem esse confinamento o Ca²⁺ se espalharia pelo dendrito e não mudaria a concentração em lugar nenhum de forma apreciável." },
+
+    { "de": "ca-entra-no-espinho", "para": "ca-sobe-so-nesta-sinapse",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["ca"],
+      "porque": "Vale aqui a mesma desproporção de gradiente que faz o Ca²⁺ ser sinal no terminal, agora dentro de um compartimento de femtolitros. Um número pequeno de íons multiplica a concentração local por dezenas de vezes." },
+
+    { "de": "ca-sobe-so-nesta-sinapse", "para": "camkii-ativa",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["camkii", "ca"],
+      "porque": "A CaMKII é ativada por Ca²⁺ ligado à calmodulina, e ela está ancorada dentro do espinho. Quem a ativa é a concentração daquele espinho e não a média da célula, de modo que a especificidade da mudança já começa neste passo." },
+
+    { "de": "camkii-ativa", "para": "camkii-se-autofosforila",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["camkii"],
+      "porque": "A CaMKII é um complexo de doze subunidades encostadas umas nas outras, e uma subunidade ativa fosforila a vizinha. A geometria da enzima é o que torna esse contágio possível: não é uma reação com uma molécula qualquer, é com quem já está ao lado." },
+
+    { "de": "camkii-se-autofosforila", "para": "atividade-persiste-sem-o-sinal",
+      "tipo": "causa", "certeza": "debatido",
+      "porque": "Que a autofosforilação prolongue a atividade além do pulso de Ca²⁺ é medido e não está em disputa. Que ela seja o que MANTÉM a sinapse forte é: a fosforilação decai em minutos enquanto a potenciação dura horas, e animais com o sítio mutado ainda mostram potenciação em algumas condições. A manutenção provavelmente envolve mais de um mecanismo." },
+
+    { "de": "camkii-ativa", "para": "ampa-inserido-na-membrana",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["camkii", "receptor-ampa"],
+      "porque": "A CaMKII fosforila receptores AMPA e proteínas de ancoragem, e o resultado é mais AMPA fixado na membrana do espinho. Os receptores já existiam em vesículas ali perto: neste passo a sinapse não fabrica nada, apenas muda onde as coisas ficam." },
+
+    { "de": "ampa-inserido-na-membrana", "para": "mesma-liberacao-da-mais-corrente",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-ampa", "neurotransmissor"],
+      "porque": "Com mais canais para o mesmo glutamato encontrar, a mesma quantidade liberada abre mais poros. A sinapse ficou mais forte sem que o lado que envia tenha mudado coisa alguma no que faz." },
+
+    { "de": "sinal-pode-ser-mudado-na-passagem", "para": "mesma-liberacao-da-mais-corrente",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Potenciar é mudar quanta corrente a mesma liberação produz, e isso só é possível porque a força já era determinada localmente, do lado que recebe. Numa junção elétrica não haveria receptor nenhum a acrescentar: guardar uma mudança exige um ponto onde a força seja ajustável, e é a conversão química que cria esse ponto." },
+
+    { "de": "mesma-liberacao-da-mais-corrente", "para": "so-a-sinapse-coincidente-fica-mais-forte",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A potenciação é medida como corrente maior para a mesma entrada. É isto que \"mais forte\" significa em número, e não uma metáfora sobre a conexão ter ficado mais importante." },
+
+    { "de": "ca-sobe-so-nesta-sinapse", "para": "so-a-sinapse-coincidente-fica-mais-forte",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Como o sinal de Ca²⁺ não sai do espinho, as sinapses vizinhas do mesmo dendrito não recebem ordem nenhuma. A especificidade não vem de a célula escolher qual conexão mudar: vem de a mudança não conseguir se espalhar." },
+
+    { "de": "as-duas-condicoes-juntas", "para": "so-a-sinapse-coincidente-fica-mais-forte",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A sinapse não tem acesso ao que a célula inteira fez. O que ela consegue é registrar que as duas coisas estavam presentes no mesmo ponto ao mesmo tempo, e esse encontro local faz as vezes de uma comparação que nenhuma instância executou." },
+
+    { "de": "atividade-persiste-sem-o-sinal", "para": "so-a-sinapse-coincidente-fica-mais-forte",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Sem alguma coisa que continue depois de o Ca²⁺ ter ido embora, a mudança acabaria junto com o estímulo. Persistir além do sinal é exatamente o que separa uma resposta de um registro." }
+  ],
+
+  "mecanismos": [
+    { "id": "ltp-nmda",
+      "fenomeno": "Como uma sinapse registra que participou de uma coincidência, se nenhuma molécula ali sabe o que a célula inteira fez?",
+      "entrada": "transmissor-na-fenda",
+      "terminal": "so-a-sinapse-coincidente-fica-mais-forte",
+      "limites": "Descreve a fase inicial da LTP dependente de NMDA em CA1 do hipocampo, que dura de dezenas de minutos a poucas horas. Não cobre a fase tardia, que exige transcrição e síntese de proteína, nem marcação e captura sinápticas, nem LTP independente de NMDA (fibras musgosas), nem plasticidade estrutural do espinho, nem os mecanismos pré-sinápticos de expressão que existem em algumas sinapses. Trata a inserção de AMPA como o mecanismo de expressão, que é o mais apoiado em CA1 mas não é universal." }
+  ]
+}
