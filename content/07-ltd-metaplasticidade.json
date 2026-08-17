@@ -1,0 +1,159 @@
+{
+  "arquivo": "LTD e metaplasticidade",
+  "nota_de_autoria": "Entra pelo terminal do 06 (`so-a-sinapse-coincidente-fica-mais-forte`), e essa ligação é o argumento do mecanismo: uma regra que só fortalece realimenta a si mesma e satura. O paradoxo central é que o MESMO mensageiro produz efeitos opostos — a resposta é que quem lê o Ca²⁺ são duas enzimas com afinidades diferentes, e a amplitude do sinal escolhe qual responde. O `debatido` daqui é quanto da metaplasticidade a troca de subunidade do NMDA explica.",
+
+  "entidades": [
+    { "id": "calmodulina", "nome": "Calmodulina", "escala": "molecular",
+      "funcao": "sensor de Ca²⁺ que muda de forma ao ligar o íon e passa a ativar outras proteínas; é a mesma para as duas vias",
+      "se_falhar": "o Ca²⁺ entra e nenhuma das duas vias é acionada — nem a que fortalece nem a que enfraquece" },
+
+    { "id": "calcineurina", "nome": "Calcineurina (PP2B)", "escala": "molecular",
+      "funcao": "fosfatase ativada por Ca²⁺-calmodulina com afinidade ALTA, o que a faz responder a concentrações baixas",
+      "se_falhar": "some a via da depressão: a sinapse só consegue subir, e satura" },
+
+    { "id": "pp1", "nome": "Fosfatase PP1", "escala": "molecular",
+      "funcao": "enzima que retira os mesmos fosfatos que a CaMKII coloca; fica presa por um inibidor até ser liberada",
+      "se_falhar": "a calcineurina ativa e nada acontece com os receptores: falta o executor da retirada" }
+  ],
+
+  "nos": [
+    { "id": "estimulo-fraco-e-prolongado", "escala": "celular",
+      "descricao": "A sinapse recebe estimulação de baixa frequência por muito tempo",
+      "quant": { "protocolo_tipico": "≈ 1 Hz por 10 a 15 min" } },
+
+    { "id": "ca-sobe-pouco-e-por-muito-tempo", "entidade": "ca", "escala": "molecular",
+      "descricao": "O Ca²⁺ do espinho fica bem acima do repouso e bem abaixo do que um estímulo forte produz" },
+
+    { "id": "calcineurina-tem-alta-afinidade", "entidade": "calcineurina", "escala": "molecular",
+      "descricao": "A calcineurina satura com pouco Ca²⁺-calmodulina" },
+
+    { "id": "camkii-precisa-de-muito-ca", "entidade": "camkii", "escala": "molecular",
+      "descricao": "A CaMKII só arranca com Ca²⁺ alto, porque precisa de várias subunidades ligadas ao mesmo tempo" },
+
+    { "id": "as-duas-vias-tem-limiares-diferentes", "escala": "molecular",
+      "descricao": "A enzima que enfraquece liga antes da que fortalece" },
+
+    { "id": "mesmo-mensageiro-dois-destinos", "escala": "molecular",
+      "descricao": "É a amplitude do sinal de Ca²⁺, e não a identidade dele, que decide o destino" },
+
+    { "id": "calcineurina-ativa", "entidade": "calcineurina", "escala": "molecular",
+      "descricao": "A calcineurina daquele espinho é ativada" },
+
+    { "id": "pp1-desfosforila", "entidade": "pp1", "escala": "molecular",
+      "descricao": "A PP1 é liberada e retira fosfatos dos receptores e das âncoras" },
+
+    { "id": "ampa-retirado-da-membrana", "entidade": "receptor-ampa", "escala": "molecular",
+      "descricao": "Receptores AMPA são internalizados e saem da membrana do espinho" },
+
+    { "id": "mesma-liberacao-da-menos-corrente", "escala": "celular",
+      "descricao": "A mesma quantidade de glutamato passa a produzir uma corrente menor" },
+
+    { "id": "sinapse-forte-despolariza-mais", "escala": "celular",
+      "descricao": "Uma sinapse já potenciada produz mais despolarização para a mesma entrada" },
+
+    { "id": "realimentacao-positiva-satura", "escala": "celular",
+      "descricao": "Fortalecer facilita fortalecer, e o processo caminha até o teto" },
+
+    { "id": "atividade-alta-sustentada", "escala": "celular",
+      "descricao": "A célula passa a manter taxa de disparo alta por longos períodos" },
+
+    { "id": "troca-de-subunidade-do-nmda", "entidade": "receptor-nmda", "escala": "molecular",
+      "descricao": "A composição do NMDA muda, com mais NR2A e menos NR2B, e cada evento passa a admitir menos Ca²⁺" },
+
+    { "id": "limiar-sobe", "escala": "celular",
+      "descricao": "A fronteira entre deprimir e potenciar se desloca para cima" },
+
+    { "id": "a-forca-fica-onde-ainda-pode-mudar", "escala": "celular",
+      "descricao": "A força da sinapse permanece numa faixa em que ainda dá para subir e descer" }
+  ],
+
+  "transicoes": [
+    { "de": "estimulo-fraco-e-prolongado", "para": "ca-sobe-pouco-e-por-muito-tempo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-nmda", "ca"],
+      "porque": "Estimulação de baixa frequência abre o NMDA de vez em quando e por pouco tempo a cada vez. O Ca²⁺ entra num filete em vez de num jato, e a concentração do espinho se estabiliza num patamar intermediário em vez de dar um pico." },
+
+    { "de": "calcineurina-tem-alta-afinidade", "para": "as-duas-vias-tem-limiares-diferentes",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["calcineurina", "calmodulina"],
+      "porque": "A calcineurina liga o complexo Ca²⁺-calmodulina com afinidade alta, o que significa que ela satura com pouca coisa. Responder cedo é propriedade bioquímica da proteína, e não uma decisão tomada pela célula em algum lugar." },
+
+    { "de": "camkii-precisa-de-muito-ca", "para": "as-duas-vias-tem-limiares-diferentes",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["camkii", "calmodulina"],
+      "porque": "A CaMKII só começa a se autofosforilar quando subunidades vizinhas do mesmo complexo estão ligadas ao mesmo tempo. Esse requisito de simultaneidade põe o gatilho dela num patamar bem mais alto que o da fosfatase." },
+
+    { "de": "as-duas-vias-tem-limiares-diferentes", "para": "mesmo-mensageiro-dois-destinos",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Se as duas leitoras ligassem no mesmo ponto, o Ca²⁺ não poderia significar duas coisas. É a diferença entre os limiares que transforma uma grandeza contínua em duas decisões opostas, sem que nada precise medir e comparar." },
+
+    { "de": "ca-sobe-pouco-e-por-muito-tempo", "para": "mesmo-mensageiro-dois-destinos",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "É a AMPLITUDE do sinal de Ca²⁺, e não a identidade dele, que escolhe o destino. O mesmo íon que fortalece quando entra em jato enfraquece quando entra em filete, e a diferença está inteiramente em quem consegue ligar naquele nível." },
+
+    { "de": "ca-sobe-pouco-e-por-muito-tempo", "para": "calcineurina-ativa",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["calcineurina", "ca", "calmodulina"],
+      "porque": "Uma concentração modesta já basta para a calcineurina, e a duração longa compensa a intensidade baixa. Um estímulo que nunca chegaria perto de disparar potenciação aciona esta via por inteiro." },
+
+    { "de": "calcineurina-ativa", "para": "pp1-desfosforila",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["calcineurina", "pp1"],
+      "porque": "A calcineurina desfosforila o inibidor que mantinha a PP1 presa, e a fosfatase é solta. A via da depressão não constrói maquinaria nova: ela libera uma enzima que já estava ali contida, e é daí que vem a rapidez dela." },
+
+    { "de": "pp1-desfosforila", "para": "ampa-retirado-da-membrana",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["pp1", "receptor-ampa"],
+      "porque": "A PP1 retira exatamente os fosfatos que a CaMKII tinha colocado nos receptores AMPA e nas proteínas de ancoragem. Sem essa marca o receptor deixa de ser retido e é internalizado por endocitose." },
+
+    { "de": "ampa-retirado-da-membrana", "para": "mesma-liberacao-da-menos-corrente",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-ampa", "neurotransmissor"],
+      "porque": "Com menos canais para o mesmo glutamato encontrar, a mesma liberação abre menos poros. A depressão é a mesma grandeza da potenciação com o sinal trocado, medida do mesmo jeito, e não um processo de outra natureza." },
+
+    { "de": "so-a-sinapse-coincidente-fica-mais-forte", "para": "sinapse-forte-despolariza-mais",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Uma sinapse potenciada produz mais despolarização para a mesma entrada. Como é a despolarização que desbloqueia o NMDA, cada potenciação torna a seguinte mais fácil de disparar naquele mesmo lugar." },
+
+    { "de": "sinapse-forte-despolariza-mais", "para": "realimentacao-positiva-satura",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Fortalecer facilita fortalecer, e realimentação positiva sem freio caminha até o limite físico. No teto todas as sinapses ficam igualmente fortes, e as diferenças entre elas, que é onde a informação está guardada, desaparecem." },
+
+    { "de": "realimentacao-positiva-satura", "para": "atividade-alta-sustentada",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Sinapses perto do teto disparam a célula com facilidade, e ela passa a manter taxa alta por longos períodos. O que era propriedade de conexões isoladas vira um estado mensurável da célula inteira." },
+
+    { "de": "atividade-alta-sustentada", "para": "limiar-sobe",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Depois de um período de atividade alta, é preciso um estímulo mais forte para produzir potenciação, e protocolos que antes potenciavam passam a deprimir. A fronteira entre os dois destinos acompanha a média da atividade recente em vez de ficar parada." },
+
+    { "de": "atividade-alta-sustentada", "para": "troca-de-subunidade-do-nmda",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["receptor-nmda"],
+      "porque": "Atividade alta prolongada muda a composição dos receptores NMDA da sinapse, aumentando a proporção de NR2A em relação a NR2B. A corrente de cada evento fica mais curta, e portanto entra menos Ca²⁺ por ativação." },
+
+    { "de": "troca-de-subunidade-do-nmda", "para": "limiar-sobe",
+      "tipo": "compoe", "certeza": "debatido",
+      "porque": "Esta é a explicação molecular mais apoiada para o deslocamento do limiar: menos Ca²⁺ por evento exige estímulo mais forte para alcançar o patamar da CaMKII. QUANTO do deslizamento ela responde continua em disputa, e há evidência de contribuições das próprias enzimas e da inibição da rede em volta." },
+
+    { "de": "limiar-sobe", "para": "a-forca-fica-onde-ainda-pode-mudar",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Um limiar que se move junto com a atividade impede tanto o teto quanto o chão: quando tudo está forte fica mais difícil fortalecer, e quando tudo está fraco fica mais fácil. O freio não é um limite imposto de fora, é a própria história de uso movendo a fronteira." },
+
+    { "de": "mesma-liberacao-da-menos-corrente", "para": "a-forca-fica-onde-ainda-pode-mudar",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Sem um caminho de descida a força só acumula, e uma sinapse no teto não consegue mais representar nada de novo. Poder enfraquecer é o que devolve alcance à sinapse, e não apenas o que desfaz um aprendizado errado." },
+
+    { "de": "mesmo-mensageiro-dois-destinos", "para": "a-forca-fica-onde-ainda-pode-mudar",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Subir e descer usam o mesmo mensageiro, a mesma entrada e o mesmo receptor, mudando só a intensidade. Por isso a sinapse não precisa de um segundo sistema para enfraquecer, e a decisão sai da própria grandeza que ela já estava medindo." }
+  ],
+
+  "mecanismos": [
+    { "id": "ltd-metaplasticidade",
+      "fenomeno": "Se o Ca²⁺ é o sinal que fortalece a sinapse, por que uma entrada fraca de Ca²⁺ a enfraquece em vez de fortalecer pouco?",
+      "entrada": "so-a-sinapse-coincidente-fica-mais-forte",
+      "terminal": "a-forca-fica-onde-ainda-pode-mudar",
+      "limites": "Descreve a LTD dependente de NMDA em CA1 e o limiar deslizante do tipo BCM. Não cobre LTD dependente de receptor metabotrópico de glutamato, nem LTD do cerebelo (que tem regra e maquinaria próprias), nem escalonamento sináptico homeostático, que é um mecanismo distinto e opera na célula inteira em vez de sinapse a sinapse. O protocolo de baixa frequência citado é o clássico de fatia; in vivo os padrões que produzem depressão são outros." }
+  ]
+}
