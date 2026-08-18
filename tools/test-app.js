@@ -218,7 +218,7 @@ PROVAS.push({
     exigir(g.transicoes.length > 0, 'o app carregou um grafo sem transição');
 
     const texto = textoTodo(v.app);
-    exigir(texto.indexOf('NeuroLab Profundo') >= 0, 'a tela não tem título');
+    exigir(texto.indexOf('NeuroLab Deep') >= 0, 'a tela não tem título');
     const etapas = P.etapas(g).camadas.length;
     for(let i = 1; i <= etapas; i++){
       exigir(texto.indexOf('Etapa ' + i) >= 0, `a tela não mostra a etapa ${i}`);
