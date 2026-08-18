@@ -411,6 +411,17 @@ PROVAS.push({
         exigir(!!estado.caixas[E.chaveDaCaixa(t, p.operacao)],
           `${onde}: exercita ${t.de} → ${t.para} em "${p.operacao}", e não há caixa para receber`);
       });
+
+      /* Ter caixa não basta: a caixa tem de ser DESTE mecanismo.
+         O recorte é `aMontante(terminal)`, então o de um mecanismo tardio
+         contém quase todo o grafo — em `ltd-metaplasticidade`, só 17% das
+         transições do recorte são próprias. Sem esta exigência, a atividade
+         "eixo-hpa × construir" perguntava sobre comportas de Na⁺, e o
+         conteúdo próprio do mecanismo quase nunca era exercitado. O
+         cronograma já agendava por dono; o gerador é que ignorava. */
+      exigir(p.transicoes.some(t=>E.donoDaCaixa(g, t, p.operacao, idx) === mec),
+        `${onde}: nenhuma das ${p.transicoes.length} transições exercitadas ` +
+        `pertence a "${mec}" — a pergunta está rotulada com um mecanismo e é sobre outro`);
     });
     exigir(vistas > 50, `só ${vistas} perguntas geradas`);
 
@@ -460,6 +471,23 @@ PROVAS.push({
           const sg = (idx || m.E.indexar(g))[mec];
           const fora = g.transicoes.find(t=>!sg.transicoes.includes(t));
           if(fora) p.transicoes = p.transicoes.concat([fora]);
+          return p;
+        }; return m; } },
+    /* O defeito medido em 2026-08-18: sortear do recorte inteiro em vez das
+       transições próprias. O mutante troca o que a pergunta EXERCITA por
+       transições do recorte que pertencem a outro dono — que é exatamente o
+       que o gerador antigo produzia. */
+    { como: 'a pergunta exercita o recorte inteiro, e não o que o mecanismo tem de seu',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.Q.gerar;
+        m.Q.gerar = (g, mec, op, semente, idx)=>{
+          const p = real(g, mec, op, semente, idx);
+          if(!p) return p;
+          idx = idx || m.E.indexar(g);
+          const deOutro = idx[mec].transicoes.filter(t=>{
+            const dono = m.E.donoDaCaixa(g, t, p.operacao, idx);
+            return dono && dono !== mec;
+          });
+          if(deOutro.length) p.transicoes = [deOutro[0]];
           return p;
         }; return m; } }
   ]

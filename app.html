@@ -1141,6 +1141,24 @@ function revelar(g, transicoes){
    acontecido". A resposta é um CONJUNTO de nós, porque um passo pode ter
    várias saídas — e é justamente aí que a pergunta deixa de ser decorável
    como fila. */
+/* ---------- o que este mecanismo tem de SEU ----------
+   O recorte de um mecanismo é `aMontante(terminal)`, então o de um mecanismo
+   tardio contém quase todo o grafo. Sortear do recorte inteiro fazia a
+   atividade "eixo-hpa × construir" perguntar sobre comportas de Na⁺: em
+   `ltd-metaplasticidade`, só 17% das transições do recorte são próprias, de
+   modo que 83% das perguntas rotuladas LTD eram sobre outro assunto.
+
+   O cronograma já resolvia isso e o gerador não usava: `donoDaCaixa` elege o
+   MENOR recorte onde a operação mede, e `planoDeSessao` agenda por dono. A
+   atividade existe para trabalhar as caixas PRÓPRIAS — o gerador agora
+   pergunta sobre elas.
+
+   O material de montante não some do estudo: ele é trabalhado na etapa que
+   o possui, que é onde a barra de progresso também o conta. */
+function transicoesProprias(g, mecanismoId, operacao, sg, idx){
+  return sg.transicoes.filter(t=>E.donoDaCaixa(g, t, operacao, idx) === mecanismoId);
+}
+
 function gerarTravessia(g, mecanismoId, operacao, sorteio, idx, evitar){
   idx = idx || E.indexar(g);
   const sg = idx[mecanismoId];
@@ -1148,7 +1166,13 @@ function gerarTravessia(g, mecanismoId, operacao, sorteio, idx, evitar){
   const r = G.reconstruir(g, mecanismoId, operacao === 'construir' ? 'frente' : 'tras');
   if(!r || !r.passos.length) return null;
 
-  const passo = escolherEvitando(r.passos, p=>operacao + ':' + p.no, evitar, sorteio);
+  /* Só passos que exercitam ao menos uma transição PRÓPRIA deste mecanismo.
+     Sem isso, um passo lá no começo da cadeia faz a atividade inteira ser
+     sobre material de outro dono. */
+  const proprias = new Set(transicoesProprias(g, mecanismoId, operacao, sg, idx));
+  const candidatos = r.passos.filter(p=>p.transicoes.some(t=>proprias.has(t)));
+  const passo = escolherEvitando(candidatos.length ? candidatos : r.passos,
+                                 p=>operacao + ':' + p.no, evitar, sorteio);
   const slate = montarSlate(g, sg, passo.resposta.map(x=>x.no), sorteio, [passo.no]);
   if(!slate) return null;
   // só entram as transições cuja saída ficou no slate: a evidência tem de
@@ -1178,10 +1202,13 @@ function gerarPerturbar(g, mecanismoId, sorteio, idx, evitar){
   const sg = idx[mecanismoId];
   if(!sg) return null;
 
-  /* As candidatas são exatamente as que `operacoesMensuraveisEm` aceita:
-     perda real e sobreviventes suficientes. Se o gerador aceitasse mais que
-     o cronograma, apareceria pergunta sem caixa para receber a evidência. */
-  const candidatas = [...new Set(sg.transicoes.flatMap(t=>t.requer || []))].sort()
+  /* As candidatas saem das transições PRÓPRIAS deste mecanismo — perturbar a
+     bomba de Na⁺/K⁺ é pergunta do gradiente eletroquímico, não do eixo HPA,
+     ainda que a bomba esteja no recorte dos dois. E vale a exigência do
+     cronograma: perda real e sobreviventes suficientes, senão o gerador
+     aceitaria mais que a caixa e a evidência não teria onde cair. */
+  const proprias = transicoesProprias(g, mecanismoId, 'perturbar', sg, idx);
+  const candidatas = [...new Set(proprias.flatMap(t=>t.requer || []))].sort()
     .filter(ent=>{
       const r = G.perturbarRecorte(g, { entidade: ent }, mecanismoId, sg);
       return r.perdidos.length > 0 && r.restantes.size >= E.MIN_SOBREVIVENTES;
@@ -1217,8 +1244,7 @@ function gerarDepurar(g, mecanismoId, sorteio, idx, evitar){
   const sg = idx[mecanismoId];
   if(!sg) return null;
 
-  const podem = sg.transicoes.filter(t=>
-    E.operacoesMensuraveisEm(g, t, mecanismoId, idx).includes('depurar'));
+  const podem = transicoesProprias(g, mecanismoId, 'depurar', sg, idx);
   if(!podem.length) return null;
 
   const errada = escolherEvitando(podem, t=>'dep:' + E.chaveDaTransicao(t), evitar, sorteio);
