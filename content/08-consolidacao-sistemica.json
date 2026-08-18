@@ -1,0 +1,219 @@
+{
+  "arquivo": "Consolidação sistêmica",
+  "nota_de_autoria": "Entra pelo terminal do 07 (`a-forca-fica-onde-ainda-pode-mudar`), e a ligação é o argumento: uma sinapse mantida onde ainda pode mudar é uma sinapse que pode ser sobrescrita. Este é o primeiro mecanismo em que o gargalo não é molecular e sim de ARQUITETURA — a tensão entre gravar de uma vez e não apagar o que já estava lá não tem solução dentro de uma rede só, e é dela que saem dois sistemas. As escalas `rede` e `sistemas` nascem aqui, e a distinção carrega o raciocínio: a interferência é um fato de rede, a saída é um fato de sistemas. O `debatido` daqui é o mais consequente do projeto até agora: até onde a lembrança antiga chega a dispensar o hipocampo.",
+
+  "entidades": [
+    { "id": "hipocampo", "nome": "Hipocampo", "escala": "sistemas",
+      "funcao": "sistema de taxa alta: registra em uma exposição quais regiões corticais estavam ativas juntas, e devolve esse conjunto inteiro a partir de um fragmento",
+      "se_falhar": "episódios novos deixam de ser gravados e o que ainda dependia do índice se perde; o que já se sustenta no córtex continua acessível" },
+
+    { "id": "giro-denteado", "nome": "Giro denteado", "escala": "sistemas",
+      "funcao": "primeira etapa do circuito hipocampal; espalha as entradas sobre uma população muito maior mantendo pouquíssimas células ativas de cada vez, o que afasta representações parecidas",
+      "se_falhar": "cenas parecidas voltam a receber códigos sobrepostos, e a interferência reaparece dentro do próprio sistema rápido" },
+
+    { "id": "neocortex", "nome": "Neocórtex", "escala": "sistemas",
+      "funcao": "sistema de taxa baixa: acumula, ao longo de muitas reativações intercaladas, o que há de comum entre episódios diferentes",
+      "se_falhar": "nada chega a se tornar permanente, e toda evocação segue dependendo do índice para reunir as partes" }
+  ],
+
+  "nos": [
+    { "id": "sinapse-que-muda-rapido-e-sobrescrita", "escala": "celular",
+      "descricao": "A mesma conexão que grava um episódio de uma vez pode ser regravada pelo episódio seguinte" },
+
+    { "id": "representacao-distribuida-compartilha-pesos", "escala": "rede",
+      "descricao": "As mesmas conexões participam de muitas lembranças, e nenhum peso pertence a uma só" },
+
+    { "id": "aprender-rapido-num-so-lugar-apaga", "escala": "rede",
+      "descricao": "Numa rede única, aprender depressa custa o que já estava guardado" },
+
+    { "id": "passo-pequeno-so-soma-o-que-se-repete", "escala": "rede",
+      "descricao": "Com ajuste pequeno, só o que aparece em muitos episódios chega a somar" },
+
+    { "id": "passo-pequeno-perde-o-episodio-unico", "escala": "rede",
+      "descricao": "O que aconteceu uma vez fica abaixo do ruído do próprio treino e não deixa marca" },
+
+    { "id": "as-duas-exigencias-pedem-taxas-opostas", "escala": "rede",
+      "descricao": "Guardar o que aconteceu uma vez e extrair o que se repete pedem valores opostos do mesmo parâmetro" },
+
+    { "id": "dois-sistemas-com-taxas-diferentes", "escala": "sistemas",
+      "descricao": "Um sistema rápido e um lento, com o rápido ensinando o lento" },
+
+    { "id": "giro-denteado-separa-padroes", "entidade": "giro-denteado", "escala": "sistemas",
+      "descricao": "Entradas parecidas recebem conjuntos de células ativas que quase não se cruzam",
+      "quant": { "esparsidade": "poucos por cento das células granulares ativas de cada vez",
+                 "expansao": "a população do giro denteado é da ordem de 5× a da entrada que ele recebe, no rato" } },
+
+    { "id": "codigos-quase-disjuntos-nao-se-deslocam", "escala": "rede",
+      "descricao": "Dois episódios cujas células quase não se cruzam não competem pelos mesmos pesos" },
+
+    { "id": "hipocampo-grava-em-uma-exposicao", "entidade": "hipocampo", "escala": "sistemas",
+      "descricao": "O sistema rápido segura um episódio inteiro depois de acontecer uma única vez" },
+
+    { "id": "hipocampo-guarda-o-indice-do-padrao", "entidade": "hipocampo", "escala": "sistemas",
+      "descricao": "O que fica gravado depressa é quais regiões corticais estavam ativas juntas, não o conteúdo delas" },
+
+    { "id": "pista-parcial-completa-o-padrao", "entidade": "hipocampo", "escala": "sistemas",
+      "descricao": "Um fragmento da cena basta para o índice devolver o conjunto inteiro" },
+
+    { "id": "ondulacao-aguda-reacende-a-sequencia", "entidade": "hipocampo", "escala": "sistemas",
+      "descricao": "Em repouso e no sono, o hipocampo percorre sozinho a sequência gravada, comprimida no tempo",
+      "quant": { "frequencia": "100 a 250 Hz", "duracao": "≈ 50 a 100 ms por evento",
+                 "compressao": "a sequência é percorrida cerca de 10 a 20× mais rápido do que foi vivida" } },
+
+    { "id": "repeticao-sem-o-mundo-repetir", "escala": "sistemas",
+      "descricao": "O episódio aconteceu uma vez e volta a acontecer centenas de vezes por dentro" },
+
+    { "id": "reativacoes-vem-embaralhadas", "escala": "sistemas",
+      "descricao": "Episódios de dias diferentes aparecem alternados na mesma janela de repouso" },
+
+    { "id": "cortex-recebe-treino-intercalado", "entidade": "neocortex", "escala": "sistemas",
+      "descricao": "O sistema lento recebe muitos episódios misturados, em vez de um item de cada vez" },
+
+    { "id": "cada-reativacao-soma-um-passo-no-cortex", "entidade": "espinho-dendritico", "escala": "celular",
+      "descricao": "Cada reativação produz nas sinapses corticais uma potenciação pequena, pela mesma regra de coincidência" },
+
+    { "id": "ligacoes-corticais-se-sustentam", "entidade": "neocortex", "escala": "sistemas",
+      "descricao": "As regiões corticais passam a reacender umas às outras diretamente" },
+
+    { "id": "evocar-deixa-de-precisar-do-indice", "escala": "sistemas",
+      "descricao": "A evocação da lembrança antiga já não passa pelo sistema rápido" },
+
+    { "id": "amnesia-retrograda-e-graduada-no-tempo", "escala": "sistemas",
+      "descricao": "Uma lesão do hipocampo leva o recente e poupa o remoto",
+      "quant": { "gradiente_em_roedor": "dias a semanas", "gradiente_em_humano": "anos a décadas" } },
+
+    { "id": "o-que-sobrevive-e-o-que-se-repetiu", "escala": "rede",
+      "descricao": "Fica o que era comum a muitas reativações, e cai o que era próprio de uma só" },
+
+    { "id": "a-memoria-que-dura-mudou-de-lugar-e-de-forma", "escala": "sistemas",
+      "descricao": "A lembrança estável não é a gravação original resistindo: é outra coisa, em outro sistema" }
+  ],
+
+  "transicoes": [
+    { "de": "a-forca-fica-onde-ainda-pode-mudar", "para": "sinapse-que-muda-rapido-e-sobrescrita",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "É o mesmo parâmetro nos dois casos. Manter a sinapse numa faixa em que ainda dá para subir e descer é exatamente o que permite que a próxima entrada a mova de novo, e nenhuma regra local consegue ser sensível a uma gravação e surda à seguinte." },
+
+    { "de": "representacao-distribuida-compartilha-pesos", "para": "aprender-rapido-num-so-lugar-apaga",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Numa rede em que as mesmas conexões participam de tudo, não existe peso que pertença a uma lembrança só. Qualquer ajuste grande em favor de um item novo passa por cima dos valores de que os itens antigos dependiam." },
+
+    { "de": "sinapse-que-muda-rapido-e-sobrescrita", "para": "aprender-rapido-num-so-lugar-apaga",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Um ajuste grande o bastante para gravar em uma exposição é, pelo mesmo tamanho, grande o bastante para desfazer o que estava gravado. O acerto no item novo e o erro no antigo crescem juntos porque saem do mesmo passo." },
+
+    { "de": "representacao-distribuida-compartilha-pesos", "para": "passo-pequeno-so-soma-o-que-se-repete",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se o passo é pequeno, um episódio isolado quase não move os pesos, e só o que reaparece em muitos episódios chega a acumular. O compartilhamento deixa de ser o problema e vira o modo de extrair o que há de comum." },
+
+    { "de": "passo-pequeno-so-soma-o-que-se-repete", "para": "passo-pequeno-perde-o-episodio-unico",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O mesmo tamanho de passo que protege o que já estava lá impede que uma exposição única deixe marca. Não são duas propriedades: é a mesma, vista pelo lado do que ela preserva e pelo lado do que ela descarta." },
+
+    { "de": "aprender-rapido-num-so-lugar-apaga", "para": "as-duas-exigencias-pedem-taxas-opostas",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Este é o custo do lado rápido: com passo grande a gravação de uma vez funciona, e o que já estava guardado é a moeda com que se paga por ela." },
+
+    { "de": "passo-pequeno-perde-o-episodio-unico", "para": "as-duas-exigencias-pedem-taxas-opostas",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "E este é o custo do lado lento. Uma rede tem um valor de taxa por vez, e escolher um dos dois comportamentos custa o outro, o que faz do conflito uma propriedade da arquitetura e não uma falha de implementação." },
+
+    { "de": "as-duas-exigencias-pedem-taxas-opostas", "para": "dois-sistemas-com-taxas-diferentes",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Se um valor não serve para as duas coisas, a saída é ter dois valores em lugares diferentes, com o rápido servindo de professor do lento. A separação não é elegância de projeto: é o que sobra depois que o conflito é levado a sério." },
+
+    { "de": "giro-denteado-separa-padroes", "para": "codigos-quase-disjuntos-nao-se-deslocam",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["giro-denteado"],
+      "porque": "Se dois episódios usam células com pouquíssima interseção, os pesos que um ajusta não são os pesos de que o outro depende. A interferência cai porque as representações deixam de dividir substrato, e não porque o aprendizado tenha ficado mais cuidadoso." },
+
+    { "de": "codigos-quase-disjuntos-nao-se-deslocam", "para": "hipocampo-grava-em-uma-exposicao",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["hipocampo", "giro-denteado"],
+      "porque": "Com pouca sobreposição dá para usar passo grande sem pagar o preço da interferência. É essa combinação, e não a velocidade sozinha, que torna a gravação em uma exposição possível sem apagar o resto." },
+
+    { "de": "dois-sistemas-com-taxas-diferentes", "para": "hipocampo-grava-em-uma-exposicao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["hipocampo"],
+      "porque": "Segurar o episódio inteiro depressa é a função do lado rápido da dupla, e é dele que vem a taxa alta. Sem alguém ocupando esse papel, a divisão de trabalho não tem serventia nenhuma." },
+
+    { "de": "hipocampo-grava-em-uma-exposicao", "para": "hipocampo-guarda-o-indice-do-padrao",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["hipocampo", "neocortex"],
+      "porque": "O conteúdo da cena continua espalhado pelo córtex, e o que cabe numa exposição só é o registro de quais regiões estavam ativas juntas. Guardar o endereço é barato o bastante para ser feito de primeira; guardar a cena não seria." },
+
+    { "de": "hipocampo-guarda-o-indice-do-padrao", "para": "pista-parcial-completa-o-padrao",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["hipocampo"],
+      "condicao": "as células do índice se ligam densamente entre si, e não apenas às entradas",
+      "porque": "Uma população cujas células se ligam umas às outras devolve o conjunto inteiro a partir de um pedaço dele. Um cheiro isolado reacende o resto porque o índice foi guardado como um todo, e não como uma lista de itens separados." },
+
+    { "de": "pista-parcial-completa-o-padrao", "para": "ondulacao-aguda-reacende-a-sequencia",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["hipocampo"],
+      "condicao": "fora do engajamento com o ambiente: sono de ondas lentas e repouso desperto",
+      "porque": "A mesma completação que serve para lembrar com uma pista dispara sem pista nenhuma quando o sistema não está ocupado com o mundo. É a autonomia dessa reativação que torna a etapa seguinte possível." },
+
+    { "de": "ondulacao-aguda-reacende-a-sequencia", "para": "repeticao-sem-o-mundo-repetir",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O episódio aconteceu uma vez, e a reativação acontece centenas de vezes. O sistema lento recebe as repetições de que precisa sem que a experiência tenha de se repetir lá fora, que é o que resolve a impossibilidade prática de treiná-lo com o mundo." },
+
+    { "de": "ondulacao-aguda-reacende-a-sequencia", "para": "reativacoes-vem-embaralhadas",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "As reativações de uma noite não vêm em bloco: episódios de dias diferentes aparecem alternados na mesma janela. A mistura não é ruído do processo, é uma condição para que o passo seguinte funcione." },
+
+    { "de": "repeticao-sem-o-mundo-repetir", "para": "cortex-recebe-treino-intercalado",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neocortex"],
+      "porque": "A quantidade é metade da receita: uma taxa baixa só chega a algum lugar se o mesmo padrão voltar muitas vezes. O número de repetições é o que compensa o tamanho pequeno de cada passo." },
+
+    { "de": "reativacoes-vem-embaralhadas", "para": "cortex-recebe-treino-intercalado",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neocortex"],
+      "porque": "A ordem é a outra metade. Treinar um item até o fim antes de passar ao próximo é exatamente o que apaga o anterior numa rede compartilhada, e intercalar faz cada ajuste ser um acordo entre todos os itens em vez de uma reescrita." },
+
+    { "de": "cortex-recebe-treino-intercalado", "para": "cada-reativacao-soma-um-passo-no-cortex",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neocortex", "camkii", "receptor-ampa", "espinho-dendritico"],
+      "porque": "A reativação põe pré e pós ativos ao mesmo tempo nas sinapses corticais, e a regra de coincidência responde ali como responde em qualquer lugar. Nada de novo é preciso na sinapse: muda a frequência com que o padrão volta, não a regra que ele obedece." },
+
+    { "de": "cada-reativacao-soma-um-passo-no-cortex", "para": "ligacoes-corticais-se-sustentam",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neocortex"],
+      "porque": "Muitos passos pequenos na mesma direção somam até que as regiões corticais consigam reacender umas às outras diretamente. O que precisava de um terceiro para ser reunido passa a se reunir sozinho." },
+
+    { "de": "ligacoes-corticais-se-sustentam", "para": "evocar-deixa-de-precisar-do-indice",
+      "tipo": "permite", "certeza": "debatido",
+      "condicao": "vale de forma bem apoiada para conhecimento geral e para a versão esquemática do episódio",
+      "porque": "Se o padrão cortical se reúne sozinho, o índice deixa de ser necessário para evocá-lo. ATÉ ONDE isso vale está em disputa aberta: há evidência consistente de que lembranças ricas em detalhe do próprio episódio continuam exigindo o hipocampo a vida inteira, e nessa leitura o que fica independente é uma versão transformada, não a mesma lembrança." },
+
+    { "de": "evocar-deixa-de-precisar-do-indice", "para": "amnesia-retrograda-e-graduada-no-tempo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["hipocampo"],
+      "porque": "Uma lesão do sistema rápido leva o que ainda dependia dele e poupa o que já não depende. O gradiente não é sobre a idade da lembrança em si, é sobre quantas reativações ela já teve, e por isso ele se estica ou encurta conforme o quanto o material foi revisitado." },
+
+    { "de": "passo-pequeno-so-soma-o-que-se-repete", "para": "o-que-sobrevive-e-o-que-se-repetiu",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O destino acumula o que é comum a muitas reativações e deixa cair o que apareceu numa só. A perda de detalhe não é falha do arquivamento: é o mesmo mecanismo que extrai a regularidade, visto pelo lado do que ele descarta." },
+
+    { "de": "cortex-recebe-treino-intercalado", "para": "o-que-sobrevive-e-o-que-se-repetiu",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Intercalar episódios diferentes reforça aquilo que eles têm em comum e dilui o que era próprio de cada um. A lembrança antiga se aproxima de um esquema, e o que ela perde é justamente o que a distinguia das outras." },
+
+    { "de": "amnesia-retrograda-e-graduada-no-tempo", "para": "a-memoria-que-dura-mudou-de-lugar-e-de-forma",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O gradiente é a assinatura observável da mudança de lugar. Se a lembrança tivesse ficado onde foi gravada, a lesão levaria as antigas junto com as recentes, e é isso que torna a afirmação testável em vez de retórica." },
+
+    { "de": "o-que-sobrevive-e-o-que-se-repetiu", "para": "a-memoria-que-dura-mudou-de-lugar-e-de-forma",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Mudar de lugar e mudar de forma aqui são a mesma coisa: o sistema lento não comporta o episódio inteiro, e o que chega até ele já vem filtrado pelo que se repetiu. Não existe transferência que preserve o original, porque o destino guarda outro tipo de coisa." }
+  ],
+
+  "mecanismos": [
+    { "id": "consolidacao-sistemica",
+      "fenomeno": "Se a sinapse que grava é a mesma que pode ser sobrescrita, como uma lembrança dura décadas?",
+      "entrada": "a-forca-fica-onde-ainda-pode-mudar",
+      "terminal": "a-memoria-que-dura-mudou-de-lugar-e-de-forma",
+      "limites": "Descreve a consolidação de memória declarativa dependente do hipocampo, na leitura de sistemas complementares de aprendizado. Não cobre consolidação sináptica local (as horas de síntese proteica logo depois do evento, que é outro processo e outra escala de tempo), nem memória procedural ou de medo, que têm circuitos próprios. A reconsolidação — o fato de que evocar uma lembrança a torna instável de novo — não está aqui e complica o quadro de transferência num sentido só. Os números de reativação e de gradiente vêm de roedor; em humano os prazos são de outra ordem e a evidência é sobretudo clínica e de imagem." }
+  ]
+}

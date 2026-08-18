@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 410 caixas para os sete mecanismos: 121 construir, 121
-reconstruir, 121 depurar e **47 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 502 caixas para os oito mecanismos: 147 construir, 147
+reconstruir, 147 depurar e **61 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
@@ -356,15 +356,20 @@ Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
 `app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
 de estudo, leitura do mecanismo e deslizador de escala.
 
-Fase D em curso: **7 mecanismos** (gradiente eletroquímico, potencial de
+Fase D em curso: **8 mecanismos** (gradiente eletroquímico, potencial de
 membrana, potencial de ação, condução saltatória, transmissão sináptica, LTP
-dependente de NMDA, LTD e metaplasticidade), **6 etapas** calculadas, 121
-transições. Nenhum arquivo declara ligação com outro.
+dependente de NMDA, LTD e metaplasticidade, consolidação sistêmica), **7
+etapas** calculadas, 147 transições. Nenhum arquivo declara ligação com outro.
 
 A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha: o
 terminal do potencial de ação (o código de frequência) não fica a montante
 da velocidade de condução, então os dois são irmãos e não sequência. A
 grade 16×4 do v2 nunca poderia ter dito isso.
 
-Restam: consolidação sistêmica, erro de previsão, acúmulo de evidência,
-controle top-down, eixo HPA.
+O vocabulário de escalas dobrou no mecanismo 08 e passou a ser `molecular ·
+celular · rede · sistemas`. Também aqui ninguém declarou nada: `escalasDe`
+lê o conteúdo, e o deslizador ganhou dois entalhes porque dois nós novos
+disseram que existiam. A distinção carrega o argumento do mecanismo — a
+interferência é um fato de **rede**, e a saída é um fato de **sistemas**.
+
+Restam: erro de previsão, acúmulo de evidência, controle top-down, eixo HPA.
