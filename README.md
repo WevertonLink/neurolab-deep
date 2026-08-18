@@ -118,9 +118,17 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 502 caixas para os oito mecanismos: 147 construir, 147
-reconstruir, 147 depurar e **61 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 602 caixas para os nove mecanismos: 177 construir, 177
+reconstruir, 177 depurar e **71 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
+
+E o 71 está **baixo por defeito conhecido**, não por propriedade do
+conteúdo. `perturbar` mede o que some do `aJusante(entrada)`, mas o recorte
+de um mecanismo é `aMontante(terminal)` — os dois não coincidem, e todo fio
+que entra pela lateral fica invisível para a perturbação. No mecanismo 07 é
+o braço executor inteiro da LTD: *"remova a calcineurina, o que para?"*
+nunca chega a ser perguntado, no mecanismo cujo assunto é a calcineurina.
+A seção 10 do validador lista quem está nessa situação.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
 uma passada só que liquida as caixas de `reconstruir` de todo o recorte. As
@@ -372,4 +380,9 @@ lê o conteúdo, e o deslizador ganhou dois entalhes porque dois nós novos
 disseram que existiam. A distinção carrega o argumento do mecanismo — a
 interferência é um fato de **rede**, e a saída é um fato de **sistemas**.
 
-Restam: erro de previsão, acúmulo de evidência, controle top-down, eixo HPA.
+O mecanismo 09 (erro de previsão) é irmão do 07, não filho: os dois saem do
+mesmo buraco deixado pela regra de coincidência — a LTD porque falta um
+sentido de descida, o erro de previsão porque a regra é cega à consequência.
+A etapa 6 ficou com os dois, e ninguém decidiu isso.
+
+Restam: acúmulo de evidência, controle top-down, eixo HPA.

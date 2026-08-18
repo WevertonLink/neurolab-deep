@@ -1,0 +1,236 @@
+{
+  "arquivo": "Erro de previsão de recompensa",
+  "nota_de_autoria": "Entra pelo terminal do 06, e não pelo do 08: este mecanismo é irmão da LTD, não filho dela. Os dois saem do mesmo buraco deixado pela regra de coincidência — a LTD porque a regra precisa de um sentido de descida, este porque a regra é CEGA à consequência. O argumento tem três fios que se encontram: quem recebe o crédito (a marca de elegibilidade), o que o sinal precisa relatar (diferença, não recompensa), e a evidência de que a dopamina tem exatamente essa forma. A ordem importa: a exigência é derivada do problema ANTES de olhar para o eletrodo, e é o encaixe entre as duas coisas que sustenta a identificação. O `debatido` daqui ataca a própria idealização que faz a conta fechar — a de que a difusão é um número só, igual para todo o alvo.",
+
+  "entidades": [
+    { "id": "neuronio-dopaminergico", "nome": "Neurônio dopaminérgico", "escala": "sistemas",
+      "funcao": "população do mesencéfalo que dispara em rajada quando o resultado excede o previsto e silencia quando ele apenas confirma o previsto",
+      "se_falhar": "as marcas de elegibilidade expiram sem confirmação; a ação continua possível, mas deixa de ser corrigida pelo resultado" },
+
+    { "id": "dopamina", "nome": "Dopamina", "escala": "molecular",
+      "funcao": "neuromodulador que não abre canal iônico e sim altera, por via metabotrópica, o que a marca deixada pela coincidência produz na sinapse",
+      "se_falhar": "o terceiro fator não chega à sinapse marcada e a coincidência expira sem virar mudança de peso" },
+
+    { "id": "receptor-dopaminergico", "nome": "Receptor dopaminérgico", "escala": "molecular",
+      "funcao": "receptor metabotrópico que traduz a chegada da dopamina em mudança de sinalização interna, com efeito lento e sem corrente própria",
+      "se_falhar": "a dopamina chega e a sinapse não tem como lê-la; o sinal existe no tecido e não existe para a célula" }
+  ],
+
+  "nos": [
+    { "id": "coincidencia-nao-distingue-consequencia", "escala": "rede",
+      "descricao": "A regra local fortalece qualquer par que coincidiu, tenha o resultado sido bom ou desastroso" },
+
+    { "id": "a-consequencia-chega-depois-da-acao", "escala": "rede",
+      "descricao": "O resultado que julga a ação aparece segundos depois da atividade que a produziu" },
+
+    { "id": "quando-o-resultado-chega-a-coincidencia-ja-passou", "escala": "celular",
+      "descricao": "No instante em que o resultado aparece, a atividade elétrica que o causou já terminou" },
+
+    { "id": "regra-local-precisa-de-um-terceiro-fator", "escala": "rede",
+      "descricao": "Além do lado que envia e do que recebe, faz falta um sinal que venha de fora da sinapse" },
+
+    { "id": "a-coincidencia-deixa-uma-marca-quimica", "entidade": "espinho-dendritico", "escala": "molecular",
+      "descricao": "A coincidência deixa no espinho um estado bioquímico que dura muito mais que o evento elétrico" },
+
+    { "id": "a-marca-nao-muda-a-forca-sozinha", "entidade": "camkii", "escala": "molecular",
+      "descricao": "Enquanto não é confirmada, a marca não altera o número de receptores da sinapse" },
+
+    { "id": "a-marca-expira-se-nada-confirmar", "entidade": "espinho-dendritico", "escala": "molecular",
+      "descricao": "Sem confirmação em poucos segundos, o estado decai e a coincidência não vira mudança",
+      "quant": { "janela": "da ordem de 1 a 10 s entre a coincidência e o sinal que a confirma" } },
+
+    { "id": "so-as-sinapses-marcadas-respondem-ao-sinal", "escala": "rede",
+      "descricao": "Um sinal que chega a todas só produz efeito onde havia marca" },
+
+    { "id": "o-sinal-alcanca-muitas-sinapses-de-uma-vez", "entidade": "neuronio-dopaminergico", "escala": "sistemas",
+      "descricao": "Poucos milhares de neurônios difundem o mesmo sinal por áreas enormes de uma vez" },
+
+    { "id": "sinal-global-da-credito-especifico", "escala": "rede",
+      "descricao": "Um sinal sem endereço nenhum consegue creditar exatamente quem participou" },
+
+    { "id": "recompensa-ja-prevista-nao-traz-informacao", "escala": "rede",
+      "descricao": "Um resultado que acontece sempre do mesmo jeito não diz nada que já não estivesse sabido" },
+
+    { "id": "aprender-tem-de-parar-quando-a-previsao-acerta", "escala": "rede",
+      "descricao": "Quando o que se espera já bate com o que acontece, não há correção a fazer" },
+
+    { "id": "sinal-de-recompensa-nao-pararia-de-ensinar", "escala": "rede",
+      "descricao": "Um sinal proporcional ao recebido seguiria chegando com força total depois de não haver mais nada a corrigir" },
+
+    { "id": "o-sinal-e-a-diferenca-entre-previsto-e-recebido", "escala": "rede",
+      "descricao": "O terceiro fator relata o quanto o resultado excedeu ou ficou aquém do esperado" },
+
+    { "id": "disparo-em-rajada-ao-inesperado", "entidade": "neuronio-dopaminergico", "escala": "sistemas",
+      "descricao": "Uma recompensa que não era esperada produz uma rajada curta e imediata",
+      "quant": { "latencia": "≈ 70 a 100 ms depois do evento", "duracao": "poucas centenas de ms" } },
+
+    { "id": "silencio-quando-o-resultado-era-previsto", "entidade": "neuronio-dopaminergico", "escala": "sistemas",
+      "descricao": "A mesma recompensa, depois de aprendida a pista, não produz resposta nenhuma" },
+
+    { "id": "queda-abaixo-da-base-quando-o-esperado-falta", "entidade": "neuronio-dopaminergico", "escala": "sistemas",
+      "descricao": "A recompensa prevista que não vem produz uma pausa abaixo do disparo de repouso",
+      "quant": { "base_tonica": "≈ 1 a 8 Hz, o que limita o quanto o sinal negativo consegue descer" } },
+
+    { "id": "a-queda-acontece-na-hora-marcada", "escala": "sistemas",
+      "descricao": "A pausa cai exatamente no instante em que a recompensa era devida" },
+
+    { "id": "a-resposta-anda-para-a-pista-mais-cedo", "escala": "sistemas",
+      "descricao": "Com o treino, a rajada migra da recompensa para o primeiro aviso que a antecipa" },
+
+    { "id": "dopamina-tem-a-forma-do-sinal-exigido", "entidade": "dopamina", "escala": "sistemas",
+      "descricao": "O que o eletrodo registra coincide com o que o problema exigia, ponto a ponto" },
+
+    { "id": "a-previsao-se-corrige-ate-o-sinal-sumir", "escala": "rede",
+      "descricao": "Cada erro ajusta a previsão no sentido que reduz o próximo erro, até não haver mais erro" },
+
+    { "id": "so-o-que-nao-era-previsto-muda-peso", "escala": "rede",
+      "descricao": "O que já era esperado atravessa o sistema sem alterar nada" },
+
+    { "id": "extincao-e-aprendizado-e-nao-esquecimento", "escala": "rede",
+      "descricao": "Deixar de esperar algo é uma correção ativa, movida por um sinal próprio" },
+
+    { "id": "o-que-ensina-e-a-surpresa-nao-a-recompensa", "escala": "rede",
+      "descricao": "O que move o aprendizado é a distância entre o mundo e o modelo dele, não o valor do que aconteceu" }
+  ],
+
+  "transicoes": [
+    { "de": "so-a-sinapse-coincidente-fica-mais-forte", "para": "coincidencia-nao-distingue-consequencia",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A regra olha só para o que aconteceu ao mesmo tempo nos dois lados da sinapse, e nem o lado que envia nem o que recebe carrega informação sobre como a história terminou. Uma coincidência que precedeu um desastre é fortalecida com o mesmo entusiasmo de uma que precedeu um acerto." },
+
+    { "de": "coincidencia-nao-distingue-consequencia", "para": "regra-local-precisa-de-um-terceiro-fator",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se a informação que falta não está em nenhum dos dois lados, nenhum ajuste da regra local consegue recuperá-la. O que falta tem de chegar de fora, e isso faz do problema uma questão de arquitetura em vez de calibragem." },
+
+    { "de": "a-consequencia-chega-depois-da-acao", "para": "quando-o-resultado-chega-a-coincidencia-ja-passou",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A atividade que produziu a ação dura dezenas de milissegundos e o resultado costuma levar segundos para aparecer. Os dois eventos que precisam ser associados não chegam a se sobrepor no tempo em momento nenhum." },
+
+    { "de": "quando-o-resultado-chega-a-coincidencia-ja-passou", "para": "regra-local-precisa-de-um-terceiro-fator",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Não basta um sinal vindo de fora: ele chega tarde demais para encontrar a atividade que deveria julgar. O terceiro fator precisa achar algum vestígio do que passou, ou não tem sobre o que agir." },
+
+    { "de": "so-a-sinapse-coincidente-fica-mais-forte", "para": "a-coincidencia-deixa-uma-marca-quimica",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["espinho-dendritico"],
+      "porque": "A mudança de força não é instantânea: entre detectar a coincidência e instalar receptores existe um estado intermediário que dura muito mais que o evento elétrico. O traço não é uma invenção deste mecanismo, é o intervalo que a potenciação comum já tinha." },
+
+    { "de": "a-coincidencia-deixa-uma-marca-quimica", "para": "a-marca-nao-muda-a-forca-sozinha",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["camkii", "espinho-dendritico"],
+      "porque": "O estado deixado pela coincidência é uma configuração transitória de proteínas, e mudar a força exige o passo separado de instalar ou retirar receptores. Marcar e executar são etapas distintas, e é a separação entre elas que abre espaço para uma confirmação vinda de fora." },
+
+    { "de": "a-marca-nao-muda-a-forca-sozinha", "para": "a-marca-expira-se-nada-confirmar",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["espinho-dendritico"],
+      "porque": "Uma configuração de proteínas que não chega a ser consolidada decai no tempo próprio dela. A janela em que a sinapse continua elegível é curta, e é ela que define quanto atraso o resultado ainda pode ter para ser creditado." },
+
+    { "de": "a-marca-expira-se-nada-confirmar", "para": "so-as-sinapses-marcadas-respondem-ao-sinal",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Se apenas as sinapses que coincidiram há pouco carregam a marca, um sinal que chega a todas encontra terreno preparado só nelas. A seletividade não está no sinal: está em quem tem como recebê-lo." },
+
+    { "de": "so-as-sinapses-marcadas-respondem-ao-sinal", "para": "sinal-global-da-credito-especifico",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O sinal não precisa descobrir qual sinapse merecia crédito, porque a própria sinapse já se marcou. Endereçamento específico sai de um sinal sem endereço nenhum, e é isso que torna a difusão em massa uma solução em vez de um problema." },
+
+    { "de": "o-sinal-alcanca-muitas-sinapses-de-uma-vez", "para": "sinal-global-da-credito-especifico",
+      "tipo": "compoe", "certeza": "debatido",
+      "requer": ["neuronio-dopaminergico", "dopamina"],
+      "condicao": "vale na idealização de um valor escalar único, igual para todo o alvo",
+      "porque": "Tratar a difusão como um número só é o que faz a conta fechar, e essa é a parte idealizada. Registros mostram populações dopaminérgicas heterogêneas, com subgrupos respondendo a coisas diferentes e com evidência de que o conjunto relata uma DISTRIBUIÇÃO de previsões em vez de uma média. Quanto disso muda a explicação continua em aberto, e a consequência prática é direta: um eletrodo em um neurônio sorteado não precisa reproduzir a curva do livro." },
+
+    { "de": "regra-local-precisa-de-um-terceiro-fator", "para": "o-sinal-e-a-diferenca-entre-previsto-e-recebido",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Um sinal vindo de fora só serve se carregar algo que a sinapse não tem como saber sozinha. E o que ela não sabe não é o valor do resultado: é o quanto esse resultado difere do que já estava previsto." },
+
+    { "de": "recompensa-ja-prevista-nao-traz-informacao", "para": "aprender-tem-de-parar-quando-a-previsao-acerta",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Ajustar um modelo que já acerta só pode piorá-lo, porque não há direção de melhora disponível. O critério de parada não é economia de esforço: é a condição para o modelo se manter onde chegou." },
+
+    { "de": "aprender-tem-de-parar-quando-a-previsao-acerta", "para": "o-sinal-e-a-diferenca-entre-previsto-e-recebido",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Subtrair o que era esperado faz o próprio acerto da previsão zerar o sinal. O desligamento fica embutido na grandeza, sem precisar de um supervisor que observe de fora e decida quando terminou." },
+
+    { "de": "sinal-de-recompensa-nao-pararia-de-ensinar", "para": "o-sinal-e-a-diferenca-entre-previsto-e-recebido",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "É a alternativa ingênua sendo descartada: um sinal proporcional ao recebido continuaria fortalecendo depois de a previsão estar certa, e o peso cresceria sem nada para detê-lo. Só uma diferença tem o zero no lugar certo." },
+
+    { "de": "o-sinal-e-a-diferenca-entre-previsto-e-recebido", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["dopamina"],
+      "porque": "A comparação só vale porque a exigência foi derivada do problema ANTES de alguém olhar para o eletrodo. É o encaixe entre uma previsão feita por raciocínio e um registro feito por medida que sustenta a identificação, e não a semelhança notada depois." },
+
+    { "de": "disparo-em-rajada-ao-inesperado", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neuronio-dopaminergico"],
+      "porque": "O primeiro encaixe é o mais óbvio: resultado melhor que o previsto produz sinal positivo. Sozinho ele não distinguiria um relato de recompensa de um relato de erro, e por isso não bastaria." },
+
+    { "de": "silencio-quando-o-resultado-era-previsto", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neuronio-dopaminergico"],
+      "porque": "Este é o encaixe que separa as duas hipóteses. A recompensa continua sendo entregue e continua sendo boa, e mesmo assim não há resposta — o que só faz sentido se o que está sendo relatado for a diferença." },
+
+    { "de": "queda-abaixo-da-base-quando-o-esperado-falta", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neuronio-dopaminergico"],
+      "porque": "Uma diferença precisa de sinal negativo, e nada acontecendo teria de ser codificado como zero. A pausa abaixo do repouso é a única forma de o sistema dizer pior do que eu esperava usando uma taxa de disparo." },
+
+    { "de": "queda-abaixo-da-base-quando-o-esperado-falta", "para": "a-queda-acontece-na-hora-marcada",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A pausa não vem quando o animal desiste nem quando a sessão acaba: ela cai no instante em que a entrega era devida. Para acertar o instante, o sistema tem de guardar não só o quanto esperava, mas quando." },
+
+    { "de": "a-queda-acontece-na-hora-marcada", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Este encaixe é o mais exigente dos quatro, porque a hora não podia ser adivinhada por acaso. Ele mostra que a previsão tem endereço no tempo, e não apenas um valor esperado." },
+
+    { "de": "disparo-em-rajada-ao-inesperado", "para": "a-resposta-anda-para-a-pista-mais-cedo",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Assim que a pista passa a prever a recompensa, a recompensa deixa de surpreender e a própria pista passa a ser o evento inesperado. A migração não é programada: ela cai de graça de um sinal que relata diferença." },
+
+    { "de": "a-resposta-anda-para-a-pista-mais-cedo", "para": "dopamina-tem-a-forma-do-sinal-exigido",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A migração é a assinatura que separa erro de previsão simples de erro de previsão encadeado no tempo. Ela mostra que cada estado aprende a prever o estado seguinte, e não apenas o desfecho final." },
+
+    { "de": "dopamina-tem-a-forma-do-sinal-exigido", "para": "o-sinal-alcanca-muitas-sinapses-de-uma-vez",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["neuronio-dopaminergico", "dopamina"],
+      "porque": "A mesma população que relata a diferença é a que projeta para áreas enormes de uma vez. Conteúdo do sinal e alcance do sinal saem dos mesmos poucos milhares de neurônios, e por isso não podem ser separados um do outro." },
+
+    { "de": "dopamina-tem-a-forma-do-sinal-exigido", "para": "so-as-sinapses-marcadas-respondem-ao-sinal",
+      "tipo": "modula", "certeza": "consolidado",
+      "requer": ["dopamina", "receptor-dopaminergico", "camkii"],
+      "porque": "A dopamina não abre canal iônico e não despolariza nada: ela age por receptor metabotrópico e altera o que a marca já existente vai produzir. Modular é a palavra exata, porque sem a marca o mesmo sinal não produz efeito nenhum." },
+
+    { "de": "sinal-global-da-credito-especifico", "para": "so-o-que-nao-era-previsto-muda-peso",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Confirmação seletiva com sinal que já é diferença faz a mudança de peso acontecer só onde houve marca E houve surpresa. As duas condições juntas são o filtro que faltava à regra puramente local." },
+
+    { "de": "o-sinal-e-a-diferenca-entre-previsto-e-recebido", "para": "a-previsao-se-corrige-ate-o-sinal-sumir",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Cada erro ajusta a previsão exatamente no sentido que reduz o erro seguinte, e o processo caminha para o ponto em que não sobra sinal. O aprendizado tem um fim natural, e o fim é a própria previsão ficar certa." },
+
+    { "de": "a-previsao-se-corrige-ate-o-sinal-sumir", "para": "o-que-ensina-e-a-surpresa-nao-a-recompensa",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Quando a correção converge, o que era novidade vira rotina e para de mover qualquer coisa. O sistema fica sensível apenas à margem entre o mundo e o que ele já dá por certo, e é essa margem que tem nome de surpresa." },
+
+    { "de": "queda-abaixo-da-base-quando-o-esperado-falta", "para": "extincao-e-aprendizado-e-nao-esquecimento",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Deixar de esperar não acontece por desuso: acontece porque a ausência gera um sinal negativo que corrige a previsão para baixo. É por isso que a extinção tem curso próprio e pode ser mais rápida ou mais lenta que o esquecimento." },
+
+    { "de": "so-o-que-nao-era-previsto-muda-peso", "para": "o-que-ensina-e-a-surpresa-nao-a-recompensa",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se o que já era esperado atravessa sem alterar nada, o valor do que aconteceu deixa de ser o que importa. O que importa é o tamanho do desacordo, e é ele, e não o prazer, que a dopamina está relatando." },
+
+    { "de": "extincao-e-aprendizado-e-nao-esquecimento", "para": "o-que-ensina-e-a-surpresa-nao-a-recompensa",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A surpresa ensina nos dois sentidos, e o sinal negativo é a prova de que ela não é sinônimo de coisa boa. Um resultado pior que o previsto corrige com a mesma legitimidade de um melhor." }
+  ],
+
+  "mecanismos": [
+    { "id": "erro-de-previsao",
+      "fenomeno": "Se a sinapse fortalece qualquer coincidência, por que uma recompensa que você já esperava não ensina nada?",
+      "entrada": "so-a-sinapse-coincidente-fica-mais-forte",
+      "terminal": "o-que-ensina-e-a-surpresa-nao-a-recompensa",
+      "limites": "Descreve o erro de previsão de recompensa do tipo diferença temporal e a leitura da dopamina mesencefálica como esse sinal. Não cobre os outros papéis da dopamina, que são reais e não derivam daqui: vigor e iniciação de movimento, custo de esforço, e a distinção entre querer e gostar (o prazer propriamente dito depende de outros sistemas). Não cobre erro de previsão sensorial fora do domínio de recompensa, nem aprendizado aversivo, cuja relação com esta população é mais disputada. A marca de elegibilidade está descrita no nível funcional: a identidade molecular do traço e a janela exata continuam sendo objeto de estudo." }
+  ]
+}

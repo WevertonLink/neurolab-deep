@@ -147,7 +147,26 @@ function arquivosDoCaminho(caminho){
 /* ---------- perturbação ----------
    Remove uma entidade ou uma transição e DERIVA o que deixa de acontecer.
    Nada aqui é escrito à mão: a consequência é o que some da alcançabilidade.
-   É isto que substitui os contrafactuais autorados do NeuroLab. */
+   É isto que substitui os contrafactuais autorados do NeuroLab.
+
+   LIMITE CONHECIDO — alcançabilidade é OU, nunca E.
+   Um nó com dois pais sobrevive se QUALQUER um deles sobrevive. Quando o nó
+   só é verdadeiro com os dois juntos, a perturbação subestima o estrago e o
+   gabarito sai curto (nunca invertido — isso é o defeito de polaridade, que
+   é outro e está barrado no validador).
+
+   Visto em 2026-08-18, no mecanismo 09: `sinal-global-da-credito-especifico`
+   exige a marca de elegibilidade E a difusão do sinal. Remover a dopamina
+   mata a difusão, o nó continua alcançável pela marca, e a perturbação
+   conclui que só dois nós se perdem — quando, de fato, a atribuição de
+   crédito inteira para.
+
+   NÃO conserte isso reescrevendo o conteúdo para virar cadeia em série. A
+   conjunção é real, e serializá-la para o número ficar bonito é falsificar
+   o mecanismo para agradar o motor. O conserto certo é dar conjunção ao
+   motor, e até lá o gabarito é conservador: o que ele lista realmente se
+   perde, e pode faltar coisa. Ver a seção 10 de tools/valida-grafo.js, que
+   avisa quando uma entidade nunca chega a derrubar nada. */
 function perturbar(g, alvo, entradaId){
   const mortas = g.transicoes.filter(t=>{
     if(alvo.entidade) return (t.requer||[]).includes(alvo.entidade);

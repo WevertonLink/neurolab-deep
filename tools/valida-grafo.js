@@ -202,6 +202,41 @@ Object.keys(g.nos).forEach(id=>{
     `ou falta um mecanismo que termine nele.`);
 });
 
+/* ---------- 10. entidade que promete e não entrega ----------
+   Uma entidade citada em `requer` afirma que aquela relação depende dela.
+   Se removê-la não derruba NADA a jusante de nenhuma entrada, a promessa é
+   vazia: o `se_falhar` descreve uma consequência que o grafo não produz, e
+   `perturbar` nunca gera pergunta a partir dela.
+
+   Isto é AVISO, não erro. Há dois motivos legítimos para a lista não ser
+   vazia: (a) a entidade sustenta um nó de origem, que fica fora do
+   `aJusante` de qualquer entrada; (b) a conjunção — o nó depende dela E de
+   outro caminho, e alcançabilidade não sabe dizer E (ver o comentário em
+   `perturbar`, em src/grafo.js). Nos dois casos o que se pede é olhar, não
+   consertar às cegas.
+
+   Nasceu de um defeito real: no mecanismo 09 escrito em 2026-08-18, remover
+   `dopamina` perdia zero nós, e o mecanismo inteiro gerou zero caixas de
+   `perturbar` sem que portão nenhum reclamasse. */
+const entidadesEmRequer = new Set();
+g.transicoes.forEach(t=>(t.requer||[]).forEach(e=>entidadesEmRequer.add(e)));
+const inertes = [];
+entidadesEmRequer.forEach(e=>{
+  const mordeEmAlgum = Object.values(g.mecanismos).some(m=>{
+    if(!g.nos[m.entrada]) return false;
+    const sg = G.subgrafo(g, m.id);
+    if(!sg) return false;
+    return G.perturbar(g, { entidade: e }, m.entrada).perdidos
+      .some(n=>sg.nos.has(n));
+  });
+  checagens++;
+  if(!mordeEmAlgum) inertes.push(e);
+});
+notar(inertes.length === 0,
+  `entidade(s) em \`requer\` cuja remoção não derruba nada em mecanismo nenhum: ` +
+  `${inertes.join(', ')}. O \`se_falhar\` delas promete uma consequência que o grafo ` +
+  `não produz, e nenhuma pergunta de \`perturbar\` sai daí.`);
+
 /* ---------- resultado ---------- */
 console.log(`grafo: ${Object.keys(g.nos).length} nós · ${g.transicoes.length} transições · ` +
             `${Object.keys(g.entidades).length} entidades · ${Object.keys(g.mecanismos).length} mecanismos ` +
