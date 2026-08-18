@@ -32,7 +32,9 @@
 
     { "id": "mr-satura-em-nivel-basal", "entidade": "receptor-mr", "escala": "molecular",
       "descricao": "O receptor de alta afinidade já está bastante ocupado em repouso",
-      "quant": { "ocupacao_em_repouso": "alta; o MR opera perto da saturação boa parte do dia" } },
+      "quant": { "ocupacao_em_repouso": "alta; o MR opera perto da saturação boa parte do dia",
+                 "afinidade_relativa": "≈ 10× a do GR pelo mesmo hormônio",
+                 "distribuicao": "restrito a áreas límbicas e alguns núcleos motores, ao contrário do GR, que é bem mais espalhado" } },
 
     { "id": "gr-so-e-ocupado-em-nivel-alto", "entidade": "receptor-gr", "escala": "molecular",
       "descricao": "O receptor de baixa afinidade só é ocupado quando o cortisol sobe muito",

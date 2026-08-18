@@ -25,15 +25,17 @@
 
     { "id": "mais-canais-de-k-que-de-na", "escala": "molecular",
       "descricao": "Há muito mais canais de vazamento de K⁺ abertos na membrana em repouso do que de Na⁺",
-      "quant": { "proporcao": "ordem de 25 a 40 canais de K⁺ para cada um de Na⁺, em número efetivo de poros abertos" } },
+      "quant": { "proporcao": "muito mais poros de K⁺ abertos que de Na⁺",
+                 "cuidado": "a razão de PERMEABILIDADE (≈20 a 33×) não é a razão do NÚMERO de canais: permeabilidade é número de poros × condutância de cada um × probabilidade de estar aberto. Os três fatores diferem entre K⁺ e Na⁺, e por isso o número de canais não sai da razão medida" } },
 
     { "id": "permeabilidade-desigual", "escala": "celular",
       "descricao": "A membrana em repouso é muito mais permeável a K⁺ do que a Na⁺",
-      "quant": { "razao_P_K_por_P_Na": "≈ 25 a 40 vezes" } },
+      "quant": { "razao_P_K_por_P_Na": "≈ 20 a 33 vezes (P_K : P_Na de 1 : 0,05 a 1 : 0,03)" } },
 
     { "id": "bomba-e-eletrogenica", "escala": "molecular",
       "descricao": "A bomba tira 3 cargas positivas e devolve 2 — o saldo por ciclo é negativo",
-      "quant": { "contribuicao_direta": "≈ −3 mV" } },
+      "quant": { "contribuicao_direta": "poucos mV — tipicamente ≈ −3, e até ≈ −10 em algumas células",
+                 "cuidado": "esta é a contribuição ELÉTRICA direta, e é pequena. Não confundir com o papel da bomba em manter os gradientes, do qual todo o resto depende" } },
 
     { "id": "potencial-de-repouso", "escala": "celular",
       "descricao": "A voltagem em que a célula se estabiliza quando nada a perturba",

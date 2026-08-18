@@ -121,7 +121,7 @@
     { "de": "a-taxa-de-disparo-sobe-gradualmente", "para": "o-acumulador-integra-a-diferenca",
       "tipo": "compoe", "certeza": "debatido",
       "condicao": "a rampa é observada na MÉDIA sobre muitas tentativas",
-      "porque": "Uma taxa que sobe em rampa, com inclinação proporcional à força da evidência, é o que se esperaria de um total sendo somado. Só que a média sobre tentativas não distingue rampas de verdade de DEGRAUS abruptos disparados em instantes sorteados, e análise tentativa a tentativa já apoiou a segunda leitura em parte dos neurônios. A mesma figura sustenta duas histórias incompatíveis, e escolher entre elas exige olhar a tentativa única." },
+      "porque": "Uma taxa que sobe em rampa, com inclinação proporcional à força da evidência, é o que se esperaria de um total sendo somado. Só que a média sobre tentativas não distingue rampas de verdade de DEGRAUS abruptos disparados em instantes sorteados, e comparação estatística tentativa a tentativa no córtex parietal descreveu melhor por degrau cerca de três quartos dos neurônios seletivos à escolha. A objeção é metodológica e a disputa segue aberta, com refinamentos dos dois lados. A mesma figura de livro sustenta duas histórias incompatíveis." },
 
     { "de": "o-acumulador-integra-a-diferenca", "para": "atravessar-o-limiar-encerra-a-deliberacao",
       "tipo": "permite", "certeza": "consolidado",

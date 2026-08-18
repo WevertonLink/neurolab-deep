@@ -128,7 +128,7 @@
 
     { "de": "camkii-se-autofosforila", "para": "atividade-persiste-sem-o-sinal",
       "tipo": "causa", "certeza": "debatido",
-      "porque": "Que a autofosforilação prolongue a atividade além do pulso de Ca²⁺ é medido e não está em disputa. Que ela seja o que MANTÉM a sinapse forte é: a fosforilação decai em minutos enquanto a potenciação dura horas, e animais com o sítio mutado ainda mostram potenciação em algumas condições. A manutenção provavelmente envolve mais de um mecanismo." },
+      "porque": "Que a autofosforilação prolongue a atividade além do pulso de Ca²⁺ é medido e não está em disputa. Que ela seja o que MANTÉM a sinapse forte é, e a disputa hoje tem um eixo bem definido: atividade ENZIMÁTICA contra função ESTRUTURAL. Um lado sustenta que a autofosforilação do T286 e a ligação subsequente à subunidade GluN2B são exigidas tanto para induzir quanto para manter; o outro, que a atividade enzimática não é exigida para manutenção nenhuma, e que o que sustenta é a atividade autônoma da CaMKII presa ao GluN2B, com o T286 sendo preciso apenas na indução. A parte estável pode ser a proteína ancorada, e não a reação que ela catalisa." },
 
     { "de": "camkii-ativa", "para": "ampa-inserido-na-membrana",
       "tipo": "causa", "certeza": "consolidado",

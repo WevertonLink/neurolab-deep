@@ -25,10 +25,14 @@
       "descricao": "O Ca²⁺ do espinho fica bem acima do repouso e bem abaixo do que um estímulo forte produz" },
 
     { "id": "calcineurina-tem-alta-afinidade", "entidade": "calcineurina", "escala": "molecular",
-      "descricao": "A calcineurina satura com pouco Ca²⁺-calmodulina" },
+      "descricao": "A calcineurina satura com pouco Ca²⁺-calmodulina",
+      "quant": { "Kd_para_Ca4CaM": "≈ 28 pM",
+                 "ativacao_meia_maxima": "≈ 1 a 10 nM de calmodulina" } },
 
     { "id": "camkii-precisa-de-muito-ca", "entidade": "camkii", "escala": "molecular",
-      "descricao": "A CaMKII só arranca com Ca²⁺ alto, porque precisa de várias subunidades ligadas ao mesmo tempo" },
+      "descricao": "A CaMKII só arranca com Ca²⁺ alto, porque precisa de várias subunidades ligadas ao mesmo tempo",
+      "quant": { "Kd_para_Ca4CaM": "≈ 33,5 nM — cerca de mil vezes menos afinidade que a calcineurina",
+                 "ativacao_meia_maxima": "≈ 40 a 80 nM de calmodulina" } },
 
     { "id": "as-duas-vias-tem-limiares-diferentes", "escala": "molecular",
       "descricao": "A enzima que enfraquece liga antes da que fortalece" },

@@ -37,7 +37,9 @@
 
     { "id": "a-marca-expira-se-nada-confirmar", "entidade": "espinho-dendritico", "escala": "molecular",
       "descricao": "Sem confirmação em poucos segundos, o estado decai e a coincidência não vira mudança",
-      "quant": { "janela": "da ordem de 1 a 10 s entre a coincidência e o sinal que a confirma" } },
+      "quant": { "janela": "da ordem de 1 a 2 s entre a coincidência e o sinal que a confirma",
+                 "forma": "é um período sensível com pico, não uma janela que decai até 10 s: no estriado, a dopamina potenciou sinapses ativas ≈2 s antes, e NÃO as ativas antes ou depois disso",
+                 "comparar_com": "os ≈50 ms da detecção de coincidência pelo NMDA — a marca estende o alcance temporal em uma a duas ordens de grandeza, e paga isso em precisão" } },
 
     { "id": "so-as-sinapses-marcadas-respondem-ao-sinal", "escala": "rede",
       "descricao": "Um sinal que chega a todas só produz efeito onde havia marca" },

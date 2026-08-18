@@ -69,7 +69,9 @@
 
     { "id": "codigo-de-frequencia-com-teto", "escala": "celular",
       "descricao": "A intensidade só pode ser representada na frequência dos disparos, e essa frequência tem teto",
-      "quant": { "teto": "≈ 500 a 1000 disparos por segundo" } }
+      "quant": { "teto_real_piramidal": "≈ 50 a 80 disparos por segundo sob estimulação sustentada",
+                 "teto_real_interneuronio_rapido": "≈ 200 a 450 Hz, e só em alguns tipos celulares",
+                 "cuidado": "≈1000 Hz é o limite TEÓRICO que sai de um refratário absoluto de ≈1 ms, e nenhum neurônio cortical comum chega perto disso. O teto que importa é biofísico, muito mais baixo, e é ele que faz da faixa de frequências um recurso escasso" } }
   ],
 
   "transicoes": [
