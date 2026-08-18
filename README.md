@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 608 caixas para os nove mecanismos: 177 construir, 177
-reconstruir, 177 depurar e **77 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 682 caixas para os dez mecanismos: 200 construir, 200
+reconstruir, 200 depurar e **82 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
 A perturbação de um mecanismo parte das **raízes do recorte**, não da
@@ -393,4 +393,11 @@ mesmo buraco deixado pela regra de coincidência — a LTD porque falta um
 sentido de descida, o erro de previsão porque a regra é cega à consequência.
 A etapa 6 ficou com os dois, e ninguém decidiu isso.
 
-Restam: acúmulo de evidência, controle top-down, eixo HPA.
+O 10 (acúmulo de evidência) caiu na etapa **4**, ao lado da transmissão
+sináptica, e isso responde a uma pergunta de currículo sem que ninguém a
+tenha respondido: decidir sob ruído não depende de plasticidade, só de
+neurônios que integrem e disparem. Ele entra pelo terminal do 03. Numa
+grade autorada, "decisão" seria um módulo avançado, no fim — aqui ele é
+irmão da sinapse, porque é o que o grafo diz.
+
+Restam: controle top-down, eixo HPA.

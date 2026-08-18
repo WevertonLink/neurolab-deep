@@ -1,0 +1,186 @@
+{
+  "arquivo": "Acúmulo de evidência até o limiar",
+  "nota_de_autoria": "Entra pelo terminal do 03, e não pelo do 09: decidir a partir de evidência ruidosa não exige plasticidade nenhuma, exige neurônios que integrem e disparem. A entrada é o CÓDIGO DE FREQUÊNCIA, porque é a natureza do código que cria o problema — se a informação é uma taxa, ler exige uma janela, e janela curta é ambígua por construção. A escala `comportamento` nasce aqui: é o primeiro mecanismo cujo terminal se mede em tempo de resposta e taxa de acerto, não em eletrodo. O `debatido` é o mais afiado do projeto — a rampa média é compatível com duas histórias de tentativa única incompatíveis entre si, e a mesma figura sustenta as duas.",
+
+  "entidades": [
+    { "id": "populacao-sensorial", "nome": "População sensorial sintonizada", "escala": "rede",
+      "funcao": "conjunto de neurônios cuja taxa sobe para uma das hipóteses e não para a outra; é a subtração entre duas dessas populações que isola a evidência",
+      "se_falhar": "não sobra grandeza a favor de nada, e o acumulador passa a somar ruído com a mesma diligência" },
+
+    { "id": "circuito-integrador", "nome": "Circuito integrador recorrente", "escala": "rede",
+      "funcao": "rede cuja excitação entre os próprios membros repõe o que a membrana perde, sustentando um total por muito mais tempo que qualquer célula sozinha",
+      "se_falhar": "o total decai na escala da membrana, e a evidência de um segundo atrás já não está lá para ser somada" }
+  ],
+
+  "nos": [
+    { "id": "a-taxa-varia-mesmo-sem-mudar-o-estimulo", "escala": "celular",
+      "descricao": "O mesmo estímulo, apresentado duas vezes, produz contagens de disparo diferentes" },
+
+    { "id": "um-instante-nao-separa-as-hipoteses", "escala": "rede",
+      "descricao": "Em janela curta, as contagens das duas hipóteses se sobrepõem quase por inteiro" },
+
+    { "id": "somar-amostras-faz-o-ruido-crescer-mais-devagar", "escala": "rede",
+      "descricao": "Numa soma de amostras independentes, a parte sistemática cresce mais depressa que a aleatória",
+      "quant": { "sistematica": "proporcional ao número de amostras",
+                 "aleatoria": "proporcional à raiz do número de amostras" } },
+
+    { "id": "so-o-tempo-desfaz-a-sobreposicao", "escala": "rede",
+      "descricao": "A única coisa capaz de separar as duas hipóteses é olhar por mais tempo" },
+
+    { "id": "a-diferenca-entre-populacoes-e-a-evidencia", "entidade": "populacao-sensorial", "escala": "rede",
+      "descricao": "A grandeza que informa é a subtração entre duas populações opostas, não a taxa de uma delas" },
+
+    { "id": "a-membrana-esquece-em-dezenas-de-ms", "entidade": "membrana", "escala": "celular",
+      "descricao": "Uma célula sozinha perde o que recebeu na escala da própria constante de tempo",
+      "quant": { "constante_de_tempo": "≈ 10 a 30 ms" } },
+
+    { "id": "realimentacao-positiva-compensa-o-vazamento", "entidade": "circuito-integrador", "escala": "rede",
+      "descricao": "A excitação recorrente entre os membros da rede repõe o que vaza de cada um" },
+
+    { "id": "o-integrador-guarda-por-muito-mais-tempo", "entidade": "circuito-integrador", "escala": "rede",
+      "descricao": "A constante de tempo da rede fica muito maior que a de qualquer célula dela",
+      "quant": { "escala_util": "centenas de ms a alguns segundos" } },
+
+    { "id": "o-acumulador-integra-a-diferenca", "escala": "rede",
+      "descricao": "Um total cresce enquanto a evidência chega, mais depressa quando ela é mais forte" },
+
+    { "id": "a-taxa-de-disparo-sobe-gradualmente", "escala": "celular",
+      "descricao": "Durante a deliberação, a taxa média sobe em rampa, com inclinação maior quando a evidência é mais forte" },
+
+    { "id": "atravessar-o-limiar-encerra-a-deliberacao", "escala": "rede",
+      "descricao": "Alcançar um valor fixo dispara a resposta e interrompe o acúmulo" },
+
+    { "id": "o-limiar-e-o-unico-parametro-livre", "escala": "rede",
+      "descricao": "A força da evidência vem do mundo e a taxa de integração vem do circuito; só a altura sobra" },
+
+    { "id": "limiar-alto-demora-e-acerta-mais", "escala": "comportamento",
+      "descricao": "Exigir um total maior custa tempo e devolve acerto" },
+
+    { "id": "limiar-baixo-responde-antes-e-erra-mais", "escala": "comportamento",
+      "descricao": "Contentar-se com um total menor devolve tempo e custa acerto" },
+
+    { "id": "velocidade-e-acerto-sao-a-mesma-escolha", "escala": "comportamento",
+      "descricao": "Rapidez e precisão são duas leituras de uma única altura, e não duas capacidades" },
+
+    { "id": "o-tempo-de-resposta-tem-cauda-longa", "escala": "comportamento",
+      "descricao": "Muitas respostas perto do mínimo e uma cauda longa de tentativas lentas",
+      "quant": { "forma": "assimétrica à direita, e não em torno de uma média" } },
+
+    { "id": "errar-e-acertar-saem-do-mesmo-processo", "escala": "comportamento",
+      "descricao": "O erro é a mesma soma alcançando o limiar do lado oposto" },
+
+    { "id": "a-taxa-chega-ao-mesmo-valor-no-fim", "escala": "celular",
+      "descricao": "No instante da resposta a atividade é a mesma em tentativas fáceis e difíceis" },
+
+    { "id": "decidir-e-um-limiar-atravessado-nao-uma-comparacao", "escala": "rede",
+      "descricao": "A decisão é uma acumulação cruzando um valor, e não um confronto resolvido num instante" }
+  ],
+
+  "transicoes": [
+    { "de": "codigo-de-frequencia-com-teto", "para": "a-taxa-varia-mesmo-sem-mudar-o-estimulo",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Se o que carrega a informação é quantos disparos por segundo, ler exige uma janela, e em janela curta a contagem flutua muito. A variação entre repetições é propriedade do código escolhido, e não erro de quem mede." },
+
+    { "de": "a-taxa-varia-mesmo-sem-mudar-o-estimulo", "para": "um-instante-nao-separa-as-hipoteses",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Duas hipóteses com taxas médias parecidas produzem, em janela curta, distribuições que se cobrem quase por inteiro. Olhar uma vez e escolher a maior acerta pouco mais que o acaso sempre que a diferença for pequena." },
+
+    { "de": "um-instante-nao-separa-as-hipoteses", "para": "so-o-tempo-desfaz-a-sobreposicao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Nenhum truque de leitura melhora um instante, porque a informação que falta não está nele. Se a grandeza disponível é sempre a mesma taxa, o que sobra para ser gasto é tempo." },
+
+    { "de": "somar-amostras-faz-o-ruido-crescer-mais-devagar", "para": "so-o-tempo-desfaz-a-sobreposicao",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "É o que torna gastar tempo um bom negócio em vez de mera espera. A razão entre a parte sistemática e a aleatória melhora sem limite conforme as amostras se acumulam, e é exatamente isso que o tempo compra." },
+
+    { "de": "so-o-tempo-desfaz-a-sobreposicao", "para": "a-diferenca-entre-populacoes-e-a-evidencia",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["populacao-sensorial"],
+      "porque": "Uma taxa sozinha confunde evidência com contraste, atenção e vigília, que movem todas as taxas juntas. Subtrair duas populações sintonizadas em hipóteses opostas cancela o que é comum e deixa de pé só o que distingue." },
+
+    { "de": "a-diferenca-entre-populacoes-e-a-evidencia", "para": "o-acumulador-integra-a-diferenca",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["populacao-sensorial", "circuito-integrador"],
+      "porque": "Somar a diferença ao longo do tempo transforma amostras ambíguas numa grandeza que separa. O acumulador não decide nada e não compara nada: ele mantém um total que cresce mais depressa quando a evidência é mais forte." },
+
+    { "de": "a-membrana-esquece-em-dezenas-de-ms", "para": "realimentacao-positiva-compensa-o-vazamento",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["membrana", "circuito-integrador"],
+      "porque": "Guardar um total por um segundo com peças que esquecem em dezenas de milissegundos exige repor o que vaza. Excitação entre os próprios membros da rede é a forma mais barata de repor, porque usa as conexões que já existem." },
+
+    { "de": "realimentacao-positiva-compensa-o-vazamento", "para": "o-integrador-guarda-por-muito-mais-tempo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["circuito-integrador"],
+      "porque": "Quando o ganho da realimentação chega perto de compensar a perda, a constante de tempo efetiva do conjunto dispara para muito além da de qualquer célula. A memória do total passa a ser propriedade do circuito, e não de neurônio nenhum." },
+
+    { "de": "o-integrador-guarda-por-muito-mais-tempo", "para": "o-acumulador-integra-a-diferenca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["circuito-integrador"],
+      "porque": "Sem sustentação o total decai antes de a evidência terminar de chegar, e a soma degenera numa média das últimas dezenas de milissegundos. Integrar de verdade exige que o começo do estímulo ainda esteja presente no fim dele." },
+
+    { "de": "a-taxa-de-disparo-sobe-gradualmente", "para": "o-acumulador-integra-a-diferenca",
+      "tipo": "compoe", "certeza": "debatido",
+      "condicao": "a rampa é observada na MÉDIA sobre muitas tentativas",
+      "porque": "Uma taxa que sobe em rampa, com inclinação proporcional à força da evidência, é o que se esperaria de um total sendo somado. Só que a média sobre tentativas não distingue rampas de verdade de DEGRAUS abruptos disparados em instantes sorteados, e análise tentativa a tentativa já apoiou a segunda leitura em parte dos neurônios. A mesma figura sustenta duas histórias incompatíveis, e escolher entre elas exige olhar a tentativa única." },
+
+    { "de": "o-acumulador-integra-a-diferenca", "para": "atravessar-o-limiar-encerra-a-deliberacao",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Um total que só cresce precisa de uma regra de parada, ou a deliberação não termina nunca. Fixar um valor e agir ao alcançá-lo é a regra mais barata possível, porque não exige confrontar nada com nada." },
+
+    { "de": "atravessar-o-limiar-encerra-a-deliberacao", "para": "o-limiar-e-o-unico-parametro-livre",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A força da evidência é imposta pelo mundo e a taxa de integração é imposta pelo circuito, mas a altura não é imposta por ninguém. É o único número que o próprio sistema pode mover de uma tentativa para a seguinte." },
+
+    { "de": "o-limiar-e-o-unico-parametro-livre", "para": "limiar-alto-demora-e-acerta-mais",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Exigir um total maior significa esperar mais amostras, e mais amostras significam menos ruído dentro da soma. O acerto sobe pelo mesmo motivo pelo qual o tempo sobe, e não por dois motivos separados." },
+
+    { "de": "o-limiar-e-o-unico-parametro-livre", "para": "limiar-baixo-responde-antes-e-erra-mais",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Contentar-se com um total menor encerra a deliberação antes de o ruído ter sido cancelado. O erro não vem de o sistema ter olhado mal, vem de ele ter olhado pouco." },
+
+    { "de": "limiar-alto-demora-e-acerta-mais", "para": "velocidade-e-acerto-sao-a-mesma-escolha",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Este é um lado do botão. Ganhar acerto sem gastar tempo exigiria mais informação por amostra, que é justamente o que não está disponível." },
+
+    { "de": "limiar-baixo-responde-antes-e-erra-mais", "para": "velocidade-e-acerto-sao-a-mesma-escolha",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "E este é o outro. Rapidez e precisão não são duas capacidades a serem treinadas em separado: são as duas leituras de uma única altura, girada em sentidos opostos." },
+
+    { "de": "atravessar-o-limiar-encerra-a-deliberacao", "para": "o-tempo-de-resposta-tem-cauda-longa",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O tempo até uma soma ruidosa alcançar um valor fixo tem distribuição assimétrica, com muitas respostas perto do mínimo e poucas muito lentas. Um sistema que respondesse depois de um tempo fixo produziria uma distribuição simétrica, que não é a que se mede." },
+
+    { "de": "atravessar-o-limiar-encerra-a-deliberacao", "para": "errar-e-acertar-saem-do-mesmo-processo",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "O erro é a mesma soma alcançando o valor do lado oposto, empurrada pelo ruído. Não existe um mecanismo do erro a ser explicado à parte, e é por isso que os tempos de acerto e de erro guardam relação previsível entre si." },
+
+    { "de": "atravessar-o-limiar-encerra-a-deliberacao", "para": "a-taxa-chega-ao-mesmo-valor-no-fim",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Se o que encerra é alcançar um valor, a atividade no instante da resposta tem de ser a mesma em tentativa fácil e difícil, mudando só o tempo levado para chegar. É uma previsão arriscada, porque bastaria a atividade final acompanhar a dificuldade para derrubá-la." },
+
+    { "de": "a-taxa-chega-ao-mesmo-valor-no-fim", "para": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Valor final constante é o que separa um limiar de uma comparação. Comparar deixaria a atividade final acompanhar a diferença entre as opções, e o que se mede é o contrário disso." },
+
+    { "de": "velocidade-e-acerto-sao-a-mesma-escolha", "para": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se a decisão fosse resolvida num instante não haveria botão a girar, e ser rápido não custaria acerto. O compromisso só existe porque a decisão acontece ao longo do tempo, e a sua própria existência é o argumento." },
+
+    { "de": "errar-e-acertar-saem-do-mesmo-processo", "para": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Uma comparação instantânea erraria por ter medido mal, e o erro seria um defeito a corrigir. Aqui ele é o resultado normal do procedimento correto, o que muda inteiramente o que faz sentido tentar consertar." },
+
+    { "de": "o-tempo-de-resposta-tem-cauda-longa", "para": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A forma da distribuição é assinatura de um processo que caminha até bater num limite, e não de um relógio que dispara na hora marcada. É o que se veria se a hesitação fosse uma travessia, e não uma consulta." }
+  ],
+
+  "mecanismos": [
+    { "id": "acumulo-de-evidencia",
+      "fenomeno": "Se cada instante é ambíguo, o que faz a hesitação terminar?",
+      "entrada": "codigo-de-frequencia-com-teto",
+      "terminal": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "limites": "Descreve decisão perceptual entre DUAS alternativas, com evidência estacionária, na leitura de acúmulo até limiar. Não cobre escolha entre muitas opções, nem evidência que muda durante a tentativa, nem decisão sob pressão de tempo com limiar que desce (os modelos de urgência descrevem os mesmos dados com um mecanismo diferente e disputam este terreno). Não cobre decisão baseada em valor, em que a grandeza acumulada não vem dos sentidos. O integrador está descrito no nível funcional: qual circuito faz a integração, e se ela é feita num lugar só, continua em aberto." }
+  ]
+}
