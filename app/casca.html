@@ -33,8 +33,12 @@ h2{font-size:16px;margin:0 0 10px;font-weight:600}
 .linha{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
 
 /* trilha do percurso */
-.trilha{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:2px;
-        color:var(--tenue);overflow-x:auto;padding:10px 0;white-space:nowrap}
+/* Sete etapas não cabiam em 390px e a trilha aparecia com barra de rolagem
+   horizontal — vista no celular dele. Ela é um resumo de uma olhada; ter de
+   arrastar para ver o fim derrota o propósito. Agora encolhe para caber. */
+.trilha{font:600 clamp(11px,3.4vw,20px)/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+        letter-spacing:1px;color:var(--tenue);padding:10px 0;
+        white-space:nowrap;overflow:hidden;text-overflow:clip}
 .trilha .feito{color:var(--certo)} .trilha .curso{color:var(--acento)}
 
 .barra{height:8px;background:var(--painel2);border-radius:99px;overflow:hidden;margin:8px 0 4px}
@@ -96,6 +100,13 @@ button:disabled{opacity:.4;cursor:default}
 .rodape > div{max-width:720px;margin:0 auto}
 .oculto{display:none}
 .explorar{margin-top:12px;width:100%;padding:10px;font-size:14px}
+/* "Estudar este" é a AÇÃO do cartão, e "Ler" é o acessório — o acento diz
+   qual das duas move o progresso. Desabilitado quando não há nada vencido,
+   porque botão que não faz nada ensina errado sobre o que o app está
+   esperando. */
+.estudar-um{margin-top:8px;width:100%;padding:10px;font-size:14px;
+            border-color:var(--acento);color:var(--acento)}
+.estudar-um:disabled{border-color:var(--borda);color:var(--tenue);opacity:.7}
 .faixas{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
 .faixa{white-space:nowrap;padding:8px 13px;font-size:13px;border-radius:99px;background:var(--painel);color:var(--fraco)}
 .faixa.viva{background:var(--acento);border-color:var(--acento);color:#06121f;font-weight:600}

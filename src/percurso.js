@@ -41,25 +41,12 @@ const E = require('./estudo.js');
    depois da anterior. Antes disso é reconhecimento recente, não retenção. */
 const CAIXA_FIRME = 4;
 
-/* ---------- as etapas ----------
-   Camadas topológicas do DAG de pré-requisitos. Se dois mecanismos
-   dependerem um do outro, nenhum dos dois entra em camada nenhuma: eles
-   voltam em `ciclicos`, para o portão gritar em vez de sumir com eles. */
-function etapas(g){
-  const pre = {};
-  Object.keys(g.mecanismos).forEach(id=>{ pre[id] = G.prerequisitos(g, id); });
-
-  const camadaDe = {}, camadas = [];
-  let restantes = Object.keys(g.mecanismos).sort();
-  while(restantes.length){
-    const prontos = restantes.filter(id=>pre[id].every(p=>camadaDe[p] !== undefined));
-    if(!prontos.length) break;                    // o que sobrou é cíclico
-    prontos.forEach(id=>{ camadaDe[id] = camadas.length; });
-    camadas.push(prontos);
-    restantes = restantes.filter(id=>!prontos.includes(id));
-  }
-  return { camadas, camadaDe, pre, ciclicos: restantes };
-}
+/* As etapas moraram aqui até 2026-08-18, e mudaram para `grafo.js` porque o
+   CRONOGRAMA passou a precisar delas — a sessão ordena por etapa, senão
+   entrega a etapa 7 antes da 1. `percurso.js` já requer `estudo.js`, então
+   estudo não pode requerer percurso: a camada topológica desce para o grafo,
+   que é de onde ela sempre saiu (só depende de `prerequisitos`). */
+const etapas = G.etapas;
 
 /* ---------- conquista ----------
    Uma caixa está conquistada quando o RECORDE dela alcançou `CAIXA_FIRME`.
@@ -85,12 +72,34 @@ function conquistaDoMecanismo(g, estado, mecanismoId, idx){
   const chaves = caixasDoMecanismo(g, mecanismoId, idx);
   const abertas = chaves.filter(k=>estado.caixas[k]);
   const conquistadas = abertas.filter(k=>(estado.caixas[k].recorde || 0) >= CAIXA_FIRME);
+
+  /* ---------- firmeza: a subida, não só o topo ----------
+     `conquistadas` é binário e exige `recorde >= CAIXA_FIRME`, o que
+     significa ter acertado numa revisão marcada 30 dias depois da anterior.
+     É a definição certa de retenção, e ela fica.
+
+     Só que ela leva MESES para sair de zero. Simulando 40 dias de estudo
+     honesto sobre este conteúdo: 1 caixa conquistada de 860. Uma barra
+     parada em 0% por meses não é rigor, é uma barra quebrada — e o motivo
+     de a barra existir foi o engajamento.
+
+     `firmeza` mede quanto da subida já foi feito: a média de
+     `min(recorde, CAIXA_FIRME) / CAIXA_FIRME`. Move desde a primeira
+     resposta, é monótona pelo mesmo motivo que a conquista (lê `recorde`,
+     que nunca desce), e chega a 1 exatamente quando tudo foi conquistado.
+     As duas convivem porque medem coisas diferentes, e nenhuma mente. */
+  const somaFirmeza = chaves.reduce((s, k)=>{
+    const c = estado.caixas[k];
+    return s + Math.min(c ? (c.recorde || 0) : 0, CAIXA_FIRME) / CAIXA_FIRME;
+  }, 0);
+
   return {
     mecanismo: mecanismoId,
     total: chaves.length,
     semeadas: abertas.length,
     conquistadas: conquistadas.length,
     fracao: chaves.length ? conquistadas.length / chaves.length : 0,
+    firmeza: chaves.length ? somaFirmeza / chaves.length : 0,
     concluido: chaves.length > 0 && conquistadas.length === chaves.length,
     iniciado: abertas.some(k=>estado.caixas[k].tentativas > 0)
   };
@@ -117,6 +126,7 @@ function percurso(g, estado, agora, idx){
     return {
       numero: i + 1, mecanismos, total, conquistadas,
       fracao: total ? conquistadas / total : 0,
+      firmeza: total ? mecanismos.reduce((s, m)=>s + m.firmeza * m.total, 0) / total : 0,
       concluida: mecanismos.length > 0 && mecanismos.every(m=>m.concluido),
       iniciada: mecanismos.some(m=>m.iniciado)
     };
@@ -137,6 +147,7 @@ function percurso(g, estado, agora, idx){
     ciclicos,
     revisoesHoje: E.devidas(estado, agora).length,   // ao lado, não dentro
     conquistadas: lista.reduce((n, e)=>n + e.conquistadas, 0),
+    firmeza: total ? lista.reduce((s, e)=>s + e.firmeza * e.total, 0) / total : 0,
     total,
     etapasConcluidas: lista.filter(e=>e.concluida).length
   };

@@ -345,10 +345,24 @@ function montarSessao(g, estado, agora, opcoes){
   const plano = E.planoDeSessao(g, estado, agora,
     opcoes.teto === undefined ? Infinity : opcoes.teto, idx);
 
+  /* `opcoes.mecanismos` restringe a sessão a um pedaço do percurso — é o que
+     torna "estudar ESTA etapa" possível. Sem isso só existia o botão global,
+     que decide sozinho o que cobrar, e não havia como trabalhar um mecanismo
+     de propósito e ver aquele mecanismo andar.
+
+     A restrição é sobre o que já está DEVIDO: ela filtra o plano, não o
+     inventa. Uma etapa sem nada vencido devolve sessão vazia, e a tela diz
+     isso em vez de fabricar revisão fora de hora. */
+  const so = opcoes.mecanismos && opcoes.mecanismos.length
+    ? new Set(opcoes.mecanismos) : null;
+  const atividades = so
+    ? plano.atividades.filter(a=>so.has(a.mecanismo))
+    : plano.atividades;
+
   const perguntas = [], jaSaiu = new Set();
   for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
     const antes = perguntas.length;
-    for(const a of plano.atividades){
+    for(const a of atividades){
       if(perguntas.length >= max) break;
       const p = gerar(g, a.mecanismo, a.operacao,
                       semente + volta * 7919 + perguntas.length * 31, idx, jaSaiu);
@@ -358,12 +372,22 @@ function montarSessao(g, estado, agora, opcoes){
     }
     if(perguntas.length === antes) break;   // nenhuma atividade rende: para
   }
-  return { plano, perguntas };
+  return { plano, perguntas, atividades };
+}
+
+/* Quantas caixas estão vencidas dentro de um recorte do percurso. É o que a
+   tela precisa para dizer "Estudar esta etapa (23 vencidas)" em vez de
+   oferecer um botão que pode não render pergunta nenhuma. */
+function devidasDe(plano, mecanismos){
+  const so = new Set(mecanismos);
+  return plano.atividades
+    .filter(a=>so.has(a.mecanismo))
+    .reduce((n, a)=>n + a.caixas.length, 0);
 }
 
 module.exports = {
   MAX_ALTERNATIVAS, MIN_ERRADAS, TETO_MARCAR_TUDO,
   sorteador, embaralhar, escolherEvitando, montarSlate, montarSessao,
-  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura,
+  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura, devidasDe,
   corrigir, anotarNoLote, revelar
 };

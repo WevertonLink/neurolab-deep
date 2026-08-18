@@ -656,6 +656,90 @@ PROVAS.push({
   ]
 });
 
+/* ---------- 6. ORDEM ----------
+   Defeito visto no CELULAR, com o app já publicado, em 2026-08-18. A tela do
+   percurso promete "Etapa 1 → Etapa 7", e a primeira sessão entregava
+   `acumulo-de-evidencia` (etapa 4), `conducao-saltatoria` (etapa 3) e
+   `consolidacao-sistemica` (etapa 7) — nunca a etapa 1.
+
+   Causa: no primeiro dia TUDO vence ao mesmo tempo, então o desempate decide
+   sozinho a sessão inteira, e o desempate era ALFABÉTICO. `acumulo` <
+   `conducao` < `consolidacao`. O percurso calculado virava rótulo.
+
+   Nenhum dos seis portões via isso, porque todos verificavam o CONTEÚDO do
+   plano e nenhum verificava a ORDEM dele. */
+PROVAS.push({
+  nome: 'ORDEM · a sessão respeita o percurso, e a revisão atrasada passa na frente',
+  roda(s){
+    const { g, E } = s;
+    const idx = E.indexar(g);
+    const camadaDe = G.etapas(g).camadaDe;
+    const etapaDe = a => camadaDe[a.mecanismo];
+
+    /* (a) tudo vencendo junto: manda a etapa, e a primeira é a etapa 1 */
+    const zero = semearTudo(s, T0);
+    const plano = E.planoDeSessao(g, zero, T0, Infinity, idx);
+    exigir(plano.atividades.length > 0, 'nada vencido logo depois de semear');
+    exigir(etapaDe(plano.atividades[0]) === 0,
+      `a primeira atividade é da etapa ${etapaDe(plano.atividades[0]) + 1} ` +
+      `("${plano.atividades[0].mecanismo}"), e a tela promete começar pela 1`);
+
+    /* e a sequência é não decrescente em etapa, enquanto o vencimento empata */
+    for(let i = 1; i < plano.atividades.length; i++){
+      const a = plano.atividades[i - 1], b = plano.atividades[i];
+      if(a.prioridade !== b.prioridade) continue;
+      exigir(etapaDe(a) <= etapaDe(b),
+        `com o mesmo vencimento, "${a.mecanismo}" (etapa ${etapaDe(a) + 1}) veio antes de ` +
+        `"${b.mecanismo}" (etapa ${etapaDe(b) + 1}) — a ordem do percurso foi ignorada`);
+    }
+
+    /* (b) mas o vencimento continua mandando: uma caixa de etapa TARDIA,
+       atrasada de verdade, tem de passar na frente de uma etapa inicial que
+       só vence hoje. Senão o percurso engoliria a revisão espaçada. */
+    const atrasado = semearTudo(s, T0);
+    const tardio = Object.keys(camadaDe).sort((x, y)=>camadaDe[y] - camadaDe[x])[0];
+    exigir(camadaDe[tardio] > 0, 'o conteúdo não tem etapa tardia para este teste');
+    const chavesTardias = Object.keys(atrasado.caixas).filter(k=>{
+      const { de, para, operacao } = E.lerChave(k);
+      const t = g.transicoes.find(x=>x.de === de && x.para === para);
+      return t && E.donoDaCaixa(g, t, operacao, idx) === tardio;
+    });
+    exigir(chavesTardias.length > 0, `nenhuma caixa é do mecanismo tardio "${tardio}"`);
+    chavesTardias.forEach(k=>{ atrasado.caixas[k].vencimento = T0 - 10 * E.DIA; });
+
+    const plano2 = E.planoDeSessao(g, atrasado, T0, Infinity, idx);
+    exigir(plano2.atividades[0].mecanismo === tardio,
+      `"${tardio}" estava 10 dias atrasado e não veio primeiro — veio ` +
+      `"${plano2.atividades[0].mecanismo}". O percurso não pode engolir o atraso.`);
+  },
+  mutantes: [
+    { como: 'o desempate volta a ser alfabético (o defeito visto no celular)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.E.planoDeSessao;
+        m.E.planoDeSessao = (g, estado, agora, teto, idx)=>{
+          const p = real(g, estado, agora, teto, idx);
+          p.atividades.sort((a, b)=>
+            (a.prioridade - b.prioridade) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+          return p;
+        }; return m; } },
+    { como: 'a etapa passa a mandar mais que o vencimento (o atraso é engolido)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.E.planoDeSessao;
+        const camadaDe = G.etapas(s.g).camadaDe;
+        m.E.planoDeSessao = (g, estado, agora, teto, idx)=>{
+          const p = real(g, estado, agora, teto, idx);
+          p.atividades.sort((a, b)=>
+            (camadaDe[a.mecanismo] - camadaDe[b.mecanismo]) || (a.prioridade - b.prioridade));
+          return p;
+        }; return m; } },
+    { como: 'a ordem vira aleatória estável (nem percurso, nem atraso)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.E.planoDeSessao;
+        m.E.planoDeSessao = (g, estado, agora, teto, idx)=>{
+          const p = real(g, estado, agora, teto, idx);
+          p.atividades.reverse();
+          return p;
+        }; return m; } }
+  ]
+});
+
 /* ===================================================================== */
 const base = sujeito();
 let falhou = false, mutantesMortos = 0, mutantesVivos = 0;

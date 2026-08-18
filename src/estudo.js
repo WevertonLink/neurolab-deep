@@ -293,8 +293,28 @@ function planoDeSessao(g, estado, agora, teto, idx){
       });
   });
 
+  /* ---------- a ordem da sessão ----------
+     Vencimento primeiro: o que está mais atrasado é o que mais corre risco
+     de ser esquecido, e esse é o contrato da revisão espaçada.
+
+     ETAPA como desempate, e isto não é detalhe. No primeiro dia TUDO vence
+     ao mesmo tempo, então o desempate decide sozinho a primeira sessão —
+     e o desempate era alfabético. Resultado medido em 2026-08-18, com o app
+     já publicado: a primeira sessão entregava `acumulo-de-evidencia` (etapa
+     4), `conducao-saltatoria` (etapa 3) e `consolidacao-sistemica` (etapa
+     7), e NUNCA a etapa 1. A tela prometia "Etapa 1 → Etapa 7" e o botão
+     entregava consolidação sistêmica antes do gradiente eletroquímico.
+
+     Com a etapa no desempate, material novo chega em ordem de dependência,
+     e revisão atrasada continua passando na frente — que é como as duas
+     coisas convivem sem uma anular a outra. */
+  const camadaDe = G.etapas(g).camadaDe;
+  const etapaDe = a => camadaDe[a.mecanismo] === undefined ? Infinity : camadaDe[a.mecanismo];
+
   const ordenadas = [...grupos.values()].sort((a, b)=>
-    (a.prioridade - b.prioridade) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    (a.prioridade - b.prioridade) ||
+    (etapaDe(a) - etapaDe(b)) ||
+    (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
   /* O teto é piso de parada, não tesoura: uma atividade entra inteira ou
      não entra. Reconstruir metade de um mecanismo não é reconstruí-lo. */

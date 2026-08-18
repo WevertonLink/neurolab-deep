@@ -129,6 +129,24 @@ const sujeito = ()=>({
 });
 const clonarSujeito = s => ({ html: s.html, uiFonte: s.uiFonte, sw: s.sw });
 
+/* Substituição que EXIGE ter mudado alguma coisa.
+
+   Três vezes nesta base um mutante sobreviveu sem morder: ele casava com um
+   trecho literal do fonte, o fonte mudou, e o mutante passou a não mutar
+   nada — continuando "vivo" e dando a impressão de que o teste não pega,
+   quando na verdade o teste nunca foi exercitado. Mutante que não muta é
+   portão que não vigia, e o silêncio é o pior modo de falhar.
+
+   Isto transforma esse silêncio em erro imediato. Use SEMPRE em mutante que
+   mexe no html por casamento de texto. */
+function trocar(texto, de, para){
+  const novo = texto.replace(de, para);
+  if(novo === texto){
+    throw new Error(`mutante não mutou nada: o alvo ${de} não existe mais no fonte`);
+  }
+  return novo;
+}
+
 /* ===================================================================== */
 const PROVAS = [];
 
@@ -491,11 +509,19 @@ PROVAS.push({
         `falta o endereço de ${t.de} → ${t.para}, e sem ele o erro não tem como ser reportado`);
     });
 
-    /* As faixas de escala vêm do CONTEÚDO, não de uma lista fixa na tela. */
-    const escalas = G.escalasDe(g);
+    /* As faixas de escala vêm do CONTEÚDO, não de uma lista fixa na tela —
+       e do recorte DESTE mecanismo, não do grafo inteiro. A versão anterior
+       desta asserção exigia todas as escalas do conteúdo, e por isso a tela
+       do gradiente eletroquímico oferecia `comportamento`, que não existe em
+       nenhum dos 10 nós dele: um filtro que sempre devolvia zero. Visto no
+       celular, não aqui. A invariante certa é NEM MAIS NEM MENOS. */
+    const escalas = G.escalasDe(g, id);
     const faixas = porClasse(v.app, 'faixa').map(f=>f.textContent);
     escalas.forEach(e=>exigir(faixas.indexOf(e) >= 0,
-      `a escala "${e}" existe no conteúdo e não aparece no deslizador`));
+      `a escala "${e}" existe no recorte de ${id} e não aparece no deslizador`));
+    faixas.filter(f=>f !== 'todas' && f !== 'pontes entre escalas')
+      .forEach(f=>exigir(escalas.indexOf(f) >= 0,
+        `o deslizador oferece "${f}", que não existe no recorte de ${id} — o filtro devolveria zero`));
     exigir(faixas.indexOf('todas') >= 0 && faixas.indexOf('pontes entre escalas') >= 0,
       'faltam as faixas "todas" e "pontes"');
 
@@ -523,11 +549,14 @@ PROVAS.push({
                                 'var cadeia = G.projetar(g, mecanismoId, escala).slice(0, 3);'); return m; } },
     { como: 'as escalas do deslizador são uma lista fixa escrita na tela',
       aplicar(s){ const m = clonarSujeito(s);
-        m.html = m.html.replace('.concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))',
-                                ".concat([{ id: 'sistemico', rotulo: 'sistemico' }])"); return m; } },
+        m.html = trocar(m.html, /\.concat\(G\.escalasDe\(g[^)]*\)\.map\(function\(e\)\{[^}]*\}\)\)/,
+                        ".concat([{ id: 'sistemico', rotulo: 'sistemico' }])"); return m; } },
+    { como: 'o deslizador oferece escalas do grafo inteiro, e não as do recorte',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = trocar(m.html, 'G.escalasDe(g, mecanismoId)', 'G.escalasDe(g)'); return m; } },
     { como: 'a leitura não mostra o endereço, e o erro não tem como ser reportado',
       aplicar(s){ const m = clonarSujeito(s);
-        m.html = m.html.replace(/cartao\.appendChild\(el\('div', \{ class: 'endereco'[^;]*;/, ''); return m; } }
+        m.html = trocar(m.html, /cartao\.appendChild\(el\('div', \{ class: 'endereco'[^;]*;/, ''); return m; } }
   ]
 });
 

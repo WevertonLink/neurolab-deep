@@ -138,6 +138,31 @@ function prerequisitos(g, mecanismoId){
     id !== mecanismoId && sg.nos.has(g.mecanismos[id].terminal));
 }
 
+/* ---------- as etapas ----------
+   Camadas topológicas do DAG de pré-requisitos. Se dois mecanismos
+   dependerem um do outro, nenhum dos dois entra em camada nenhuma: eles
+   voltam em `ciclicos`, para o portão gritar em vez de sumir com eles.
+
+   Mora aqui, e não em `percurso.js`, porque o CRONOGRAMA também precisa
+   dela: a sessão ordena por etapa. Como `percurso.js` já requer `estudo.js`,
+   deixar a camada topológica lá criaria ciclo. E ela sempre foi do grafo —
+   só depende de `prerequisitos`. */
+function etapas(g){
+  const pre = {};
+  Object.keys(g.mecanismos).forEach(id=>{ pre[id] = prerequisitos(g, id); });
+
+  const camadaDe = {}, camadas = [];
+  let restantes = Object.keys(g.mecanismos).sort();
+  while(restantes.length){
+    const prontos = restantes.filter(id=>pre[id].every(p=>camadaDe[p] !== undefined));
+    if(!prontos.length) break;                    // o que sobrou é cíclico
+    prontos.forEach(id=>{ camadaDe[id] = camadas.length; });
+    camadas.push(prontos);
+    restantes = restantes.filter(id=>!prontos.includes(id));
+  }
+  return { camadas, camadaDe, pre, ciclicos: restantes };
+}
+
 /* Um nó "cruza arquivos" quando as transições que o tocam vêm de arquivos
    diferentes — é a assinatura da composição sem costura. */
 function arquivosDoCaminho(caminho){
@@ -325,8 +350,16 @@ function reconstruir(g, mecanismoId, sentido){
 
    O vocabulário de escalas é DERIVADO do conteúdo, não uma lista fixa. No
    dia em que um mecanismo trouxer escala nova, ela aparece sozinha. */
-function escalasDe(g){
-  return [...new Set(Object.values(g.nos).map(n=>n.escala).filter(Boolean))].sort();
+/* As escalas presentes. Com `mecanismoId`, só as do recorte dele — sem isso
+   a tela de leitura do gradiente eletroquímico oferecia um filtro
+   `comportamento`, que não existe em nenhum dos 10 nós dele e devolvia
+   sempre zero. Filtro que nunca acha nada é filtro que ensina errado sobre
+   o que o mecanismo contém. */
+function escalasDe(g, mecanismoId){
+  const nos = mecanismoId
+    ? [...((subgrafo(g, mecanismoId) || { nos: new Set() }).nos)].map(id=>g.nos[id]).filter(Boolean)
+    : Object.values(g.nos);
+  return [...new Set(nos.map(n=>n.escala).filter(Boolean))].sort();
 }
 
 /* A cadeia do mecanismo em ordem causal: das raízes ao terminal, sem
@@ -362,7 +395,7 @@ function projetar(g, mecanismoId, escala){
 
 module.exports = {
   carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
-  prerequisitos, arquivosDoCaminho, perturbar, perturbarRecorte, transicoesQueDependemDe,
+  prerequisitos, etapas, arquivosDoCaminho, perturbar, perturbarRecorte, transicoesQueDependemDe,
   explicar, reconstruir, escalasDe, cadeiaOrdenada, projetar, RESSALVA, VERBO,
   TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
 };

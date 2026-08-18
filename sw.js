@@ -8,7 +8,7 @@
    `tools/test-app.js` confere que este arquivo corresponde ao index.html
    commitado, de modo que publicar um app que o portão nunca viu falha o CI.
    ===================================================================== */
-const VERSION = 'deep-1eb427162b11';
+const VERSION = 'deep-1e994e84e72e';
 const ATIVOS = [
   "./",
   "./index.html",

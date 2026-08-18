@@ -67,7 +67,12 @@ function semBotao(){ rodape.classList.add('oculto'); acao.onclick = null; }
 function telaPercurso(){
   sessao = null;
   limpar();
-  var p = P.percurso(g, estado, Date.now(), idx);
+  var agoraTela = Date.now();
+  var p = P.percurso(g, estado, agoraTela, idx);
+  /* O plano é calculado UMA vez e reusado por todos os cartões: cada um
+     precisa saber quantas caixas próprias estão vencidas, e recalcular por
+     cartão custaria caro à toa. */
+  var plano = E.planoDeSessao(g, estado, agoraTela, Infinity, idx);
 
   app.appendChild(el('h1', { texto: 'NeuroLab Deep' }));
   app.appendChild(el('p', { class: 'sub',
@@ -98,17 +103,38 @@ function telaPercurso(){
 
     e.mecanismos.forEach(function(m){
       cartao.appendChild(el('div', { class: 'fenomeno', texto: m.fenomeno }));
+      /* A barra mostra a SUBIDA (firmeza), o texto mostra o TOPO (conquista).
+         São duas coisas e nenhuma mente: a conquista exige o intervalo de 30
+         dias e leva meses para sair de zero; a firmeza move desde a primeira
+         resposta. As duas sobem e nunca descem. */
       var barra = el('div', { class: 'barra' });
-      barra.appendChild(el('i', { style: 'width:' + pct(m.fracao) }));
+      barra.appendChild(el('i', { style: 'width:' + pct(m.firmeza) }));
       cartao.appendChild(barra);
       cartao.appendChild(el('div', { class: 'rotulo',
-        texto: m.conquistadas + ' de ' + m.total + ' conquistadas' }));
+        texto: pct(m.firmeza) + ' firmado · ' + m.conquistadas + ' de ' + m.total + ' conquistadas' }));
       if(m.prerequisitos.length){
         cartao.appendChild(el('div', { class: 'dep', texto: 'depende de: ' + m.prerequisitos.join(', ') }));
       }
       var ver = el('button', { class: 'fantasma explorar', type: 'button', texto: 'Ler o mecanismo' });
       ver.onclick = (function(id){ return function(){ telaExplorar(id, 'todas'); }; })(m.mecanismo);
       cartao.appendChild(ver);
+
+      /* "Estudar ESTE mecanismo". Sem isto só existia o botão global, que
+         decide sozinho o que cobrar — e não havia como trabalhar um pedaço
+         de propósito e ver aquele pedaço andar, que é a modularização que
+         ele pediu. Ler não marca nada; só responder marca. */
+      var vencidas = Q.devidasDe(plano, [m.mecanismo]);
+      var estudar = el('button', {
+        class: 'fantasma estudar-um', type: 'button',
+        texto: vencidas > 0 ? 'Estudar este (' + vencidas + ' vencidas)' : 'Nada vencido aqui'
+      });
+      estudar.disabled = vencidas === 0;
+      if(vencidas > 0){
+        estudar.onclick = (function(id){
+          return function(){ comecarSessao([id]); };
+        })(m.mecanismo);
+      }
+      cartao.appendChild(estudar);
     });
     app.appendChild(cartao);
   });
@@ -176,9 +202,11 @@ function telaExplorar(mecanismoId, escala){
   cabeca.appendChild(el('p', { class: 'fenomeno', texto: m.limites }));
   app.appendChild(cabeca);
 
-  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui. */
+  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui —
+     e do recorte DESTE mecanismo, não do grafo inteiro, senão a tela oferece
+     filtro que devolve zero. */
   var faixas = [{ id: 'todas', rotulo: 'todas' }]
-    .concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))
+    .concat(G.escalasDe(g, mecanismoId).map(function(e){ return { id: e, rotulo: e }; }))
     .concat([{ id: 'pontes', rotulo: 'pontes entre escalas' }]);
   var barra = el('div', { class: 'faixas' });
   faixas.forEach(function(f){
@@ -222,9 +250,12 @@ function telaExplorar(mecanismoId, escala){
 }
 
 /* ---------- sessão ---------- */
-function comecarSessao(){
+function comecarSessao(mecanismos){
   var agora = Date.now();
-  var montada = Q.montarSessao(g, estado, agora, { idx: idx, semente: (agora / 60000) | 0 });
+  var montada = Q.montarSessao(g, estado, agora, {
+    idx: idx, semente: (agora / 60000) | 0,
+    mecanismos: mecanismos || null
+  });
   if(!montada.perguntas.length) return telaPercurso();
   sessao = {
     perguntas: montada.perguntas, i: 0, agora: agora,

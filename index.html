@@ -33,8 +33,12 @@ h2{font-size:16px;margin:0 0 10px;font-weight:600}
 .linha{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
 
 /* trilha do percurso */
-.trilha{font:600 20px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:2px;
-        color:var(--tenue);overflow-x:auto;padding:10px 0;white-space:nowrap}
+/* Sete etapas não cabiam em 390px e a trilha aparecia com barra de rolagem
+   horizontal — vista no celular dele. Ela é um resumo de uma olhada; ter de
+   arrastar para ver o fim derrota o propósito. Agora encolhe para caber. */
+.trilha{font:600 clamp(11px,3.4vw,20px)/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+        letter-spacing:1px;color:var(--tenue);padding:10px 0;
+        white-space:nowrap;overflow:hidden;text-overflow:clip}
 .trilha .feito{color:var(--certo)} .trilha .curso{color:var(--acento)}
 
 .barra{height:8px;background:var(--painel2);border-radius:99px;overflow:hidden;margin:8px 0 4px}
@@ -96,6 +100,13 @@ button:disabled{opacity:.4;cursor:default}
 .rodape > div{max-width:720px;margin:0 auto}
 .oculto{display:none}
 .explorar{margin-top:12px;width:100%;padding:10px;font-size:14px}
+/* "Estudar este" é a AÇÃO do cartão, e "Ler" é o acessório — o acento diz
+   qual das duas move o progresso. Desabilitado quando não há nada vencido,
+   porque botão que não faz nada ensina errado sobre o que o app está
+   esperando. */
+.estudar-um{margin-top:8px;width:100%;padding:10px;font-size:14px;
+            border-color:var(--acento);color:var(--acento)}
+.estudar-um:disabled{border-color:var(--borda);color:var(--tenue);opacity:.7}
 .faixas{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
 .faixa{white-space:nowrap;padding:8px 13px;font-size:13px;border-radius:99px;background:var(--painel);color:var(--fraco)}
 .faixa.viva{background:var(--acento);border-color:var(--acento);color:#06121f;font-weight:600}
@@ -275,6 +286,31 @@ function prerequisitos(g, mecanismoId){
   if(!sg) return [];
   return Object.keys(g.mecanismos).filter(id=>
     id !== mecanismoId && sg.nos.has(g.mecanismos[id].terminal));
+}
+
+/* ---------- as etapas ----------
+   Camadas topológicas do DAG de pré-requisitos. Se dois mecanismos
+   dependerem um do outro, nenhum dos dois entra em camada nenhuma: eles
+   voltam em `ciclicos`, para o portão gritar em vez de sumir com eles.
+
+   Mora aqui, e não em `percurso.js`, porque o CRONOGRAMA também precisa
+   dela: a sessão ordena por etapa. Como `percurso.js` já requer `estudo.js`,
+   deixar a camada topológica lá criaria ciclo. E ela sempre foi do grafo —
+   só depende de `prerequisitos`. */
+function etapas(g){
+  const pre = {};
+  Object.keys(g.mecanismos).forEach(id=>{ pre[id] = prerequisitos(g, id); });
+
+  const camadaDe = {}, camadas = [];
+  let restantes = Object.keys(g.mecanismos).sort();
+  while(restantes.length){
+    const prontos = restantes.filter(id=>pre[id].every(p=>camadaDe[p] !== undefined));
+    if(!prontos.length) break;                    // o que sobrou é cíclico
+    prontos.forEach(id=>{ camadaDe[id] = camadas.length; });
+    camadas.push(prontos);
+    restantes = restantes.filter(id=>!prontos.includes(id));
+  }
+  return { camadas, camadaDe, pre, ciclicos: restantes };
 }
 
 /* Um nó "cruza arquivos" quando as transições que o tocam vêm de arquivos
@@ -464,8 +500,16 @@ function reconstruir(g, mecanismoId, sentido){
 
    O vocabulário de escalas é DERIVADO do conteúdo, não uma lista fixa. No
    dia em que um mecanismo trouxer escala nova, ela aparece sozinha. */
-function escalasDe(g){
-  return [...new Set(Object.values(g.nos).map(n=>n.escala).filter(Boolean))].sort();
+/* As escalas presentes. Com `mecanismoId`, só as do recorte dele — sem isso
+   a tela de leitura do gradiente eletroquímico oferecia um filtro
+   `comportamento`, que não existe em nenhum dos 10 nós dele e devolvia
+   sempre zero. Filtro que nunca acha nada é filtro que ensina errado sobre
+   o que o mecanismo contém. */
+function escalasDe(g, mecanismoId){
+  const nos = mecanismoId
+    ? [...((subgrafo(g, mecanismoId) || { nos: new Set() }).nos)].map(id=>g.nos[id]).filter(Boolean)
+    : Object.values(g.nos);
+  return [...new Set(nos.map(n=>n.escala).filter(Boolean))].sort();
 }
 
 /* A cadeia do mecanismo em ordem causal: das raízes ao terminal, sem
@@ -501,7 +545,7 @@ function projetar(g, mecanismoId, escala){
 
 module.exports = {
   carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
-  prerequisitos, arquivosDoCaminho, perturbar, perturbarRecorte, transicoesQueDependemDe,
+  prerequisitos, etapas, arquivosDoCaminho, perturbar, perturbarRecorte, transicoesQueDependemDe,
   explicar, reconstruir, escalasDe, cadeiaOrdenada, projetar, RESSALVA, VERBO,
   TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
 };
@@ -807,8 +851,28 @@ function planoDeSessao(g, estado, agora, teto, idx){
       });
   });
 
+  /* ---------- a ordem da sessão ----------
+     Vencimento primeiro: o que está mais atrasado é o que mais corre risco
+     de ser esquecido, e esse é o contrato da revisão espaçada.
+
+     ETAPA como desempate, e isto não é detalhe. No primeiro dia TUDO vence
+     ao mesmo tempo, então o desempate decide sozinho a primeira sessão —
+     e o desempate era alfabético. Resultado medido em 2026-08-18, com o app
+     já publicado: a primeira sessão entregava `acumulo-de-evidencia` (etapa
+     4), `conducao-saltatoria` (etapa 3) e `consolidacao-sistemica` (etapa
+     7), e NUNCA a etapa 1. A tela prometia "Etapa 1 → Etapa 7" e o botão
+     entregava consolidação sistêmica antes do gradiente eletroquímico.
+
+     Com a etapa no desempate, material novo chega em ordem de dependência,
+     e revisão atrasada continua passando na frente — que é como as duas
+     coisas convivem sem uma anular a outra. */
+  const camadaDe = G.etapas(g).camadaDe;
+  const etapaDe = a => camadaDe[a.mecanismo] === undefined ? Infinity : camadaDe[a.mecanismo];
+
   const ordenadas = [...grupos.values()].sort((a, b)=>
-    (a.prioridade - b.prioridade) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    (a.prioridade - b.prioridade) ||
+    (etapaDe(a) - etapaDe(b)) ||
+    (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
   /* O teto é piso de parada, não tesoura: uma atividade entra inteira ou
      não entra. Reconstruir metade de um mecanismo não é reconstruí-lo. */
@@ -897,25 +961,12 @@ const E = require('./estudo.js');
    depois da anterior. Antes disso é reconhecimento recente, não retenção. */
 const CAIXA_FIRME = 4;
 
-/* ---------- as etapas ----------
-   Camadas topológicas do DAG de pré-requisitos. Se dois mecanismos
-   dependerem um do outro, nenhum dos dois entra em camada nenhuma: eles
-   voltam em `ciclicos`, para o portão gritar em vez de sumir com eles. */
-function etapas(g){
-  const pre = {};
-  Object.keys(g.mecanismos).forEach(id=>{ pre[id] = G.prerequisitos(g, id); });
-
-  const camadaDe = {}, camadas = [];
-  let restantes = Object.keys(g.mecanismos).sort();
-  while(restantes.length){
-    const prontos = restantes.filter(id=>pre[id].every(p=>camadaDe[p] !== undefined));
-    if(!prontos.length) break;                    // o que sobrou é cíclico
-    prontos.forEach(id=>{ camadaDe[id] = camadas.length; });
-    camadas.push(prontos);
-    restantes = restantes.filter(id=>!prontos.includes(id));
-  }
-  return { camadas, camadaDe, pre, ciclicos: restantes };
-}
+/* As etapas moraram aqui até 2026-08-18, e mudaram para `grafo.js` porque o
+   CRONOGRAMA passou a precisar delas — a sessão ordena por etapa, senão
+   entrega a etapa 7 antes da 1. `percurso.js` já requer `estudo.js`, então
+   estudo não pode requerer percurso: a camada topológica desce para o grafo,
+   que é de onde ela sempre saiu (só depende de `prerequisitos`). */
+const etapas = G.etapas;
 
 /* ---------- conquista ----------
    Uma caixa está conquistada quando o RECORDE dela alcançou `CAIXA_FIRME`.
@@ -941,12 +992,34 @@ function conquistaDoMecanismo(g, estado, mecanismoId, idx){
   const chaves = caixasDoMecanismo(g, mecanismoId, idx);
   const abertas = chaves.filter(k=>estado.caixas[k]);
   const conquistadas = abertas.filter(k=>(estado.caixas[k].recorde || 0) >= CAIXA_FIRME);
+
+  /* ---------- firmeza: a subida, não só o topo ----------
+     `conquistadas` é binário e exige `recorde >= CAIXA_FIRME`, o que
+     significa ter acertado numa revisão marcada 30 dias depois da anterior.
+     É a definição certa de retenção, e ela fica.
+
+     Só que ela leva MESES para sair de zero. Simulando 40 dias de estudo
+     honesto sobre este conteúdo: 1 caixa conquistada de 860. Uma barra
+     parada em 0% por meses não é rigor, é uma barra quebrada — e o motivo
+     de a barra existir foi o engajamento.
+
+     `firmeza` mede quanto da subida já foi feito: a média de
+     `min(recorde, CAIXA_FIRME) / CAIXA_FIRME`. Move desde a primeira
+     resposta, é monótona pelo mesmo motivo que a conquista (lê `recorde`,
+     que nunca desce), e chega a 1 exatamente quando tudo foi conquistado.
+     As duas convivem porque medem coisas diferentes, e nenhuma mente. */
+  const somaFirmeza = chaves.reduce((s, k)=>{
+    const c = estado.caixas[k];
+    return s + Math.min(c ? (c.recorde || 0) : 0, CAIXA_FIRME) / CAIXA_FIRME;
+  }, 0);
+
   return {
     mecanismo: mecanismoId,
     total: chaves.length,
     semeadas: abertas.length,
     conquistadas: conquistadas.length,
     fracao: chaves.length ? conquistadas.length / chaves.length : 0,
+    firmeza: chaves.length ? somaFirmeza / chaves.length : 0,
     concluido: chaves.length > 0 && conquistadas.length === chaves.length,
     iniciado: abertas.some(k=>estado.caixas[k].tentativas > 0)
   };
@@ -973,6 +1046,7 @@ function percurso(g, estado, agora, idx){
     return {
       numero: i + 1, mecanismos, total, conquistadas,
       fracao: total ? conquistadas / total : 0,
+      firmeza: total ? mecanismos.reduce((s, m)=>s + m.firmeza * m.total, 0) / total : 0,
       concluida: mecanismos.length > 0 && mecanismos.every(m=>m.concluido),
       iniciada: mecanismos.some(m=>m.iniciado)
     };
@@ -993,6 +1067,7 @@ function percurso(g, estado, agora, idx){
     ciclicos,
     revisoesHoje: E.devidas(estado, agora).length,   // ao lado, não dentro
     conquistadas: lista.reduce((n, e)=>n + e.conquistadas, 0),
+    firmeza: total ? lista.reduce((s, e)=>s + e.firmeza * e.total, 0) / total : 0,
     total,
     etapasConcluidas: lista.filter(e=>e.concluida).length
   };
@@ -1358,10 +1433,24 @@ function montarSessao(g, estado, agora, opcoes){
   const plano = E.planoDeSessao(g, estado, agora,
     opcoes.teto === undefined ? Infinity : opcoes.teto, idx);
 
+  /* `opcoes.mecanismos` restringe a sessão a um pedaço do percurso — é o que
+     torna "estudar ESTA etapa" possível. Sem isso só existia o botão global,
+     que decide sozinho o que cobrar, e não havia como trabalhar um mecanismo
+     de propósito e ver aquele mecanismo andar.
+
+     A restrição é sobre o que já está DEVIDO: ela filtra o plano, não o
+     inventa. Uma etapa sem nada vencido devolve sessão vazia, e a tela diz
+     isso em vez de fabricar revisão fora de hora. */
+  const so = opcoes.mecanismos && opcoes.mecanismos.length
+    ? new Set(opcoes.mecanismos) : null;
+  const atividades = so
+    ? plano.atividades.filter(a=>so.has(a.mecanismo))
+    : plano.atividades;
+
   const perguntas = [], jaSaiu = new Set();
   for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
     const antes = perguntas.length;
-    for(const a of plano.atividades){
+    for(const a of atividades){
       if(perguntas.length >= max) break;
       const p = gerar(g, a.mecanismo, a.operacao,
                       semente + volta * 7919 + perguntas.length * 31, idx, jaSaiu);
@@ -1371,13 +1460,23 @@ function montarSessao(g, estado, agora, opcoes){
     }
     if(perguntas.length === antes) break;   // nenhuma atividade rende: para
   }
-  return { plano, perguntas };
+  return { plano, perguntas, atividades };
+}
+
+/* Quantas caixas estão vencidas dentro de um recorte do percurso. É o que a
+   tela precisa para dizer "Estudar esta etapa (23 vencidas)" em vez de
+   oferecer um botão que pode não render pergunta nenhuma. */
+function devidasDe(plano, mecanismos){
+  const so = new Set(mecanismos);
+  return plano.atividades
+    .filter(a=>so.has(a.mecanismo))
+    .reduce((n, a)=>n + a.caixas.length, 0);
 }
 
 module.exports = {
   MAX_ALTERNATIVAS, MIN_ERRADAS, TETO_MARCAR_TUDO,
   sorteador, embaralhar, escolherEvitando, montarSlate, montarSessao,
-  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura,
+  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura, devidasDe,
   corrigir, anotarNoLote, revelar
 };
 
@@ -1454,7 +1553,12 @@ function semBotao(){ rodape.classList.add('oculto'); acao.onclick = null; }
 function telaPercurso(){
   sessao = null;
   limpar();
-  var p = P.percurso(g, estado, Date.now(), idx);
+  var agoraTela = Date.now();
+  var p = P.percurso(g, estado, agoraTela, idx);
+  /* O plano é calculado UMA vez e reusado por todos os cartões: cada um
+     precisa saber quantas caixas próprias estão vencidas, e recalcular por
+     cartão custaria caro à toa. */
+  var plano = E.planoDeSessao(g, estado, agoraTela, Infinity, idx);
 
   app.appendChild(el('h1', { texto: 'NeuroLab Deep' }));
   app.appendChild(el('p', { class: 'sub',
@@ -1485,17 +1589,38 @@ function telaPercurso(){
 
     e.mecanismos.forEach(function(m){
       cartao.appendChild(el('div', { class: 'fenomeno', texto: m.fenomeno }));
+      /* A barra mostra a SUBIDA (firmeza), o texto mostra o TOPO (conquista).
+         São duas coisas e nenhuma mente: a conquista exige o intervalo de 30
+         dias e leva meses para sair de zero; a firmeza move desde a primeira
+         resposta. As duas sobem e nunca descem. */
       var barra = el('div', { class: 'barra' });
-      barra.appendChild(el('i', { style: 'width:' + pct(m.fracao) }));
+      barra.appendChild(el('i', { style: 'width:' + pct(m.firmeza) }));
       cartao.appendChild(barra);
       cartao.appendChild(el('div', { class: 'rotulo',
-        texto: m.conquistadas + ' de ' + m.total + ' conquistadas' }));
+        texto: pct(m.firmeza) + ' firmado · ' + m.conquistadas + ' de ' + m.total + ' conquistadas' }));
       if(m.prerequisitos.length){
         cartao.appendChild(el('div', { class: 'dep', texto: 'depende de: ' + m.prerequisitos.join(', ') }));
       }
       var ver = el('button', { class: 'fantasma explorar', type: 'button', texto: 'Ler o mecanismo' });
       ver.onclick = (function(id){ return function(){ telaExplorar(id, 'todas'); }; })(m.mecanismo);
       cartao.appendChild(ver);
+
+      /* "Estudar ESTE mecanismo". Sem isto só existia o botão global, que
+         decide sozinho o que cobrar — e não havia como trabalhar um pedaço
+         de propósito e ver aquele pedaço andar, que é a modularização que
+         ele pediu. Ler não marca nada; só responder marca. */
+      var vencidas = Q.devidasDe(plano, [m.mecanismo]);
+      var estudar = el('button', {
+        class: 'fantasma estudar-um', type: 'button',
+        texto: vencidas > 0 ? 'Estudar este (' + vencidas + ' vencidas)' : 'Nada vencido aqui'
+      });
+      estudar.disabled = vencidas === 0;
+      if(vencidas > 0){
+        estudar.onclick = (function(id){
+          return function(){ comecarSessao([id]); };
+        })(m.mecanismo);
+      }
+      cartao.appendChild(estudar);
     });
     app.appendChild(cartao);
   });
@@ -1563,9 +1688,11 @@ function telaExplorar(mecanismoId, escala){
   cabeca.appendChild(el('p', { class: 'fenomeno', texto: m.limites }));
   app.appendChild(cabeca);
 
-  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui. */
+  /* O vocabulário de escalas vem do conteúdo, nunca de uma lista fixa aqui —
+     e do recorte DESTE mecanismo, não do grafo inteiro, senão a tela oferece
+     filtro que devolve zero. */
   var faixas = [{ id: 'todas', rotulo: 'todas' }]
-    .concat(G.escalasDe(g).map(function(e){ return { id: e, rotulo: e }; }))
+    .concat(G.escalasDe(g, mecanismoId).map(function(e){ return { id: e, rotulo: e }; }))
     .concat([{ id: 'pontes', rotulo: 'pontes entre escalas' }]);
   var barra = el('div', { class: 'faixas' });
   faixas.forEach(function(f){
@@ -1609,9 +1736,12 @@ function telaExplorar(mecanismoId, escala){
 }
 
 /* ---------- sessão ---------- */
-function comecarSessao(){
+function comecarSessao(mecanismos){
   var agora = Date.now();
-  var montada = Q.montarSessao(g, estado, agora, { idx: idx, semente: (agora / 60000) | 0 });
+  var montada = Q.montarSessao(g, estado, agora, {
+    idx: idx, semente: (agora / 60000) | 0,
+    mecanismos: mecanismos || null
+  });
   if(!montada.perguntas.length) return telaPercurso();
   sessao = {
     perguntas: montada.perguntas, i: 0, agora: agora,
