@@ -431,15 +431,33 @@ PROVAS.push({
     /* Agora abre o app DE NOVO com o armazenamento anterior. É a recarga
        real: se `carregarEstado` ignorasse o que está salvo, a tela voltaria
        a mostrar tudo vencido como se nada tivesse sido estudado. */
-    const vencidasFrescas = subir(s.html).acao.textContent;
-    const v2 = subir(s.html, salvo);
-    const vencidasDepois = v2.acao.textContent;
-    exigir(vencidasDepois !== vencidasFrescas,
-      `depois de estudar, reabrir mostrou "${vencidasDepois}" — o mesmo de um app zerado`);
+    /* Esta asserção lia o RÓTULO DO BOTÃO como prova de que houve progresso.
+       Era proxy frágil, e quebrou assim que o rótulo mudou de "N vencidas"
+       para "começa na etapa N" — um teste vermelho sem defeito nenhum no
+       app. Agora ela mede o que de fato representa progresso na tela: a
+       firmeza, que é a barra, e que sobe com a primeira resposta. */
+    const firmadoDe = v => porClasse(v.app, 'rotulo').map(e=>e.textContent)
+      .filter(t=>t.indexOf('firmado') >= 0);
 
-    const numero = t => { const m = /\((\d+)/.exec(t); return m ? Number(m[1]) : -1; };
-    exigir(numero(vencidasDepois) < numero(vencidasFrescas),
-      `reabrir mostrou ${numero(vencidasDepois)} vencidas contra ${numero(vencidasFrescas)} de um app zerado`);
+    const fresco = firmadoDe(subir(s.html));
+    const v2 = subir(s.html, salvo);
+    const depois = firmadoDe(v2);
+    exigir(fresco.length > 0 && depois.length > 0,
+      'a tela não mostra a firmeza de cada mecanismo');
+    exigir(fresco.every(t=>t.indexOf('0% firmado') === 0),
+      `um app zerado já mostra firmeza acima de zero: ${fresco.find(t=>t.indexOf('0%') !== 0)}`);
+    exigir(depois.some(t=>t.indexOf('0% firmado') !== 0),
+      'depois de estudar, reabrir mostrou 0% firmado em tudo — o mesmo de um app zerado');
+
+    /* E o botão de cada cartão tem de cobrar MENOS depois de estudar: as
+       caixas respondidas foram para o futuro, e o número ao lado dele é o
+       que diz ao usuário que a resposta chegou ao cronograma. */
+    const vencidasDe = v => porClasse(v.app, 'estudar-um').map(b=>{
+      const m = /\((\d+)/.exec(b.textContent); return m ? Number(m[1]) : 0;
+    }).reduce((a, b)=>a + b, 0);
+    exigir(vencidasDe(v2) < vencidasDe(subir(s.html)),
+      `reabrir cobra ${vencidasDe(v2)} caixas nos cartões, e um app zerado cobra ` +
+      `${vencidasDe(subir(s.html))} — estudar não tirou nada de vencido`);
 
     /* E o progresso continua lá depois de semear de novo — é o que faz
        conteúdo novo aparecer sem migração e sem apagar nada. */
@@ -549,8 +567,11 @@ PROVAS.push({
                                 'var cadeia = G.projetar(g, mecanismoId, escala).slice(0, 3);'); return m; } },
     { como: 'as escalas do deslizador são uma lista fixa escrita na tela',
       aplicar(s){ const m = clonarSujeito(s);
-        m.html = trocar(m.html, /\.concat\(G\.escalasDe\(g[^)]*\)\.map\(function\(e\)\{[^}]*\}\)\)/,
-                        ".concat([{ id: 'sistemico', rotulo: 'sistemico' }])"); return m; } },
+        /* `[^}]*` parava no `}` do literal `{ id: e, rotulo: e }` e o mutante
+           deixou de casar. Foi o `trocar()` que denunciou, em vez de ele
+           sobreviver calado. Agora vai preguiçoso até o `})` que fecha. */
+        m.html = trocar(m.html, /G\.escalasDe\(g, mecanismoId\)\.map\([\s\S]*?\}\)/,
+                        "[{ id: 'sistemico', rotulo: 'sistemico' }]"); return m; } },
     { como: 'o deslizador oferece escalas do grafo inteiro, e não as do recorte',
       aplicar(s){ const m = clonarSujeito(s);
         m.html = trocar(m.html, 'G.escalasDe(g, mecanismoId)', 'G.escalasDe(g)'); return m; } },

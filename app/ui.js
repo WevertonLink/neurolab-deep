@@ -165,7 +165,19 @@ function telaPercurso(){
            'As revisões vêm por fora, e continuam vindo mesmo com o percurso inteiro fechado — ' +
            'é assim que ele fica fechado.' }));
 
-  if(p.revisoesHoje > 0) botao('Estudar (' + p.revisoesHoje + ' vencidas)', comecarSessao);
+  /* "Estudar (860 vencidas)" era verdade e era inútil: a sessão tem 10
+     perguntas, e o número gigante ao lado das 35 do cartão assusta em vez de
+     orientar. O que ajuda é saber ONDE a sessão começa — que também é o que
+     liga o botão ao percurso, e era exatamente a confusão dele. */
+  if(p.revisoesHoje > 0){
+    var primeira = plano.atividades.length ? plano.atividades[0].mecanismo : null;
+    var etapaInicial = null;
+    p.etapas.forEach(function(e){
+      if(e.mecanismos.some(function(m){ return m.mecanismo === primeira; })) etapaInicial = e.numero;
+    });
+    botao(etapaInicial ? 'Estudar · começa na etapa ' + etapaInicial : 'Estudar',
+          function(){ comecarSessao(); });
+  }
   else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
 }
 

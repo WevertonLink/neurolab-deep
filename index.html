@@ -24,7 +24,10 @@ body{
   -webkit-text-size-adjust:100%;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-#app{max-width:720px;margin:0 auto;padding:16px 14px 96px}
+/* O 96px de folga embaixo não bastava: com a barra de gestos do Android o
+   rodapé fixo cobria o último botão do cartão. Visto na captura dele. */
+#app{max-width:720px;margin:0 auto;
+     padding:16px 14px calc(124px + env(safe-area-inset-bottom))}
 h1{font-size:19px;margin:0 0 2px;letter-spacing:-.01em}
 h2{font-size:16px;margin:0 0 10px;font-weight:600}
 .sub{color:var(--fraco);font-size:13px;margin:0 0 18px}
@@ -1651,7 +1654,19 @@ function telaPercurso(){
            'As revisões vêm por fora, e continuam vindo mesmo com o percurso inteiro fechado — ' +
            'é assim que ele fica fechado.' }));
 
-  if(p.revisoesHoje > 0) botao('Estudar (' + p.revisoesHoje + ' vencidas)', comecarSessao);
+  /* "Estudar (860 vencidas)" era verdade e era inútil: a sessão tem 10
+     perguntas, e o número gigante ao lado das 35 do cartão assusta em vez de
+     orientar. O que ajuda é saber ONDE a sessão começa — que também é o que
+     liga o botão ao percurso, e era exatamente a confusão dele. */
+  if(p.revisoesHoje > 0){
+    var primeira = plano.atividades.length ? plano.atividades[0].mecanismo : null;
+    var etapaInicial = null;
+    p.etapas.forEach(function(e){
+      if(e.mecanismos.some(function(m){ return m.mecanismo === primeira; })) etapaInicial = e.numero;
+    });
+    botao(etapaInicial ? 'Estudar · começa na etapa ' + etapaInicial : 'Estudar',
+          function(){ comecarSessao(); });
+  }
   else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
 }
 
