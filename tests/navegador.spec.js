@@ -46,36 +46,47 @@ test('o botão de estudar está visível sem rolar a página', async ({ page }) 
   expect(caixa.y + caixa.height, 'o botão de ação está abaixo da dobra').toBeLessThanOrEqual(altura);
 });
 
-test('estudar uma sessão faz o progresso subir, e ele sobrevive a recarregar', async ({ page }) => {
+const CHAVE = 'neurolab-profundo/estado/v1';
+const lerEstado = page => page.evaluate(k => localStorage.getItem(k), CHAVE);
+
+test('uma sessão inteira grava o progresso, e ele sobrevive a recarregar', async ({ page }) => {
   await page.goto('/');
 
-  const antes = await page.evaluate(() => localStorage.getItem('neurolab-profundo/estado/v1'));
-  expect(antes, 'o estado deveria ser semeado na primeira abertura').not.toBeNull();
+  /* Nada é gravado só por abrir, e isso é de propósito: as respostas entram
+     num LOTE e viram uma decisão de intervalo por caixa quando a sessão
+     fecha. Semear acontece em memória a cada carga, e é idempotente. */
+  expect(await lerEstado(page), 'abrir não deveria gravar nada').toBeNull();
 
   await page.locator('#acao').click();
+  await expect(page.locator('button.alt').first()).toBeVisible();
 
-  /* A tela de pergunta: um enunciado e alternativas clicáveis */
-  await expect(page.locator('h2')).toBeVisible();
-  const alternativas = page.locator('button.alt');
-  await expect(alternativas.first()).toBeVisible();
+  /* Percorre a sessão inteira até o botão virar "Voltar ao percurso", que é
+     quando o lote fechou. Acertar ou errar não importa aqui — o que se
+     verifica é que a resposta chega ao cronograma e é gravada. */
+  const acao = page.locator('#acao');
+  for(let i = 0; i < 40; i++){
+    const rotulo = (await acao.textContent() || '').trim();
+    if(rotulo === 'Voltar ao percurso') break;
+    if(rotulo === 'Responder') await page.locator('button.alt').first().click();
+    await expect(acao).toBeEnabled();
+    await acao.click();
+  }
+  await expect(acao).toHaveText('Voltar ao percurso');
 
-  /* Responder marcando UMA alternativa. Acertar ou errar não importa aqui —
-     o que se verifica é que a resposta chega ao cronograma. */
-  await alternativas.first().click();
-  await expect(page.locator('#acao')).toBeEnabled();
-  await page.locator('#acao').click();
+  const gravado = await lerEstado(page);
+  expect(gravado, 'a sessão fechou e nada foi gravado').not.toBeNull();
 
-  /* A revelação aparece, com o `porque` da transição */
-  await expect(page.locator('.cartao')).toBeVisible();
-
-  const depois = await page.evaluate(() => localStorage.getItem('neurolab-profundo/estado/v1'));
-  expect(depois, 'responder não mudou o estado guardado').not.toBe(antes);
-
-  /* E o progresso sobrevive a recarregar — que é a diferença entre estudar
-     e brincar. Este é o teste que `file://` reprovaria. */
+  /* E o progresso sobrevive a recarregar — que é a diferença entre estudar e
+     brincar. É este o teste que `file://` reprovaria, e a razão de o app ter
+     deixado de ser arquivo solto. */
   await page.reload();
-  const apos = await page.evaluate(() => localStorage.getItem('neurolab-profundo/estado/v1'));
-  expect(apos, 'o progresso não sobreviveu a recarregar').toBe(depois);
+  expect(await lerEstado(page), 'o progresso não sobreviveu a recarregar').toBe(gravado);
+
+  /* E o estado guardado é o do cronograma, com caixas de verdade */
+  const caixas = JSON.parse(gravado).caixas;
+  expect(Object.keys(caixas).length, 'nenhuma caixa no estado gravado').toBeGreaterThan(100);
+  const tocadas = Object.values(caixas).filter(c => c.tentativas > 0);
+  expect(tocadas.length, 'nenhuma caixa registrou tentativa').toBeGreaterThan(0);
 });
 
 test('o service worker registra e o app é instalável', async ({ page, baseURL }) => {

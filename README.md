@@ -1,4 +1,11 @@
-# NeuroLab Profundo
+# NeuroLab Deep
+
+### 👉 [wevertonlink.github.io/neurolab-deep](https://wevertonlink.github.io/neurolab-deep/)
+
+Abra no celular e salve na tela inicial. Depois da primeira abertura funciona
+em modo avião, e o progresso fica guardado no aparelho.
+
+---
 
 Laboratório de reconstrução de mecanismos. O NeuroLab (v2) continua sendo o
 mapa: 16 módulos, o território inteiro, conteúdo fechado. Este aqui é a
@@ -8,6 +15,26 @@ lidos.
 O problema que originou o projeto: um banco finito de perguntas escritas à
 mão acaba decorado. A resposta não é escrever mais perguntas — é fazer as
 perguntas **saírem do conteúdo**.
+
+## Como usar
+
+**Estudar.** A tela inicial mostra o percurso em etapas calculadas. O botão
+de baixo abre uma sessão com o que está vencido hoje. Cada pergunta é gerada
+na hora a partir do grafo — a mesma transição volta com outro sorteio, outro
+recorte e outros distratores, e por isso não há o que decorar.
+
+**Ler um mecanismo.** Toque num cartão de etapa para abrir a leitura, com o
+deslizador de escala (`molecular · celular · rede · sistemas ·
+comportamento`) e a opção `pontes entre escalas`, que mostra só as transições
+que atravessam níveis.
+
+**Reportar um erro.** Cada transição aparece com o endereço dela —
+`07-ltd-metaplasticidade.json[14]`. Se algo estiver errado, o endereço é
+tudo que eu preciso para achar e corrigir. Existe também a
+[folha de auditoria](https://wevertonlink.github.io/neurolab-deep/auditoria.html),
+que lista as 252 transições em ordem, com filtros (não revisadas · debatidas
+· pontes entre arquivos) e três botões por item — confere, suspeita, errada.
+No fim, o botão **Reportar** monta a lista pronta para colar.
 
 ---
 
@@ -118,8 +145,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 852 caixas para os doze mecanismos: 250 construir, 250
-reconstruir, 250 depurar e **102 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 860 caixas para os doze mecanismos: 252 construir, 252
+reconstruir, 252 depurar e **104 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
 A perturbação de um mecanismo parte das **raízes do recorte**, não da
@@ -191,7 +218,7 @@ node tools/percurso.js 200   # simula 200 dias e mostra o percurso preenchendo
 ## O app
 
 ```sh
-node tools/build-app.js      # gera app.html
+node tools/build-app.js      # gera index.html + sw.js
 ```
 
 Um arquivo só, ~100 KB, **sem servidor e sem rede**: abre direto no
@@ -203,7 +230,7 @@ módulos entram no pacote byte a byte como o Node os executa, e o que muda é
 o ambiente em volta — um `require` mínimo e um `node:fs` falso servindo o
 conteúdo já embutido. Se houvesse uma versão de navegador separada, o app
 rodaria um motor que portão nenhum vigia. `tools/test-app.js` confere que a
-fonte inteira de cada módulo está lá dentro e que o `app.html` commitado é o
+fonte inteira de cada módulo está lá dentro e que o `index.html` commitado é o
 que as fontes geram hoje.
 
 A **escala** é atributo do nó, e o deslizador é uma projeção do mesmo grafo —
@@ -323,7 +350,7 @@ sintoma de corpus pequeno, e some conforme os mecanismos entram.
 node tools/build-app.js
 ```
 
-Abra o `app.html` no navegador (ou mande para o celular). Você vê o
+Abra o site (ou o `index.html` local). Você vê o
 percurso, aperta Estudar, responde as quatro operações intercaladas e vê a
 revelação com o `porque` de cada transição que a pergunta cobrou. Ao fechar
 a sessão, o cronograma decide um intervalo por caixa e o progresso fica
@@ -369,11 +396,11 @@ mensurabilidade derivada, lote de evidências, Leitner, plano de sessão — e o
 percurso: etapas calculadas, conquista como troféu.
 
 Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
-`app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
+`index.html` é o app inteiro — arquivo único, sem servidor, com sessão
 de estudo, leitura do mecanismo e deslizador de escala.
 
-**Fase D fechada: os 12 mecanismos do primeiro corte estão escritos.** 202
-nós, 250 transições, 42 entidades, **7 etapas** calculadas. Nenhum arquivo
+**Fase D fechada: os 12 mecanismos do primeiro corte estão escritos.** 204
+nós, 252 transições, 42 entidades, **7 etapas** calculadas. Nenhum arquivo
 declara ligação com outro — as etapas, os irmãos e as pontes entre escalas
 são todos resultado de leitura do grafo.
 
@@ -426,10 +453,32 @@ U não precisou ser afirmada — ela cai das duas afinidades. O projeto
 reencontra a própria estrutura em outra escala, e isso não foi arranjado: MR
 e GR têm afinidades diferentes de fato.
 
-**O que falta agora não é conteúdo, é auditoria.** São 250 transições, e
-nenhum portão checa verdade. Os seis verificam coerência: referência que não
-existe, nó órfão, terminal inalcançável, entidade que promete e não entrega,
-gabarito que não bate com o grafo. Todos passam num grafo inteiramente falso,
-desde que ele seja consistente. A tela de leitura do `app.html` mostra o
-endereço de cada transição (`07-….json[3]`) exatamente para tornar esse
-trabalho reportável por número, do celular.
+**Fase E fechada: a ferramenta é usável.** O app deixou de ser arquivo solto
+e virou site instalável, com service worker de `VERSION` derivada do hash do
+próprio conteúdo (esquecer de incrementar deixa de ser possível), ícone,
+manifest, e CI que roda os seis portões, checa deriva do build e abre a
+página num navegador de verdade.
+
+E antes disso, o defeito que só apareceu quando alguém **olhou a saída**:
+duas passadas de auditoria conferiram o que ENTRA no gerador, e ninguém
+tinha lido as perguntas que SAEM. De dez, havia quatro distintas. Além
+disso, o gerador sorteava do recorte inteiro em vez das caixas próprias —
+em `ltd-metaplasticidade`, 83% das perguntas rotuladas LTD eram sobre outro
+assunto. Os dois defeitos viraram portão, com mutantes.
+
+---
+
+**O que falta não é conteúdo nem ferramenta: é auditoria científica.** São
+252 transições, e nenhum portão checa verdade. Os seis verificam coerência —
+referência que não existe, nó órfão, terminal inalcançável, entidade que
+promete e não entrega, gabarito que não bate com o grafo. **Todos passam num
+grafo inteiramente falso, desde que ele seja consistente.**
+
+Duas passadas contra fontes já acharam nove erros reais, incluindo uma
+atribuição causal invertida (a via rápida do cortisol não depende de o
+hormônio entrar na célula) e um número errado por uma ordem de grandeza
+(o teto de frequência de disparo). A
+[folha de auditoria](https://wevertonlink.github.io/neurolab-deep/auditoria.html)
+existe para o resto, e a tela de leitura do app mostra o endereço de cada
+transição (`07-….json[3]`) para tornar esse trabalho reportável por número,
+do celular.

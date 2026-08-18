@@ -69,7 +69,7 @@ function telaPercurso(){
   limpar();
   var p = P.percurso(g, estado, Date.now(), idx);
 
-  app.appendChild(el('h1', { texto: 'NeuroLab Profundo' }));
+  app.appendChild(el('h1', { texto: 'NeuroLab Deep' }));
   app.appendChild(el('p', { class: 'sub',
     texto: p.total + ' caixas de revisão · ' + g.transicoes.length + ' transições causais' }));
 
