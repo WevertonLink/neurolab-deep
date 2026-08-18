@@ -115,7 +115,7 @@
     { "de": "mielina-envolve-o-axonio", "para": "canais-de-na-so-nos-nodos",
       "tipo": "causa", "certeza": "consolidado",
       "requer": ["mielina", "nodo-de-ranvier", "canal-na-voltagem"],
-      "porque": "O contato da célula glial com o axônio organiza a membrana embaixo dela e empurra os canais dependentes de voltagem para as lacunas descobertas. A concentração nos nodos depende desse contato: sem bainha, os canais ficam espalhados por todo o comprimento." },
+      "porque": "O contato da célula glial monta, na borda de cada lacuna, um arranjo de moléculas de adesão e de ancoragem que prende os canais dependentes de voltagem ali e os mantém fora do trecho coberto. A concentração no nodo é construída por esse andaime, e não por empurrão: sem bainha, os canais ficam espalhados por todo o comprimento." },
 
     { "de": "resistencia-da-membrana-sobe", "para": "constante-de-comprimento-aumenta",
       "tipo": "causa", "certeza": "consolidado",

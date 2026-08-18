@@ -45,7 +45,10 @@
       "descricao": "Um sinal que chega a todas só produz efeito onde havia marca" },
 
     { "id": "o-sinal-alcanca-muitas-sinapses-de-uma-vez", "entidade": "neuronio-dopaminergico", "escala": "sistemas",
-      "descricao": "Poucos milhares de neurônios difundem o mesmo sinal por áreas enormes de uma vez" },
+      "descricao": "Uma população minúscula difunde o mesmo sinal por áreas enormes de uma vez",
+      "quant": { "quantos_no_humano": "≈250 000 a 440 000 no complexo substância negra / área tegmentar ventral",
+                 "quantos_no_rato": "da ordem de 10 000",
+                 "proporcao": "no humano, algo em torno de 0,0005% dos neurônios do cérebro — e é essa desproporção entre quantos são e quanto alcançam que faz do sinal um difusor, não um endereço" } },
 
     { "id": "sinal-global-da-credito-especifico", "escala": "rede",
       "descricao": "Um sinal sem endereço nenhum consegue creditar exatamente quem participou" },
@@ -196,7 +199,7 @@
     { "de": "dopamina-tem-a-forma-do-sinal-exigido", "para": "o-sinal-alcanca-muitas-sinapses-de-uma-vez",
       "tipo": "compoe", "certeza": "consolidado",
       "requer": ["neuronio-dopaminergico", "dopamina"],
-      "porque": "A mesma população que relata a diferença é a que projeta para áreas enormes de uma vez. Conteúdo do sinal e alcance do sinal saem dos mesmos poucos milhares de neurônios, e por isso não podem ser separados um do outro." },
+      "porque": "A mesma população que relata a diferença é a que projeta para áreas enormes de uma vez. Conteúdo do sinal e alcance do sinal saem das mesmas poucas centenas de milhares de células, uma fração ínfima do cérebro, e por isso não podem ser separados um do outro." },
 
     { "de": "dopamina-tem-a-forma-do-sinal-exigido", "para": "so-as-sinapses-marcadas-respondem-ao-sinal",
       "tipo": "modula", "certeza": "consolidado",

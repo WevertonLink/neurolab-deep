@@ -55,9 +55,11 @@
     { "id": "a-curva-tem-um-otimo-no-meio", "escala": "comportamento",
       "descricao": "O desempenho sobe até um ponto e desce depois dele, formando um U invertido" },
 
-    { "id": "acao-rapida-fora-do-nucleo", "entidade": "cortisol", "escala": "molecular",
-      "descricao": "Parte do efeito aparece rápido demais para depender de gene ligado",
-      "quant": { "latencia": "segundos a poucos minutos" } },
+    { "id": "acao-rapida-fora-do-nucleo", "entidade": "receptor-mr", "escala": "molecular",
+      "descricao": "Há receptores NA membrana, e por eles o efeito aparece rápido demais para depender de gene ligado",
+      "quant": { "latencia": "segundos a poucos minutos",
+                 "afinidade_do_mr_de_membrana": "≈10× MENOR que a do MR intracelular — por isso ele só entra em cena quando o nível sobe, e funciona como detector de subida",
+                 "cuidado": "esta via não exige que o hormônio entre na célula: o receptor está na superfície. Quem depende da entrada é a via lenta" } },
 
     { "id": "acao-lenta-por-transcricao", "escala": "molecular",
       "descricao": "A parte que depende de expressão gênica leva muito mais tempo para aparecer",
@@ -153,10 +155,10 @@
       "tipo": "causa", "certeza": "consolidado",
       "porque": "Um efeito que ajuda enquanto sobe e atrapalha depois de certo ponto desenha um U invertido, sem que nada precise medir onde está o ótimo. A forma da curva é consequência de duas afinidades, e não uma regra de bom senso escrita em algum lugar." },
 
-    { "de": "o-cortisol-atravessa-a-membrana", "para": "acao-rapida-fora-do-nucleo",
+    { "de": "um-sinal-quimico-alcanca-tudo-de-uma-vez", "para": "acao-rapida-fora-do-nucleo",
       "tipo": "causa", "certeza": "consolidado",
-      "requer": ["cortisol"],
-      "porque": "Parte dos efeitos aparece em segundos, o que é rápido demais para depender de gene ligado e proteína feita. Existe uma via que não passa pelo núcleo, e é ela que responde pelo que acontece durante o próprio episódio." },
+      "requer": ["cortisol", "receptor-mr"],
+      "porque": "Parte dos efeitos aparece em segundos, rápido demais para depender de gene ligado e proteína feita — e rápido demais, também, para depender de o hormônio ter entrado. Essa via usa receptores que ficam NA superfície da célula, e a versão de membrana tem afinidade cerca de dez vezes menor que a intracelular, o que a faz responder à subida do nível em vez de à presença dele." },
 
     { "de": "os-receptores-ficam-dentro-da-celula", "para": "acao-lenta-por-transcricao",
       "tipo": "causa", "certeza": "consolidado",

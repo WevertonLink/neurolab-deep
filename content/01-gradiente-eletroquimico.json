@@ -46,6 +46,17 @@
     { "id": "equilibrio-eletroquimico", "escala": "celular",
       "descricao": "A saída por difusão e a entrada por atração elétrica se igualam: fluxo líquido zero" },
 
+    { "id": "membrana-e-um-isolante-fino", "entidade": "membrana", "escala": "celular",
+      "descricao": "Uma camada de gordura de poucos nanômetros separa dois meios que conduzem bem",
+      "quant": { "espessura": "≈ 4 a 5 nm", "capacitancia": "≈ 1 µF por cm² de membrana" } },
+
+    { "id": "pouquissimo-k-precisa-sair", "entidade": "k", "escala": "celular",
+      "descricao": "A quantidade de K⁺ que precisa sair para gerar a voltagem é desprezível diante da que existe dentro",
+      "quant": {
+        "fracao": "da ordem de uma parte em 100 000 do K⁺ interno, para uma célula de ≈50 µm",
+        "conta": "Q = C·V = 1 µF/cm² × 0,07 V ≈ 7·10⁻⁸ C/cm², que dá ≈7·10⁻¹³ mol de carga por cm² de membrana",
+        "depende_do_tamanho": "célula menor tem mais superfície por volume, e nela a fração é maior — mas continua pequena" } },
+
     { "id": "potencial-de-equilibrio-do-k", "escala": "celular",
       "descricao": "A voltagem em que as duas forças se anulam para o K⁺",
       "quant": { "valor": "≈ −95 mV com estas concentrações", "equacao": "E_K = 61,5 · log([K⁺]fora / [K⁺]dentro) = 61,5 · log(4/140)", "por_que_os_livros_dizem_90": "o número muda com as concentrações assumidas: 5/140 mM dá ≈ −90 mV. A faixa −90 a −95 mV é a mesma conta com entradas diferentes, não duas teorias" } }
@@ -88,7 +99,17 @@
     { "de": "equilibrio-eletroquimico", "para": "potencial-de-equilibrio-do-k",
       "tipo": "causa", "certeza": "consolidado",
       "porque": "Nernst quantifica em que voltagem as duas forças se anulam. O valor depende só da razão entre as concentrações — não de quantos íons existem, mas de quão desiguais estão.",
-      "quant": { "calculo": "61,5 · log(4/140) = 61,5 · (−1,544) ≈ −95 mV" } }
+      "quant": { "calculo": "61,5 · log(4/140) = 61,5 · (−1,544) ≈ −95 mV" } },
+
+    { "de": "membrana-e-um-isolante-fino", "para": "pouquissimo-k-precisa-sair",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["membrana", "k"],
+      "porque": "Separar cargas através de um isolante muito fino sai barato: pouca carga de um lado e do outro já produz muita voltagem entre eles. Como a membrana tem poucos nanômetros, a carga necessária para chegar aos −95 mV é uma fração ínfima do K⁺ disponível." },
+
+    { "de": "pouquissimo-k-precisa-sair", "para": "potencial-de-equilibrio-do-k",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["k"],
+      "porque": "A conta de Nernst trata as concentrações como fixas, e isso só é legítimo porque estabelecer a voltagem quase não as altera. Se gerar o potencial custasse esvaziar a célula de K⁺, a razão mudaria durante o próprio processo e a conta não fecharia. É também por isso que a célula não corre risco de ficar sem potássio ao ficar em repouso: o que a bomba repõe é o vazamento lento, não a carga que gerou a voltagem." }
   ],
 
   "mecanismos": [

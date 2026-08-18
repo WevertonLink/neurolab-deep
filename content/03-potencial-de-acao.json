@@ -182,7 +182,7 @@
 
     { "de": "periodo-refratario", "para": "codigo-de-frequencia-com-teto",
       "tipo": "compoe", "certeza": "consolidado",
-      "porque": "O tempo em que a célula fica indisponível é um piso para o intervalo entre dois disparos, e o inverso desse piso é o número máximo de disparos por segundo. O refratário deixa de ser detalhe de cinética e vira o limite de quanta informação o axônio consegue carregar." }
+      "porque": "O tempo em que a célula fica indisponível é um piso para o intervalo entre dois disparos, e o inverso desse piso é um LIMITE SUPERIOR absoluto para a frequência — não a frequência máxima real, que é bem menor e vem de outras correntes, como a adaptação e a hiperpolarização tardia. O refratário deixa de ser detalhe de cinética e vira uma fronteira do que o axônio consegue carregar, mesmo que na prática ele nunca chegue perto dela." }
   ],
 
   "mecanismos": [

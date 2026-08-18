@@ -70,11 +70,11 @@
     { "de": "mais-canais-de-k-que-de-na", "para": "permeabilidade-desigual",
       "tipo": "causa", "certeza": "consolidado",
       "requer": ["canal-vazamento-k", "canal-vazamento-na", "membrana"],
-      "porque": "Permeabilidade não é propriedade do íon, é do número de portas abertas para ele. A membrana não escolhe o K⁺: ela simplesmente tem muito mais poros por onde o K⁺ passa. Troque a densidade de canais e a permeabilidade muda junto, sem que nada no íon mude." },
+      "porque": "Permeabilidade é propriedade da MEMBRANA, não do íon: a membrana não escolhe o K⁺, ela simplesmente oferece muito mais passagem para ele. Três coisas compõem essa passagem — quantos poros existem, quanta corrente cada poro deixa passar e que fração do tempo ele fica aberto —, e por isso a razão de permeabilidade medida não é a contagem de canais. Mexa em qualquer um dos três e a permeabilidade muda, sem que nada no íon mude." },
 
     { "de": "permeabilidade-desigual", "para": "potencial-de-repouso",
       "tipo": "modula", "certeza": "consolidado",
-      "porque": "Goldman: o potencial final é uma média dos potenciais de equilíbrio de cada íon, PONDERADA pela permeabilidade a cada um. Como P_K é 25 a 40× maior que P_Na, o resultado fica muito mais perto de E_K que de E_Na.",
+      "porque": "Goldman: o potencial final é uma média dos potenciais de equilíbrio de cada íon, PONDERADA pela permeabilidade a cada um. Como P_K é da ordem de 20 a 33× maior que P_Na, o resultado fica muito mais perto de E_K que de E_Na.",
       "quant": { "E_K": "≈ −95 mV", "E_Na": "≈ +60 mV", "resultado": "≈ −70 mV" } },
 
     { "de": "bomba-e-eletrogenica", "para": "potencial-de-repouso",
