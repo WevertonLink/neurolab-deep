@@ -1,0 +1,61 @@
+name: portões
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Os seis portões de sempre. Rodam em Node puro, sem navegador e sem
+  # dependência nenhuma — é por isso que também rodam no Termux, no celular.
+  portoes:
+    name: portões (Node, sem dependências)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Estrutura, motor, cronograma, percurso, perguntas, app
+        run: npm run portoes
+
+      # O site é gerado. Se o index.html ou o sw.js commitados divergirem do
+      # que as fontes produzem, o GitHub Pages publica uma versão que portão
+      # nenhum viu — e ninguém fica sabendo. Isto falha antes disso.
+      - name: O site commitado é o que as fontes geram
+        run: |
+          node tools/build-app.js
+          node tools/auditar.js
+          git diff --exit-code -- index.html sw.js auditoria.html \
+            || { echo "::error::index.html/sw.js/auditoria.html estão velhos — rode 'node tools/build-app.js' e 'node tools/auditar.js'"; exit 1; }
+
+  # O que os seis portões NÃO conseguem ver, porque exige navegador de
+  # verdade: a página abrir, o CSS carregar, o localStorage funcionar, o
+  # service worker registrar. É a diferença entre lógica certa e app usável.
+  navegador:
+    name: navegador (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

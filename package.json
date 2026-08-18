@@ -1,0 +1,16 @@
+{
+  "name": "neurolab-deep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Laboratório de mecanismos causais: o átomo é a transição, e as quatro operações de estudo são derivadas do grafo.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node tools/build-app.js",
+    "portoes": "node tools/valida-grafo.js && node tools/test-motor.js && node tools/test-estudo.js && node tools/test-percurso.js && node tools/test-perguntas.js && node tools/test-app.js",
+    "auditoria": "node tools/auditar.js",
+    "navegador": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  }
+}
