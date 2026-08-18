@@ -302,17 +302,86 @@ function arquivosDoCaminho(caminho){
    motor, e até lá o gabarito é conservador: o que ele lista realmente se
    perde, e pode faltar coisa. Ver a seção 10 de tools/valida-grafo.js, que
    avisa quando uma entidade nunca chega a derrubar nada. */
-function perturbar(g, alvo, entradaId){
-  const mortas = g.transicoes.filter(t=>{
+function transicoesAtingidas(g, alvo){
+  return g.transicoes.filter(t=>{
     if(alvo.entidade) return (t.requer||[]).includes(alvo.entidade);
     if(alvo.transicao) return t === alvo.transicao;
     return false;
   });
+}
+
+function perturbar(g, alvo, entradaId){
+  const mortas = transicoesAtingidas(g, alvo);
   const vivas = g.transicoes.filter(t=>!mortas.includes(t));
   const antes = aJusante(g, entradaId);
   const depois = aJusante(Object.assign({}, g, {transicoes:vivas}), entradaId);
   const perdidos = [...antes].filter(n=>!depois.has(n));
   return { mortas, perdidos, restantes: depois };
+}
+
+/* ---------- perturbação de um MECANISMO ----------
+   `perturbar` parte de UM nó. Serve para pergunta solta, e é o primitivo.
+   Para um mecanismo ele é a ferramenta errada, e isso custou caro:
+
+   o recorte de um mecanismo é `aMontante(terminal)`, mas `aJusante(entrada)`
+   é outro conjunto. A diferença entre os dois são os fios que entram pela
+   lateral — as co-causas, que `subgrafo` já chamava de `raizes` desde o
+   começo. Medir a partir da `entrada` deixava esses fios INVISÍVEIS para a
+   perturbação: no mecanismo 07, o braço executor inteiro da LTD
+   (`calcineurina-ativa`, `pp1-desfosforila`, `ampa-retirado-da-membrana`)
+   entra pelo protocolo de estimulação, não pela entrada declarada. Remover
+   a calcineurina perdia ZERO nós, no mecanismo cujo assunto é a calcineurina.
+
+   Um nó do recorte acontece quando alguma raiz o sustenta. Perder é deixar
+   de ser sustentado por qualquer uma delas. A `entrada` declarada continua
+   sendo uma raiz — ela só deixou de ser a única.
+
+   Continua valendo o limite de conjunção descrito em `perturbar`: dois pais
+   viram OU, e o gabarito segue conservador. */
+/* Uma BFS multi-origem, com índice de adjacência montado uma vez. A versão
+   ingênua chamava `aJusante` uma vez POR RAIZ, e `aJusante` varre todas as
+   transições a cada nó visitado — com 10 raízes num recorte de 103 nós isso
+   é meio milhão de comparações por chamada, e `operacoesMensuraveisEm`
+   chama isto para cada transição × mecanismo × entidade. O portão de
+   perguntas foi de 24 s para mais de 5 min antes desta troca. */
+function alcancadosDe(transicoes, raizes){
+  const porDe = new Map();
+  for(const t of transicoes){
+    const a = porDe.get(t.de);
+    if(a) a.push(t); else porDe.set(t.de, [t]);
+  }
+  const vistos = new Set(raizes), fila = raizes.slice();
+  while(fila.length){
+    const saidas = porDe.get(fila.pop());
+    if(!saidas) continue;
+    for(const t of saidas){
+      if(vistos.has(t.para)) continue;
+      vistos.add(t.para); fila.push(t.para);
+    }
+  }
+  return vistos;
+}
+
+function perturbarRecorte(g, alvo, mecanismoId, sg){
+  sg = sg || subgrafo(g, mecanismoId);
+  if(!sg) return { mortas: [], perdidos: [], restantes: new Set() };
+  const dentro = n=>sg.nos.has(n);
+
+  /* O estado intacto não depende do alvo: vale a pena guardar. A identidade
+     do array de transições é a chave — se o grafo mudou, o cache não serve. */
+  if(sg._intactoDe !== g.transicoes){
+    sg._intacto = new Set([...alcancadosDe(g.transicoes, sg.raizes)].filter(dentro));
+    sg._intactoDe = g.transicoes;
+  }
+  const antes = sg._intacto;
+
+  const mortas = transicoesAtingidas(g, alvo);
+  if(!mortas.length) return { mortas, perdidos: [], restantes: new Set(antes) };
+
+  const mortasSet = new Set(mortas);
+  const vivas = g.transicoes.filter(t=>!mortasSet.has(t));
+  const depois = new Set([...alcancadosDe(vivas, sg.raizes)].filter(dentro));
+  return { mortas, perdidos: [...antes].filter(n=>!depois.has(n)), restantes: depois };
 }
 
 /* Transições que dependem de uma entidade — para saber o que dá para perturbar */
@@ -428,7 +497,7 @@ function projetar(g, mecanismoId, escala){
 
 module.exports = {
   carregar, saindoDe, chegandoEm, aJusante, aMontante, caminhos, subgrafo,
-  prerequisitos, arquivosDoCaminho, perturbar, transicoesQueDependemDe,
+  prerequisitos, arquivosDoCaminho, perturbar, perturbarRecorte, transicoesQueDependemDe,
   explicar, reconstruir, escalasDe, cadeiaOrdenada, projetar, RESSALVA, VERBO,
   TIPOS_DE_TRANSICAO, NIVEIS_DE_CERTEZA, RAIZ, CONTEUDO
 };
@@ -529,10 +598,9 @@ function operacoesMensuraveisEm(g, t, mecanismoId, idx){
      derruba o recorte inteiro gera pergunta sem distrator, e aí "marcar
      tudo" acerta. As duas degeneram para o mesmo lugar: item decorável. */
   const perturbavel = (t.requer||[]).some(entidade=>{
-    const perdidos = G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos
-      .filter(n=>sg.nos.has(n));
-    if(!perdidos.length) return false;
-    return (sg.nos.size - perdidos.length) >= MIN_SOBREVIVENTES;
+    const r = G.perturbarRecorte(g, { entidade }, mecanismoId, sg);
+    if(!r.perdidos.length) return false;
+    return r.restantes.size >= MIN_SOBREVIVENTES;
   });
   if(perturbavel) ops.push('perturbar');
 
@@ -1074,15 +1142,14 @@ function gerarPerturbar(g, mecanismoId, sorteio, idx){
      o cronograma, apareceria pergunta sem caixa para receber a evidência. */
   const candidatas = [...new Set(sg.transicoes.flatMap(t=>t.requer || []))].sort()
     .filter(ent=>{
-      const perdidos = G.perturbar(g, { entidade: ent }, sg.mecanismo.entrada).perdidos
-        .filter(n=>sg.nos.has(n));
-      return perdidos.length > 0 && (sg.nos.size - perdidos.length) >= E.MIN_SOBREVIVENTES;
+      const r = G.perturbarRecorte(g, { entidade: ent }, mecanismoId, sg);
+      return r.perdidos.length > 0 && r.restantes.size >= E.MIN_SOBREVIVENTES;
     });
   if(!candidatas.length) return null;
 
   const entidade = escolher(candidatas, sorteio);
-  const r = G.perturbar(g, { entidade }, sg.mecanismo.entrada);
-  const slate = montarSlate(g, sg, r.perdidos.filter(n=>sg.nos.has(n)), sorteio);
+  const r = G.perturbarRecorte(g, { entidade }, mecanismoId, sg);
+  const slate = montarSlate(g, sg, r.perdidos, sorteio);
   if(!slate) return null;
   const alvo = g.entidades[entidade] || { nome: entidade };
   const mortas = r.mortas.filter(t=>sg.transicoes.includes(t));

@@ -118,17 +118,25 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 602 caixas para os nove mecanismos: 177 construir, 177
-reconstruir, 177 depurar e **71 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 608 caixas para os nove mecanismos: 177 construir, 177
+reconstruir, 177 depurar e **77 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
-E o 71 está **baixo por defeito conhecido**, não por propriedade do
-conteúdo. `perturbar` mede o que some do `aJusante(entrada)`, mas o recorte
-de um mecanismo é `aMontante(terminal)` — os dois não coincidem, e todo fio
-que entra pela lateral fica invisível para a perturbação. No mecanismo 07 é
-o braço executor inteiro da LTD: *"remova a calcineurina, o que para?"*
-nunca chega a ser perguntado, no mecanismo cujo assunto é a calcineurina.
-A seção 10 do validador lista quem está nessa situação.
+A perturbação de um mecanismo parte das **raízes do recorte**, não da
+`entrada` declarada. A distinção não é sutil: o recorte é
+`aMontante(terminal)`, e `aJusante(entrada)` é outro conjunto — a diferença
+entre os dois são os fios que entram pela lateral, as co-causas. Medindo da
+entrada, eles eram invisíveis para a perturbação, e remover a calcineurina
+perdia zero nós no mecanismo cujo assunto é a calcineurina. `subgrafo` já
+chamava esses nós de `raizes` desde o começo; `perturbar` é que nunca os
+usou.
+
+Sobra o limite de **conjunção**: um nó com dois pais sobrevive se qualquer
+um deles sobrevive, e alcançabilidade não sabe dizer E. O gabarito fica
+conservador — o que ele lista realmente some, e pode faltar coisa. Está
+documentado em `perturbar`, com o aviso de **não** serializar conteúdo para
+o número subir: a conjunção é real, e achatá-la seria falsificar o mecanismo
+para agradar o motor. A seção 10 do validador lista quem ainda não morde.
 
 A **atividade** é mecanismo × operação: reconstruir o potencial de repouso é
 uma passada só que liquida as caixas de `reconstruir` de todo o recorte. As

@@ -133,15 +133,14 @@ function gerarPerturbar(g, mecanismoId, sorteio, idx){
      o cronograma, apareceria pergunta sem caixa para receber a evidência. */
   const candidatas = [...new Set(sg.transicoes.flatMap(t=>t.requer || []))].sort()
     .filter(ent=>{
-      const perdidos = G.perturbar(g, { entidade: ent }, sg.mecanismo.entrada).perdidos
-        .filter(n=>sg.nos.has(n));
-      return perdidos.length > 0 && (sg.nos.size - perdidos.length) >= E.MIN_SOBREVIVENTES;
+      const r = G.perturbarRecorte(g, { entidade: ent }, mecanismoId, sg);
+      return r.perdidos.length > 0 && r.restantes.size >= E.MIN_SOBREVIVENTES;
     });
   if(!candidatas.length) return null;
 
   const entidade = escolher(candidatas, sorteio);
-  const r = G.perturbar(g, { entidade }, sg.mecanismo.entrada);
-  const slate = montarSlate(g, sg, r.perdidos.filter(n=>sg.nos.has(n)), sorteio);
+  const r = G.perturbarRecorte(g, { entidade }, mecanismoId, sg);
+  const slate = montarSlate(g, sg, r.perdidos, sorteio);
   if(!slate) return null;
   const alvo = g.entidades[entidade] || { nome: entidade };
   const mortas = r.mortas.filter(t=>sg.transicoes.includes(t));

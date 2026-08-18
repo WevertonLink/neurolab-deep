@@ -97,10 +97,10 @@ const candidatas = Object.keys(g.entidades)
 const alvoEnt = process.argv[3] || candidatas[0];
 L(`\n  Entidades que dá para remover neste grafo: ${candidatas.join(', ')}\n`);
 L(`  ▸ E se removermos: ${(g.entidades[alvoEnt]||{}).nome || alvoEnt}?\n`);
-const p = G.perturbar(g, { entidade: alvoEnt }, m.entrada);
+const p = G.perturbarRecorte(g, { entidade: alvoEnt }, m.id);
 L(`  Param de acontecer ${p.mortas.length} transição(ões):`);
 p.mortas.forEach(t=>L(`     ✕ ${nome(t.de)}  ──${G.VERBO[t.tipo]}──▶  ${nome(t.para)}`));
-L(`\n  Deixa de existir (${p.perdidos.length} nós, a partir de "${nome(m.entrada)}"):`);
+L(`\n  Deixa de existir (${p.perdidos.length} nós, de ${p.perdidos.length + p.restantes.size} do recorte):`);
 p.perdidos.forEach(n=>L(`     ✕ ${nome(n)}`));
 L(`\n  Continua de pé: ${p.restantes.size ? [...p.restantes].map(nome).join(' · ') : '— nada'}`);
 if((g.entidades[alvoEnt]||{}).se_falhar){

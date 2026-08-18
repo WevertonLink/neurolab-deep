@@ -92,11 +92,22 @@ PROVAS.push({
           `${onde}: exercita transição que não é do recorte`));
       }
       if(p.operacao === 'perturbar'){
-        const r = G.perturbar(g, { entidade: p.entidade }, sg.mecanismo.entrada);
-        p.corretas.forEach(c=>exigir(r.perdidos.includes(c),
-          `${onde}: "${c}" está no gabarito mas não some quando "${p.entidade}" é removida`));
+        /* Conferência INDEPENDENTE: refaz a conta do zero, com as transições
+           do recorte e as raízes dele, sem chamar `perturbarRecorte`. Gabarito
+           conferido pela mesma função que o gerou não é conferência. */
+        const vivas = sg.transicoes.filter(t=>!(t.requer||[]).includes(p.entidade));
+        const sustentados = new Set(sg.raizes), fila = sg.raizes.slice();
+        while(fila.length){
+          const atual = fila.pop();
+          for(const t of vivas){
+            if(t.de !== atual || sustentados.has(t.para)) continue;
+            sustentados.add(t.para); fila.push(t.para);
+          }
+        }
+        p.corretas.forEach(c=>exigir(!sustentados.has(c),
+          `${onde}: "${c}" está no gabarito mas o recorte continua sustentando ele sem "${p.entidade}"`));
         p.alternativas.filter(a=>!p.corretas.includes(a.id)).forEach(a=>{
-          exigir(!r.perdidos.includes(a.id),
+          exigir(sustentados.has(a.id),
             `${onde}: "${a.id}" foi apresentado como distrator e na verdade some junto`);
         });
         p.transicoes.forEach(t=>exigir((t.requer||[]).includes(p.entidade),

@@ -354,6 +354,100 @@ PROVAS.push({
   ]
 });
 
+/* ---------- 5. PERTURBAÇÃO DE RECORTE ----------
+   `perturbar` parte de um nó; `perturbarRecorte` parte das RAÍZES do
+   recorte. A diferença não é estilística: medindo da `entrada` declarada,
+   todo fio que entra pela lateral ficava invisível, e a consequência saía
+   curta sem que portão nenhum reclamasse. Foi assim que remover a
+   calcineurina perdeu ZERO nós no mecanismo cujo assunto é a calcineurina. */
+PROVAS.push({
+  nome: 'RECORTE · a perturbação parte das raízes, não da entrada declarada',
+  roda(s){
+    const { g, M } = s;
+
+    for(const id of Object.keys(g.mecanismos)){
+      const sg = M.subgrafo(g, id);
+
+      /* (a) sem perturbação, TODO nó do recorte é sustentado por alguma raiz.
+         É exatamente esta a afirmação que era falsa antes do conserto. */
+      const intacto = M.perturbarRecorte(g, { entidade:'__nao_existe__' }, id, sg);
+      exigir(intacto.perdidos.length === 0,
+        `${id}: perturbar entidade inexistente perdeu ${intacto.perdidos.length} nós`);
+      exigir(intacto.restantes.size === sg.nos.size,
+        `${id}: sem perturbação, só ${intacto.restantes.size} dos ${sg.nos.size} nós do ` +
+        `recorte são sustentados — algum fio não sai de raiz nenhuma`);
+
+      /* (b) o resultado não vaza do recorte, e perder exclui sobreviver */
+      for(const e of Object.keys(g.entidades)){
+        const r = M.perturbarRecorte(g, { entidade:e }, id, sg);
+        exigir(r.perdidos.every(n=>sg.nos.has(n)),
+          `${id}/${e}: a perda inclui nó de fora do recorte`);
+        exigir(r.perdidos.every(n=>!r.restantes.has(n)),
+          `${id}/${e}: um nó aparece como perdido E como restante`);
+        exigir(r.perdidos.length + r.restantes.size === sg.nos.size,
+          `${id}/${e}: perdidos e restantes não particionam o recorte`);
+      }
+
+      /* (c) alvo com um pai só: remover a entidade que esse pai exige TEM de
+         derrubá-lo. Sem caminho alternativo, não há como sobreviver — e é o
+         caso em que a medição antiga errava em todo fio lateral. */
+      for(const t of sg.transicoes){
+        if(sg.transicoes.filter(o=>o.para === t.para).length !== 1) continue;
+        for(const e of (t.requer||[])){
+          const r = M.perturbarRecorte(g, { entidade:e }, id, sg);
+          exigir(r.perdidos.includes(t.para),
+            `${id}: "${t.para}" tem um pai só, que exige "${e}", e sobreviveu à remoção dele`);
+        }
+      }
+    }
+
+    /* (d) o caso concreto que originou o conserto */
+    const semCalcineurina = M.perturbarRecorte(g, { entidade:'calcineurina' }, 'ltd-metaplasticidade');
+    exigir(semCalcineurina.perdidos.includes('pp1-desfosforila'),
+      'sem calcineurina, a PP1 continuou sendo liberada');
+    exigir(semCalcineurina.perdidos.includes('ampa-retirado-da-membrana'),
+      'sem calcineurina, o AMPA continuou sendo internalizado');
+  },
+  mutantes: [
+    { como: 'medir a partir da `entrada` declarada, e não das raízes (o defeito original)',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.perturbarRecorte = (g, alvo, id, sg)=>{
+          sg = sg || s.M.subgrafo(g, id);
+          return s.M.perturbarRecorte(g, alvo, id,
+            Object.assign({}, sg, { raizes: [sg.mecanismo.entrada] })); };
+        return m; } },
+
+    { como: 'tratar todo nó do recorte como raiz (nada nunca se perde)',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.perturbarRecorte = (g, alvo, id, sg)=>{
+          sg = sg || s.M.subgrafo(g, id);
+          return s.M.perturbarRecorte(g, alvo, id,
+            Object.assign({}, sg, { raizes: [...sg.nos] })); };
+        return m; } },
+
+    { como: 'não recortar o alcance: deixar a perda vazar para fora do mecanismo',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.perturbarRecorte = (g, alvo, id, sg)=>{
+          sg = sg || s.M.subgrafo(g, id);
+          const todos = new Set(Object.keys(g.nos));
+          return s.M.perturbarRecorte(g, alvo, id, Object.assign({}, sg, { nos: todos })); };
+        return m; } },
+
+    { como: 'inverter a diferença: reportar o que ganhou alcance em vez do que perdeu',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.perturbarRecorte = (g, alvo, id, sg)=>{
+          const r = s.M.perturbarRecorte(g, alvo, id, sg);
+          return { mortas:r.mortas, perdidos:[...r.restantes].filter(n=>false), restantes:r.restantes }; };
+        return m; } },
+
+    { como: 'ignorar o alvo: perturbar sempre a mesma entidade',
+      aplicar(s){ const m = sujeitoClonado(s); m.M = Object.assign({}, s.M);
+        m.M.perturbarRecorte = (g, alvo, id, sg)=>
+          s.M.perturbarRecorte(g, { entidade:'ca' }, id, sg);
+        return m; } }
+  ]
+});
+
 /* ---------- 6. PROJEÇÃO ---------- */
 PROVAS.push({
   nome: 'PROJEÇÃO · a escala é um recorte do mesmo grafo, não um conteúdo à parte',

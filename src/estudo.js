@@ -88,10 +88,9 @@ function operacoesMensuraveisEm(g, t, mecanismoId, idx){
      derruba o recorte inteiro gera pergunta sem distrator, e aí "marcar
      tudo" acerta. As duas degeneram para o mesmo lugar: item decorável. */
   const perturbavel = (t.requer||[]).some(entidade=>{
-    const perdidos = G.perturbar(g, { entidade }, sg.mecanismo.entrada).perdidos
-      .filter(n=>sg.nos.has(n));
-    if(!perdidos.length) return false;
-    return (sg.nos.size - perdidos.length) >= MIN_SOBREVIVENTES;
+    const r = G.perturbarRecorte(g, { entidade }, mecanismoId, sg);
+    if(!r.perdidos.length) return false;
+    return r.restantes.size >= MIN_SOBREVIVENTES;
   });
   if(perturbavel) ops.push('perturbar');
 

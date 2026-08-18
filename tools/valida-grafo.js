@@ -222,13 +222,8 @@ const entidadesEmRequer = new Set();
 g.transicoes.forEach(t=>(t.requer||[]).forEach(e=>entidadesEmRequer.add(e)));
 const inertes = [];
 entidadesEmRequer.forEach(e=>{
-  const mordeEmAlgum = Object.values(g.mecanismos).some(m=>{
-    if(!g.nos[m.entrada]) return false;
-    const sg = G.subgrafo(g, m.id);
-    if(!sg) return false;
-    return G.perturbar(g, { entidade: e }, m.entrada).perdidos
-      .some(n=>sg.nos.has(n));
-  });
+  const mordeEmAlgum = Object.values(g.mecanismos).some(m=>
+    G.perturbarRecorte(g, { entidade: e }, m.id).perdidos.length > 0);
   checagens++;
   if(!mordeEmAlgum) inertes.push(e);
 });
