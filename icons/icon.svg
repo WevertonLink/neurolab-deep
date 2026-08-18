@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- O átomo do projeto: uma transição causal. Não é cérebro nem neurônio —
+       é a unidade de conhecimento que o app manipula, e é isso que o ícone
+       precisa dizer.
+
+       Nó de origem VAZADO, nó de destino PREENCHIDO: a assimetria carrega o
+       sentido da causa mesmo quando a seta some no tamanho pequeno.
+
+       Composição horizontal e dois tons de propósito: isto é ícone de
+       lançador, lido a 48px, não ilustração. Tudo cabe no círculo central de
+       80% do lado, que é a zona que o Android não recorta no modo maskable. -->
+  <rect width="512" height="512" fill="#0e1116"/>
+
+  <!-- nó de origem: contorno, a causa -->
+  <circle cx="150" cy="256" r="62" fill="none" stroke="#4da3ff" stroke-width="22"/>
+
+  <!-- a haste, da borda do primeiro nó até a base da ponta -->
+  <line x1="223" y1="256" x2="268" y2="256"
+        stroke="#4da3ff" stroke-width="22" stroke-linecap="butt"/>
+
+  <!-- a ponta, tocando a borda do segundo nó -->
+  <polygon points="298,256 262,232 262,280" fill="#4da3ff"/>
+
+  <!-- nó de destino: preenchido, a consequência -->
+  <circle cx="362" cy="256" r="62" fill="#4da3ff"/>
+</svg>

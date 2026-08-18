@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /* =====================================================================
-   NeuroLab Profundo · portão do app
+   NeuroLab Deep · portão do app
 
-   O app.html é gerado, e gerado é onde as coisas apodrecem em silêncio: o
+   O index.html é gerado, e gerado é onde as coisas apodrecem em silêncio: o
    arquivo commitado descola das fontes, um módulo deixa de ser empacotado,
    o conteúdo fica velho. Nada disso dá erro visível — dá um app que estuda
    um grafo que não existe mais.
 
-     1. PACOTE     — o que está dentro do app.html é byte a byte o `src/` e
+     1. PACOTE     — o que está dentro do index.html é byte a byte o `src/` e
                      o `content/` de hoje.
      2. CARREGA    — o app monta num DOM stubado e mostra o percurso real.
      3. SESSÃO     — estudar gera perguntas, responder o gabarito faz a
@@ -97,8 +97,14 @@ function textoTodo(raiz){
 function subir(html, armazenamentoInicial){
   const dom = fazerDom();
   if(armazenamentoInicial) dom.localStorage._bruto['neurolab-profundo/estado/v1'] = armazenamentoInicial;
+  /* Três blocos: motor, UI e o registro do service worker. O terceiro NÃO é
+     executado aqui de propósito — ele fala com `navigator`, que este contexto
+     não tem, e o que ele faz (offline) é justamente o que só um navegador de
+     verdade consegue verificar. Quem cobre isso é o Playwright no CI. */
   const blocos = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
-  if(blocos.length !== 2) throw new Error(`o app tem ${blocos.length} blocos de script, esperava 2`);
+  if(blocos.length !== 3) throw new Error(`o app tem ${blocos.length} blocos de script, esperava 3`);
+  if(!/serviceWorker/.test(blocos[2]))
+    throw new Error('o terceiro bloco de script deveria ser o registro do service worker');
 
   const ctx = vm.createContext({
     console, Math, JSON, Object, Array, String, Number, Boolean, Error, Set, Map, Buffer,
@@ -112,9 +118,16 @@ function subir(html, armazenamentoInicial){
   return { dom, ctx, req, app: dom.porId.app, rodape: dom.porId.rodape, acao: dom.porId.acao };
 }
 
-const sujeito = ()=>({ html: B.construir(),
-                       uiFonte: fs.readFileSync(path.join(RAIZ, 'app', 'ui.js'), 'utf8') });
-const clonarSujeito = s => ({ html: s.html, uiFonte: s.uiFonte });
+/* O `sw` entra no sujeito, e não é lido direto do disco dentro da prova, para
+   que um mutante consiga errar a VERSION SEM mexer no html. Lendo do disco,
+   qualquer mutante do service worker morria antes, na checagem de deriva do
+   index.html — morte pela asserção errada, que não prova nada. */
+const sujeito = ()=>({
+  html: B.construir(),
+  uiFonte: fs.readFileSync(path.join(RAIZ, 'app', 'ui.js'), 'utf8'),
+  sw: fs.existsSync(B.SAIDA_SW) ? fs.readFileSync(B.SAIDA_SW, 'utf8') : null
+});
+const clonarSujeito = s => ({ html: s.html, uiFonte: s.uiFonte, sw: s.sw });
 
 /* ===================================================================== */
 const PROVAS = [];
@@ -130,7 +143,7 @@ PROVAS.push({
       const fonte = fs.readFileSync(path.join(RAIZ, 'src', nome + '.js'), 'utf8')
         .replace(/<\/script/gi, '<\\/script').replace(/<!--/g, '<\\!--');
       exigir(s.html.indexOf(fonte) >= 0,
-        `src/${nome}.js não está inteiro dentro do app.html — o pacote descolou da fonte`);
+        `src/${nome}.js não está inteiro dentro do index.html — o pacote descolou da fonte`);
     });
 
     const dirConteudo = path.join(RAIZ, 'content');
@@ -144,7 +157,23 @@ PROVAS.push({
        o app do celular estuda um grafo de semanas atrás. */
     if(fs.existsSync(B.SAIDA)){
       exigir(fs.readFileSync(B.SAIDA, 'utf8') === s.html,
-        'app.html no repositório está diferente do que as fontes geram — rode `node tools/build-app.js`');
+        'index.html no repositório está diferente do que as fontes geram — rode `node tools/build-app.js`');
+    }
+
+    /* ---- e o service worker tem de corresponder a ESTE index.html ----
+       Num app offline, publicar HTML novo com `VERSION` velha deixa o
+       usuário preso na versão antiga para sempre, sem sinal nenhum. Por
+       isso a VERSION é derivada do conteúdo, e por isso ela é conferida:
+       se os dois arquivos descolarem, o portão falha antes do deploy. */
+    if(s.sw){
+      const sw = s.sw;
+      const esperada = B.versaoDe(s.html);
+      const achada = (sw.match(/const VERSION = '([^']+)'/) || [])[1];
+      exigir(achada === esperada,
+        `sw.js declara VERSION "${achada}" e o index.html de hoje dá "${esperada}" — ` +
+        `rode \`node tools/build-app.js\``);
+      B.ATIVOS.forEach(a=>exigir(sw.indexOf(JSON.stringify(a)) >= 0,
+        `sw.js não guarda "${a}", e o app não abriria offline sem ele`));
     }
   },
   mutantes: [
@@ -155,9 +184,24 @@ PROVAS.push({
     { como: 'o conteúdo embutido é esvaziado',
       aplicar(s){ const m = clonarSujeito(s);
         m.html = m.html.replace(/var __CONTEUDO = \{[\s\S]*?\};\n/, 'var __CONTEUDO = {};\n'); return m; } },
-    { como: 'o app.html do repositório fica velho em relação às fontes',
+    /* Este mutante já morreu por acidente uma vez: ele casava com o texto
+       exato do `<title>`, o título mudou, e ele passou a não mutar nada —
+       sobrevivendo em silêncio. Agora ele muta uma coisa que existe por
+       construção (o comentário que todo arquivo gerado carrega) e CONFERE
+       que mudou. Mutante que não muta é portão que não vigia. */
+    { como: 'o index.html do repositório fica velho em relação às fontes',
       aplicar(s){ const m = clonarSujeito(s);
-        m.html = m.html.replace('<title>NeuroLab Profundo</title>', '<title>versão antiga</title>');
+        const alvo = 'não edite à mão';
+        if(m.html.indexOf(alvo) < 0) throw new Error('o mutante não achou o que mutar');
+        m.html = m.html.replace(alvo, 'versão antiga');
+        return m; } },
+    { como: 'o sw.js declara uma VERSION que não corresponde ao index.html',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.sw = m.sw.replace(/const VERSION = '[^']+'/, "const VERSION = 'deep-000000000000'");
+        return m; } },
+    { como: 'o sw.js deixa de guardar o index.html (o app não abre offline)',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.sw = m.sw.replace('"./index.html",', '');
         return m; } }
   ]
 });
@@ -491,7 +535,7 @@ PROVAS.push({
 const base = sujeito();
 let falhou = false, mutantesMortos = 0, mutantesVivos = 0;
 
-console.log(`app.html: ${(Buffer.byteLength(base.html, 'utf8') / 1024).toFixed(0)} KB · ` +
+console.log(`index.html: ${(Buffer.byteLength(base.html, 'utf8') / 1024).toFixed(0)} KB · ` +
             `${B.MODULOS.length} módulos empacotados\n`);
 
 for(const prova of PROVAS){

@@ -1,0 +1,19 @@
+{
+  "name": "NeuroLab Deep — mecanismos causais",
+  "short_name": "NeuroLab Deep",
+  "description": "Laboratório de mecanismos: um grafo causal tipado de que as quatro operações de estudo — construir, reconstruir, perturbar, depurar — são derivadas, nunca escritas à mão.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
