@@ -34,6 +34,22 @@ function embaralhar(lista, sorteio){
 }
 function escolher(lista, sorteio){ return lista[Math.floor(sorteio() * lista.length)]; }
 
+/* Sorteia preferindo o que ainda não saiu nesta sessão.
+   Sem isto, cada pergunta sorteava do mecanismo inteiro sem memória, e numa
+   sessão de 10 perguntas sobre um mecanismo de 10 transições saíam 3
+   `depurar` com o MESMO gabarito, 2 `reconstruir` idênticas e 2 `construir`
+   idênticas — quatro perguntas distintas vestidas de dez. Repetição assim é
+   a porta de entrada do decorar, que é justamente o que o projeto existe
+   para fechar.
+
+   Quando tudo já saiu, volta a sortear do conjunto inteiro: é melhor
+   repetir do que devolver sessão curta. */
+function escolherEvitando(lista, chaveDe, evitar, sorteio){
+  if(!evitar || !evitar.size) return escolher(lista, sorteio);
+  const novos = lista.filter(x=>!evitar.has(chaveDe(x)));
+  return escolher(novos.length ? novos : lista, sorteio);
+}
+
 const nomeDoNo = (g, id) => (g.nos[id] && g.nos[id].descricao) || id;
 
 /* ---------- o slate de alternativas ----------
@@ -54,16 +70,40 @@ const nomeDoNo = (g, id) => (g.nos[id] && g.nos[id].descricao) || id;
    grafo, só perguntada sobre menos itens. */
 const MIN_ERRADAS = 2;
 
-function montarSlate(g, sg, corretas, sorteio){
-  const universo = [...sg.nos];
+/* Reservar duas erradas não bastava. Numa perturbação em que a entidade
+   sustenta quase tudo, o slate saía com 6 corretas em 8, e marcar tudo
+   tirava 0,75 contra um corte de 0,80 — passava a um vigésimo de distância.
+   Item que quase premia marcar tudo é item decorável, que é o problema que
+   este projeto existe para não ter.
+
+   Agora a regra é proporcional: as corretas nunca passam de TETO_MARCAR_TUDO
+   do slate, e marcar tudo tira no máximo essa fração. Como o gabarito já
+   podia ser uma AMOSTRA das corretas quando havia muitas, isto não inventa
+   nem esconde verdade: mostra menos itens, e o que mostra continua sendo o
+   que o grafo diz. */
+const TETO_MARCAR_TUDO = 0.6;
+
+/* `excluir` tira nós do slate. Serve para o nó do ENUNCIADO, que estava
+   aparecendo entre as próprias alternativas: "Dado X, o que acontece em
+   seguida?" listava o próprio X como opção. Não é só feio — é uma
+   alternativa que não é nem certa nem errada, e ocupa a vaga de um
+   distrator de verdade. */
+function montarSlate(g, sg, corretas, sorteio, excluir){
+  const fora = new Set(excluir || []);
+  const universo = [...sg.nos].filter(n=>!fora.has(n));
   const certas  = universo.filter(n=>corretas.includes(n));
   const erradas = universo.filter(n=>!corretas.includes(n));
   if(!certas.length || erradas.length < MIN_ERRADAS) return null;
 
   const n = Math.min(MAX_ALTERNATIVAS, universo.length);
-  const quantasCertas = Math.min(certas.length, n - MIN_ERRADAS);
+  const porProporcao = Math.floor(n * TETO_MARCAR_TUDO);
+  const porDisponibilidade = Math.floor(erradas.length * TETO_MARCAR_TUDO / (1 - TETO_MARCAR_TUDO));
+  const quantasCertas = Math.min(certas.length, n - MIN_ERRADAS, porProporcao, porDisponibilidade);
+  if(quantasCertas < 1) return null;
+
   const escolhidasCertas = embaralhar(certas, sorteio).slice(0, quantasCertas);
   const escolhidasErradas = embaralhar(erradas, sorteio).slice(0, n - escolhidasCertas.length);
+  if(escolhidasErradas.length < MIN_ERRADAS) return null;
 
   const ids = embaralhar(escolhidasCertas.concat(escolhidasErradas), sorteio);
   return {
@@ -92,15 +132,15 @@ function revelar(g, transicoes){
    acontecido". A resposta é um CONJUNTO de nós, porque um passo pode ter
    várias saídas — e é justamente aí que a pergunta deixa de ser decorável
    como fila. */
-function gerarTravessia(g, mecanismoId, operacao, sorteio, idx){
+function gerarTravessia(g, mecanismoId, operacao, sorteio, idx, evitar){
   idx = idx || E.indexar(g);
   const sg = idx[mecanismoId];
   if(!sg) return null;
   const r = G.reconstruir(g, mecanismoId, operacao === 'construir' ? 'frente' : 'tras');
   if(!r || !r.passos.length) return null;
 
-  const passo = escolher(r.passos, sorteio);
-  const slate = montarSlate(g, sg, passo.resposta.map(x=>x.no), sorteio);
+  const passo = escolherEvitando(r.passos, p=>operacao + ':' + p.no, evitar, sorteio);
+  const slate = montarSlate(g, sg, passo.resposta.map(x=>x.no), sorteio, [passo.no]);
   if(!slate) return null;
   // só entram as transições cuja saída ficou no slate: a evidência tem de
   // corresponder ao que foi de fato perguntado
@@ -110,6 +150,7 @@ function gerarTravessia(g, mecanismoId, operacao, sorteio, idx){
   return {
     operacao, mecanismo: mecanismoId,
     enunciado: passo.pergunta,
+    noDoEnunciado: passo.no,
     tipoDeResposta: 'conjunto',
     alternativas: slate.alternativas,
     corretas: slate.corretas,
@@ -123,7 +164,7 @@ function gerarTravessia(g, mecanismoId, operacao, sorteio, idx){
    Ninguém escreveu essa lista: ela é recalculada a cada pergunta, e muda
    sozinha quando o conteúdo muda. É a resposta direta ao banco finito de
    contrafactuais escritos à mão. */
-function gerarPerturbar(g, mecanismoId, sorteio, idx){
+function gerarPerturbar(g, mecanismoId, sorteio, idx, evitar){
   idx = idx || E.indexar(g);
   const sg = idx[mecanismoId];
   if(!sg) return null;
@@ -138,7 +179,7 @@ function gerarPerturbar(g, mecanismoId, sorteio, idx){
     });
   if(!candidatas.length) return null;
 
-  const entidade = escolher(candidatas, sorteio);
+  const entidade = escolherEvitando(candidatas, e=>'pert:' + e, evitar, sorteio);
   const r = G.perturbarRecorte(g, { entidade }, mecanismoId, sg);
   const slate = montarSlate(g, sg, r.perdidos, sorteio);
   if(!slate) return null;
@@ -162,7 +203,7 @@ function gerarPerturbar(g, mecanismoId, sorteio, idx){
    afirmação invertida é a errada, e é por isso que `operacoesMensuraveisEm`
    exige que a inversa não exista de verdade no grafo: se existisse, a
    afirmação invertida seria verdadeira e a pergunta não teria gabarito. */
-function gerarDepurar(g, mecanismoId, sorteio, idx){
+function gerarDepurar(g, mecanismoId, sorteio, idx, evitar){
   idx = idx || E.indexar(g);
   const sg = idx[mecanismoId];
   if(!sg) return null;
@@ -171,7 +212,7 @@ function gerarDepurar(g, mecanismoId, sorteio, idx){
     E.operacoesMensuraveisEm(g, t, mecanismoId, idx).includes('depurar'));
   if(!podem.length) return null;
 
-  const errada = escolher(podem, sorteio);
+  const errada = escolherEvitando(podem, t=>'dep:' + E.chaveDaTransicao(t), evitar, sorteio);
   const outras = embaralhar(sg.transicoes.filter(t=>t !== errada), sorteio).slice(0, 3);
   const frase = (de, verbo, para) => `${nomeDoNo(g, de)} ${verbo} ${nomeDoNo(g, para)}`;
 
@@ -202,13 +243,23 @@ function gerarDepurar(g, mecanismoId, sorteio, idx){
   };
 }
 
-function gerar(g, mecanismoId, operacao, semente, idx){
+function gerar(g, mecanismoId, operacao, semente, idx, evitar){
   const sorteio = sorteador(semente);
   if(operacao === 'construir' || operacao === 'reconstruir')
-    return gerarTravessia(g, mecanismoId, operacao, sorteio, idx);
-  if(operacao === 'perturbar') return gerarPerturbar(g, mecanismoId, sorteio, idx);
-  if(operacao === 'depurar')   return gerarDepurar(g, mecanismoId, sorteio, idx);
+    return gerarTravessia(g, mecanismoId, operacao, sorteio, idx, evitar);
+  if(operacao === 'perturbar') return gerarPerturbar(g, mecanismoId, sorteio, idx, evitar);
+  if(operacao === 'depurar')   return gerarDepurar(g, mecanismoId, sorteio, idx, evitar);
   throw new Error(`operação desconhecida: ${operacao}`);
+}
+
+/* A assinatura de uma pergunta, para a sessão não repeti-la. É o que o
+   gerador sorteou, não o texto: duas travessias que partem do mesmo nó são
+   a mesma pergunta ainda que o slate saia embaralhado diferente. */
+function assinatura(p){
+  if(p.operacao === 'construir' || p.operacao === 'reconstruir')
+    return p.operacao + ':' + p.noDoEnunciado;
+  if(p.operacao === 'perturbar') return 'pert:' + p.entidade;
+  return 'dep:' + p.chaveErrada;
 }
 
 /* ---------- correção ----------
@@ -268,13 +319,16 @@ function montarSessao(g, estado, agora, opcoes){
   const plano = E.planoDeSessao(g, estado, agora,
     opcoes.teto === undefined ? Infinity : opcoes.teto, idx);
 
-  const perguntas = [];
+  const perguntas = [], jaSaiu = new Set();
   for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
     const antes = perguntas.length;
     for(const a of plano.atividades){
       if(perguntas.length >= max) break;
-      const p = gerar(g, a.mecanismo, a.operacao, semente + volta * 7919 + perguntas.length * 31, idx);
-      if(p) perguntas.push(p);
+      const p = gerar(g, a.mecanismo, a.operacao,
+                      semente + volta * 7919 + perguntas.length * 31, idx, jaSaiu);
+      if(!p) continue;
+      jaSaiu.add(assinatura(p));
+      perguntas.push(p);
     }
     if(perguntas.length === antes) break;   // nenhuma atividade rende: para
   }
@@ -282,7 +336,8 @@ function montarSessao(g, estado, agora, opcoes){
 }
 
 module.exports = {
-  MAX_ALTERNATIVAS, MIN_ERRADAS, sorteador, embaralhar, montarSlate, montarSessao,
-  gerar, gerarTravessia, gerarPerturbar, gerarDepurar,
+  MAX_ALTERNATIVAS, MIN_ERRADAS, TETO_MARCAR_TUDO,
+  sorteador, embaralhar, escolherEvitando, montarSlate, montarSessao,
+  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura,
   corrigir, anotarNoLote, revelar
 };

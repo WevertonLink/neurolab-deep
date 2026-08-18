@@ -187,10 +187,25 @@ PROVAS.push({
       const erradas = p.alternativas.filter(a=>!p.corretas.includes(a.id)).length;
       exigir(erradas >= Q.MIN_ERRADAS,
         `${onde}: só ${erradas} alternativa(s) errada(s); o mínimo é ${Q.MIN_ERRADAS}`);
+
+      /* Reprovar não basta: tem de reprovar com FOLGA. Numa perturbação em
+         que a entidade sustentava quase tudo, o slate saía com 6 corretas em
+         8 e marcar tudo tirava 0,75 contra um corte de 0,80 — passava a um
+         vigésimo de distância. Item que quase premia marcar tudo é item
+         decorável, que é o problema que o projeto existe para não ter. */
+      if(p.tipoDeResposta === 'conjunto'){
+        const fracao = p.corretas.length / p.alternativas.length;
+        exigir(fracao <= Q.TETO_MARCAR_TUDO + 1e-9,
+          `${onde}: ${p.corretas.length} corretas em ${p.alternativas.length} alternativas ` +
+          `(${fracao.toFixed(2)}), acima do teto ${Q.TETO_MARCAR_TUDO} — marcar tudo chega perto demais`);
+      }
     });
     exigir(vistas > 50, `só ${vistas} perguntas geradas`);
     exigir(piorMarcandoTudo < E.PASSA,
       `a melhor nota de quem marca tudo foi ${piorMarcandoTudo.toFixed(2)}, e o corte é ${E.PASSA}`);
+    exigir(piorMarcandoTudo <= Q.TETO_MARCAR_TUDO + 1e-9,
+      `marcar tudo chegou a ${piorMarcandoTudo.toFixed(2)}; o teto é ${Q.TETO_MARCAR_TUDO}. ` +
+      `Passar raspando do corte é o mesmo defeito, só que ainda não disparado.`);
   },
   mutantes: [
     { como: 'o slate não reserva alternativas erradas (volta a "todas as anteriores")',
@@ -216,6 +231,18 @@ PROVAS.push({
           const nota = esc.some(x=>cor.includes(x)) ? 1 : 0;
           return { nota, acertou: nota >= m.E.PASSA, faltaram: [], sobraram: [],
                    porTransicao: p.transicoes.map(t=>({ transicao: t, nota })) };
+        }; return m; } },
+    { como: 'o slate só garante DUAS erradas, sem teto proporcional (marcar tudo raspa no corte)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.Q.gerar;
+        m.Q.gerar = (g, mec, op, semente, idx, evitar)=>{
+          const p = real(g, mec, op, semente, idx, evitar);
+          if(!p || p.tipoDeResposta !== 'conjunto') return p;
+          /* promove alternativas a corretas até sobrarem só MIN_ERRADAS —
+             que é exatamente o que a regra antiga permitia */
+          const erradas = p.alternativas.filter(a=>!p.corretas.includes(a.id));
+          const promover = erradas.slice(0, Math.max(0, erradas.length - s.Q.MIN_ERRADAS));
+          p.corretas = p.corretas.concat(promover.map(a=>a.id));
+          return p;
         }; return m; } }
   ]
 });
@@ -435,6 +462,164 @@ PROVAS.push({
           if(fora) p.transicoes = p.transicoes.concat([fora]);
           return p;
         }; return m; } }
+  ]
+});
+
+/* ---------- 6. SLATE ----------
+   O nó do ENUNCIADO não pode estar entre as alternativas. Estava: "Dado X, o
+   que acontece em seguida?" listava o próprio X como opção. Não é só feio —
+   é uma alternativa que não é nem certa nem errada, e que ocupa a vaga de um
+   distrator de verdade.
+
+   Isto passou por seis portões e só apareceu quando eu li uma sessão de
+   verdade. É a lição da rodada: os portões olhavam o que ENTRA no gerador, e
+   ninguém olhava o que SAI. */
+PROVAS.push({
+  nome: 'SLATE · o enunciado não aparece entre as próprias alternativas',
+  roda(s){
+    const { Q } = s;
+    let comEnunciado = 0, vistas = 0;
+    cada(s, (p, mec, op, semente)=>{
+      const onde = `${mec}/${op}/${semente}`;
+      vistas++;
+      if(!p.noDoEnunciado) return;            // perturbar e depurar não têm nó de enunciado
+      comEnunciado++;
+      exigir(!p.alternativas.some(a=>a.id === p.noDoEnunciado),
+        `${onde}: o nó do enunciado "${p.noDoEnunciado}" está entre as alternativas`);
+      exigir(!p.corretas.includes(p.noDoEnunciado),
+        `${onde}: o nó do enunciado está no próprio gabarito`);
+
+      /* e as alternativas continuam vindo de DENTRO do recorte */
+      const sg = s.E.indexar(s.g)[mec];
+      p.alternativas.forEach(a=>exigir(sg.nos.has(a.id),
+        `${onde}: alternativa "${a.id}" não é nó do recorte`));
+    });
+    exigir(comEnunciado > 20, `só ${comEnunciado} travessias geradas de ${vistas} perguntas`);
+  },
+  mutantes: [
+    { como: 'o slate não exclui o nó do enunciado (ele vira uma das opções)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.Q.gerar;
+        m.Q.gerar = (g, mec, op, semente, idx, evitar)=>{
+          const p = real(g, mec, op, semente, idx, evitar);
+          if(!p || !p.noDoEnunciado) return p;
+          const nome = id => (g.nos[id] || {}).descricao || id;
+          p.alternativas = p.alternativas.slice(0, -1)
+            .concat([{ id: p.noDoEnunciado, texto: nome(p.noDoEnunciado) }]);
+          return p;
+        }; return m; } },
+    { como: 'o enunciado entra também no gabarito',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.Q.gerar;
+        m.Q.gerar = (g, mec, op, semente, idx, evitar)=>{
+          const p = real(g, mec, op, semente, idx, evitar);
+          if(!p || !p.noDoEnunciado) return p;
+          const nome = id => (g.nos[id] || {}).descricao || id;
+          p.alternativas = p.alternativas.concat([{ id: p.noDoEnunciado, texto: nome(p.noDoEnunciado) }]);
+          p.corretas = p.corretas.concat([p.noDoEnunciado]);
+          return p;
+        }; return m; } },
+    { como: 'distratores vêm de fora do recorte (viram descartáveis de graça)',
+      aplicar(s){ const m = clonarSujeito(s); const real = s.Q.gerar;
+        m.Q.gerar = (g, mec, op, semente, idx, evitar)=>{
+          const p = real(g, mec, op, semente, idx, evitar);
+          if(!p || !p.noDoEnunciado) return p;
+          const sg = (idx || m.E.indexar(g))[mec];
+          const fora = Object.keys(g.nos).find(n=>!sg.nos.has(n));
+          if(!fora) return p;
+          const trocavel = p.alternativas.find(a=>!p.corretas.includes(a.id));
+          if(trocavel) trocavel.id = fora;
+          return p;
+        }; return m; } }
+  ]
+});
+
+/* Reprodução fiel de `montarSessao`, menos a memória. `vazia` distingue os
+   dois modos de falha: não passar a memória, ou passar um conjunto que nunca
+   é preenchido. Os dois dão no mesmo — e é isso que a propriedade afirma. */
+function sessaoSemMemoria(s, g, estado, agora, opcoes, vazia){
+  opcoes = opcoes || {};
+  const idx = opcoes.idx || s.E.indexar(g);
+  const max = opcoes.maxPerguntas || 10;
+  const semente = (opcoes.semente || 1) >>> 0;
+  const plano = s.E.planoDeSessao(g, estado, agora, Infinity, idx);
+  const perguntas = [], nunca = new Set();
+  for(let volta = 0; volta < 4 && perguntas.length < max; volta++){
+    const antes = perguntas.length;
+    for(const a of plano.atividades){
+      if(perguntas.length >= max) break;
+      const p = s.Q.gerar(g, a.mecanismo, a.operacao,
+                          semente + volta * 7919 + perguntas.length * 31, idx,
+                          vazia ? nunca : null);
+      if(p) perguntas.push(p);
+    }
+    if(perguntas.length === antes) break;
+  }
+  return { plano, perguntas };
+}
+
+/* ---------- 7. SESSÃO ----------
+   Uma sessão de dez perguntas tem de conter dez perguntas, não quatro
+   repetidas. Antes de haver memória de sessão, `gerar` sorteava do mecanismo
+   inteiro a cada chamada: num mecanismo pequeno saíam três `depurar` com o
+   MESMO gabarito, duas `reconstruir` idênticas e duas `construir` idênticas.
+   Repetição assim é a porta de entrada do decorar. */
+PROVAS.push({
+  nome: 'SESSÃO · dez perguntas são dez perguntas, não quatro repetidas',
+  roda(s){
+    const { E, Q, g } = s;
+    const idx = E.indexar(g);
+    const T = Date.UTC(2026, 7, 18, 9, 0, 0);
+    let sessoes = 0;
+
+    Object.keys(g.mecanismos).sort().forEach(mec=>{
+      [1, 29, 97].forEach(semente=>{
+        const estado = E.novoEstado();
+        E.semear(g, estado, mec, T, idx);
+        const s1 = Q.montarSessao(g, estado, T, { idx, semente, maxPerguntas: 10 });
+        if(!s1.perguntas.length) return;
+        sessoes++;
+        const onde = `${mec}/semente ${semente}`;
+
+        const assinaturas = s1.perguntas.map(Q.assinatura);
+        exigir(new Set(assinaturas).size === assinaturas.length,
+          `${onde}: ${assinaturas.length} perguntas mas só ` +
+          `${new Set(assinaturas).size} distintas — a sessão está se repetindo`);
+
+        /* Não se exige que toda pergunta seja do mecanismo semeado: `semear`
+           cria caixa para toda operação mensurável da transição, e o DONO da
+           caixa pode ser um recorte menor — é a regra de propriedade, de
+           propósito. O que se exige é que toda pergunta tenha caixa. */
+        s1.perguntas.forEach(p=>exigir(idx[p.mecanismo],
+          `${onde}: pergunta de um mecanismo que não existe: "${p.mecanismo}"`));
+
+        /* determinismo sobrevive à memória de sessão */
+        const estado2 = E.novoEstado();
+        E.semear(g, estado2, mec, T, idx);
+        const s2 = Q.montarSessao(g, estado2, T, { idx, semente, maxPerguntas: 10 });
+        exigir(s2.perguntas.map(Q.assinatura).join('|') === assinaturas.join('|'),
+          `${onde}: a mesma semente deu sessões diferentes`);
+      });
+    });
+    exigir(sessoes >= 12, `só ${sessoes} sessões montadas`);
+  },
+  mutantes: [
+    /* `montarSessao` chama o `gerar` LOCAL do módulo, então trocar o export
+       não a afeta — descobri isso com dois mutantes que sobreviveram. O
+       mutante honesto reimplementa a própria `montarSessao`, fielmente,
+       menos a memória. É o código exato de antes do conserto. */
+    { como: 'montarSessao não passa a memória adiante (o código de antes do conserto)',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.Q.montarSessao = (g, estado, agora, opcoes)=>
+          sessaoSemMemoria(s, g, estado, agora, opcoes, false);
+        return m; } },
+    { como: 'a memória existe mas nunca é preenchida',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.Q.montarSessao = (g, estado, agora, opcoes)=>
+          sessaoSemMemoria(s, g, estado, agora, opcoes, true);
+        return m; } },
+    { como: 'a assinatura ignora a operação (construir e reconstruir colidem)',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.Q.assinatura = p=>p.noDoEnunciado || p.entidade || p.chaveErrada;
+        return m; } }
   ]
 });
 
