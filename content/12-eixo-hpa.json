@@ -1,0 +1,224 @@
+{
+  "arquivo": "Eixo HPA e a curva em U",
+  "nota_de_autoria": "Entra pelo terminal do 07, e a escolha é o argumento: se a força fica numa faixa em que ainda pode mudar, alguma coisa de fora pode deslocar ONDE essa faixa está. A curva em U não é um fato a ser descrito — ela cai de duas leituras do mesmo hormônio com afinidades diferentes, que é exatamente a forma lógica do mecanismo 07 com o cortisol no lugar do Ca²⁺. O projeto fecha reencontrando a própria estrutura em outra escala, e isso não foi arranjado: as duas classes de receptor têm afinidades diferentes de fato. O segundo fio é a alça: o freio do eixo é feito do tecido que o eixo danifica, e é daí que sai o terminal. O `debatido` é a direção da causa em humanos, que é o ponto onde a leitura clínica se decide.",
+
+  "entidades": [
+    { "id": "cortisol", "nome": "Cortisol", "escala": "sistemas",
+      "funcao": "hormônio esteroide lançado no sangue pelo eixo do estresse; por ser lipossolúvel, atravessa a membrana e alcança o interior de praticamente toda célula do corpo",
+      "se_falhar": "o eixo perde o sinal que ele existe para produzir, e também o próprio desligamento, que depende desse mesmo sinal" },
+
+    { "id": "receptor-mr", "nome": "Receptor mineralocorticoide (MR)", "escala": "molecular",
+      "funcao": "receptor intracelular de ALTA afinidade pelo cortisol, ocupado em boa parte já nos níveis de repouso",
+      "se_falhar": "some a leitura de nível baixo, e a sustentação basal da excitabilidade vai junto" },
+
+    { "id": "receptor-gr", "nome": "Receptor glicocorticoide (GR)", "escala": "molecular",
+      "funcao": "receptor intracelular de BAIXA afinidade, que só é ocupado de forma significativa quando o cortisol sobe muito",
+      "se_falhar": "some a leitura de nível alto: nem o efeito sobre a plasticidade em pico, nem o desligamento do eixo" }
+  ],
+
+  "nos": [
+    { "id": "o-ponto-de-operacao-pode-ser-deslocado-de-fora", "escala": "rede",
+      "descricao": "Se a força fica numa faixa móvel, algo de fora pode mover onde essa faixa está" },
+
+    { "id": "um-sinal-quimico-alcanca-tudo-de-uma-vez", "entidade": "cortisol", "escala": "sistemas",
+      "descricao": "Um hormônio no sangue chega a todo o cérebro sem endereço nenhum",
+      "quant": { "escala_de_tempo": "minutos para subir, dezenas de minutos a horas para voltar ao basal" } },
+
+    { "id": "o-cortisol-atravessa-a-membrana", "entidade": "cortisol", "escala": "molecular",
+      "descricao": "Por ser lipossolúvel, ele entra na célula em vez de agir na superfície" },
+
+    { "id": "os-receptores-ficam-dentro-da-celula", "escala": "molecular",
+      "descricao": "Os receptores esperam no interior e agem sobre a expressão de genes" },
+
+    { "id": "mr-satura-em-nivel-basal", "entidade": "receptor-mr", "escala": "molecular",
+      "descricao": "O receptor de alta afinidade já está bastante ocupado em repouso",
+      "quant": { "ocupacao_em_repouso": "alta; o MR opera perto da saturação boa parte do dia" } },
+
+    { "id": "gr-so-e-ocupado-em-nivel-alto", "entidade": "receptor-gr", "escala": "molecular",
+      "descricao": "O receptor de baixa afinidade só é ocupado quando o cortisol sobe muito",
+      "quant": { "ocupacao_em_repouso": "baixa; sobe de forma apreciável apenas no pico do estresse" } },
+
+    { "id": "duas-leituras-com-limiares-diferentes-de-novo", "escala": "molecular",
+      "descricao": "Outra vez o mesmo desenho: dois leitores do mesmo sinal, com limiares distintos" },
+
+    { "id": "ocupacao-basal-sustenta-a-plasticidade", "escala": "celular",
+      "descricao": "Com apenas o de alta afinidade ocupado, a potenciação acontece com facilidade" },
+
+    { "id": "ocupacao-alta-eleva-o-limiar-de-potenciacao", "escala": "celular",
+      "descricao": "Com os dois ocupados, é preciso muito mais para potenciar, e protocolos médios passam a deprimir" },
+
+    { "id": "o-mesmo-hormonio-produz-efeitos-opostos", "escala": "celular",
+      "descricao": "É a amplitude, e não a identidade do hormônio, que decide o sentido do efeito" },
+
+    { "id": "a-curva-tem-um-otimo-no-meio", "escala": "comportamento",
+      "descricao": "O desempenho sobe até um ponto e desce depois dele, formando um U invertido" },
+
+    { "id": "acao-rapida-fora-do-nucleo", "entidade": "cortisol", "escala": "molecular",
+      "descricao": "Parte do efeito aparece rápido demais para depender de gene ligado",
+      "quant": { "latencia": "segundos a poucos minutos" } },
+
+    { "id": "acao-lenta-por-transcricao", "escala": "molecular",
+      "descricao": "A parte que depende de expressão gênica leva muito mais tempo para aparecer",
+      "quant": { "latencia": "de uma a várias horas, e persiste depois de o cortisol cair" } },
+
+    { "id": "o-mesmo-episodio-ajuda-agora-e-atrapalha-depois", "escala": "comportamento",
+      "descricao": "Um único episódio favorece o que está sendo vivido e prejudica o que vem horas depois" },
+
+    { "id": "o-eixo-se-desliga-pelo-proprio-produto", "escala": "sistemas",
+      "descricao": "O cortisol que o eixo produz é o sinal que manda o eixo parar" },
+
+    { "id": "o-hipocampo-e-parte-do-freio", "entidade": "hipocampo", "escala": "sistemas",
+      "descricao": "O hipocampo, denso em receptores do hormônio, participa do desligamento do eixo" },
+
+    { "id": "exposicao-prolongada-retrai-dendritos", "entidade": "espinho-dendritico", "escala": "celular",
+      "descricao": "Semanas de nível alto encurtam ramos dendríticos e reduzem espinhos no hipocampo",
+      "quant": { "reversibilidade": "em roedor, a retração reverte semanas depois do fim da exposição" } },
+
+    { "id": "o-freio-enfraquecido-deixa-o-nivel-alto", "escala": "sistemas",
+      "descricao": "Com o freio prejudicado, o eixo demora mais para desligar e o nível fica alto por mais tempo" },
+
+    { "id": "o-nivel-alto-prolongado-realimenta-o-dano", "escala": "sistemas",
+      "descricao": "Mais tempo em nível alto produz mais retração, que enfraquece ainda mais o freio" },
+
+    { "id": "o-regulador-e-feito-do-tecido-que-ele-regula", "escala": "sistemas",
+      "descricao": "Quem desliga o eixo é justamente o que a saída do eixo desgasta" },
+
+    { "id": "a-resposta-e-boa-e-a-cronicidade-nao", "escala": "comportamento",
+      "descricao": "A mesma resposta que serve por minutos deixa de servir quando não termina" },
+
+    { "id": "o-defeito-nao-esta-no-hormonio-esta-na-alca", "escala": "sistemas",
+      "descricao": "O problema não é a substância ser nociva, é a alça de regulação se comer" }
+  ],
+
+  "transicoes": [
+    { "de": "a-forca-fica-onde-ainda-pode-mudar", "para": "o-ponto-de-operacao-pode-ser-deslocado-de-fora",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Uma faixa que se move com a história de uso é uma faixa que pode ser movida por outra coisa também. O limiar deslizante não é propriedade privada da atividade sináptica: qualquer sinal capaz de alcançar a sinapse pode deslocá-lo." },
+
+    { "de": "um-sinal-quimico-alcanca-tudo-de-uma-vez", "para": "o-ponto-de-operacao-pode-ser-deslocado-de-fora",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["cortisol"],
+      "porque": "Um hormônio no sangue chega a todo o cérebro sem endereço, o que o torna inútil para dizer o que aprender e adequado para dizer em que regime operar. A falta de especificidade não é limitação aqui: é o que permite ajustar o sistema inteiro de uma vez." },
+
+    { "de": "o-cortisol-atravessa-a-membrana", "para": "os-receptores-ficam-dentro-da-celula",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["cortisol"],
+      "porque": "Um sinal que entra na célula dispensa receptor de superfície e pode agir sobre a expressão de genes. É a diferença com o neurotransmissor, que fica na fenda e precisa de um canal ou de um receptor de membrana para dizer qualquer coisa." },
+
+    { "de": "os-receptores-ficam-dentro-da-celula", "para": "mr-satura-em-nivel-basal",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["receptor-mr", "cortisol"],
+      "porque": "O receptor de alta afinidade liga o hormônio com avidez e por isso já está bastante ocupado nos níveis de repouso. Responder cedo é propriedade bioquímica da proteína, e não uma decisão tomada em algum lugar." },
+
+    { "de": "os-receptores-ficam-dentro-da-celula", "para": "gr-so-e-ocupado-em-nivel-alto",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["receptor-gr", "cortisol"],
+      "porque": "O receptor de baixa afinidade só acumula ocupação quando a concentração sobe bastante acima do repouso. Ter afinidade menor é o que o faz funcionar como detector de pico em vez de detector de presença." },
+
+    { "de": "mr-satura-em-nivel-basal", "para": "duas-leituras-com-limiares-diferentes-de-novo",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["receptor-mr"],
+      "porque": "Um leitor que já está ocupado em repouso relata que o sistema está funcionando, e não que algo aconteceu. Ele fica saturado justamente na faixa em que o outro ainda não começou." },
+
+    { "de": "gr-so-e-ocupado-em-nivel-alto", "para": "duas-leituras-com-limiares-diferentes-de-novo",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["receptor-gr"],
+      "porque": "O outro leitor só entra em cena onde o primeiro já não distingue mais nada. É a mesma solução do cálcio no espinho, com outro sinal e outra escala: duas afinidades diferentes transformam uma grandeza contínua em dois regimes." },
+
+    { "de": "duas-leituras-com-limiares-diferentes-de-novo", "para": "ocupacao-basal-sustenta-a-plasticidade",
+      "tipo": "modula", "certeza": "consolidado",
+      "requer": ["receptor-mr", "receptor-nmda"],
+      "porque": "Com apenas o leitor de alta afinidade ocupado, a excitabilidade e a resposta ao glutamato ficam num ponto que favorece a potenciação. O hormônio não gera plasticidade nenhuma: ele ajusta o regime em que a regra sináptica opera." },
+
+    { "de": "duas-leituras-com-limiares-diferentes-de-novo", "para": "ocupacao-alta-eleva-o-limiar-de-potenciacao",
+      "tipo": "modula", "certeza": "consolidado",
+      "requer": ["receptor-gr", "camkii"],
+      "porque": "Com os dois leitores ocupados, é preciso muito mais atividade para alcançar potenciação, e protocolos que antes potenciavam passam a deprimir. O efeito é o mesmo deslocamento de limiar do mecanismo anterior, agora imposto de fora em vez de vir da história de uso." },
+
+    { "de": "ocupacao-basal-sustenta-a-plasticidade", "para": "o-mesmo-hormonio-produz-efeitos-opostos",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Este é o lado de baixo da curva, e ele já derruba a ideia de que o hormônio do estresse seja prejudicial por natureza. No nível de repouso a ocupação é necessária, e sua ausência prejudica." },
+
+    { "de": "ocupacao-alta-eleva-o-limiar-de-potenciacao", "para": "o-mesmo-hormonio-produz-efeitos-opostos",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "E este é o lado de cima. Nada muda de identidade entre os dois casos: muda quanto do hormônio existe, e portanto qual dos leitores está respondendo." },
+
+    { "de": "o-ponto-de-operacao-pode-ser-deslocado-de-fora", "para": "o-mesmo-hormonio-produz-efeitos-opostos",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "Ocupar receptor só produz efeito oposto se houver um ponto de operação para deslocar. Numa sinapse presa no teto ou no chão, as duas ocupações dariam no mesmo, e o hormônio não teria sobre o que agir." },
+
+    { "de": "o-mesmo-hormonio-produz-efeitos-opostos", "para": "a-curva-tem-um-otimo-no-meio",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Um efeito que ajuda enquanto sobe e atrapalha depois de certo ponto desenha um U invertido, sem que nada precise medir onde está o ótimo. A forma da curva é consequência de duas afinidades, e não uma regra de bom senso escrita em algum lugar." },
+
+    { "de": "o-cortisol-atravessa-a-membrana", "para": "acao-rapida-fora-do-nucleo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["cortisol"],
+      "porque": "Parte dos efeitos aparece em segundos, o que é rápido demais para depender de gene ligado e proteína feita. Existe uma via que não passa pelo núcleo, e é ela que responde pelo que acontece durante o próprio episódio." },
+
+    { "de": "os-receptores-ficam-dentro-da-celula", "para": "acao-lenta-por-transcricao",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "A via que passa pela expressão de genes leva horas para produzir efeito e persiste depois de o hormônio ter caído. O atraso não é lentidão do sistema: é o tempo de fabricar as proteínas que sustentarão o novo regime." },
+
+    { "de": "acao-rapida-fora-do-nucleo", "para": "o-mesmo-episodio-ajuda-agora-e-atrapalha-depois",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O que é imediato favorece o que está sendo vivido naquele momento, que é justamente o que valeria a pena guardar. Uma resposta que chegasse só horas depois não protegeria a memória do próprio episódio." },
+
+    { "de": "acao-lenta-por-transcricao", "para": "o-mesmo-episodio-ajuda-agora-e-atrapalha-depois",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O que é lento pega o material seguinte, que nada tem a ver com o episódio, e o encontra num regime desfavorável. Dizer que estresse melhora ou piora a memória é ambíguo enquanto não se disser qual memória e quando." },
+
+    { "de": "um-sinal-quimico-alcanca-tudo-de-uma-vez", "para": "o-eixo-se-desliga-pelo-proprio-produto",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["cortisol", "receptor-gr"],
+      "porque": "Um sinal que alcança todo o cérebro alcança também as estruturas que comandam o eixo, e o produto vira a ordem de parar. Fechar a alça com o próprio produto dispensa um medidor separado e é o que torna a resposta autolimitada." },
+
+    { "de": "o-eixo-se-desliga-pelo-proprio-produto", "para": "o-hipocampo-e-parte-do-freio",
+      "tipo": "compoe", "certeza": "consolidado",
+      "requer": ["hipocampo", "receptor-gr"],
+      "porque": "O hipocampo é uma das estruturas mais densas em receptores do hormônio e participa do desligamento do eixo. É a mesma estrutura que grava episódios, e isso não é coincidência inofensiva: ela está nos dois papéis ao mesmo tempo." },
+
+    { "de": "o-hipocampo-e-parte-do-freio", "para": "exposicao-prolongada-retrai-dendritos",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["hipocampo", "espinho-dendritico"],
+      "porque": "Justamente por ser densa em receptores, essa estrutura recebe a maior dose do sinal, e semanas de nível alto encurtam ramos e reduzem espinhos ali. Ser sensível ao hormônio é o que a habilita como freio e o que a expõe ao desgaste." },
+
+    { "de": "exposicao-prolongada-retrai-dendritos", "para": "o-freio-enfraquecido-deixa-o-nivel-alto",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["hipocampo"],
+      "porque": "Menos árvore dendrítica significa menos capacidade de exercer o desligamento, e o eixo demora mais para voltar ao repouso. O dano ao freio aparece como uma resposta que não termina no tempo devido." },
+
+    { "de": "o-freio-enfraquecido-deixa-o-nivel-alto", "para": "o-nivel-alto-prolongado-realimenta-o-dano",
+      "tipo": "causa", "certeza": "debatido",
+      "condicao": "bem apoiado em roedor; em humano a direção da causa é o ponto em disputa",
+      "porque": "Mais tempo em nível alto produz mais retração, que enfraquece ainda mais o freio, e a alça negativa passa a abrigar uma alça positiva por dentro. Em humano, porém, hipocampo menor aparece junto de transtorno relacionado a estresse SEM que se saiba o que veio antes: estudos com gêmeos apontam para vulnerabilidade prévia em pelo menos parte dos casos. A direção da seta muda o que se espera de uma intervenção, e é por isso que ela importa." },
+
+    { "de": "o-nivel-alto-prolongado-realimenta-o-dano", "para": "o-regulador-e-feito-do-tecido-que-ele-regula",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A vulnerabilidade não está na potência do hormônio e sim no desenho da alça: quem desliga é feito do que a saída desgasta. Um sistema cujo sensor fosse imune ao próprio sinal não teria esse modo de falha, por mais forte que o sinal fosse." },
+
+    { "de": "a-curva-tem-um-otimo-no-meio", "para": "a-resposta-e-boa-e-a-cronicidade-nao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se existe um ótimo no meio, ficar permanentemente do lado direito da curva é ruim mesmo quando a resposta que levou até lá era adequada. O problema deixa de ser a intensidade de cada episódio e passa a ser a fração do tempo em que o sistema fica ali." },
+
+    { "de": "o-mesmo-episodio-ajuda-agora-e-atrapalha-depois", "para": "a-resposta-e-boa-e-a-cronicidade-nao",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se as duas fases de um único episódio já têm sinais opostos, episódios encadeados fazem a fase lenta de um encontrar a fase rápida do seguinte. O regime desfavorável passa a ser o estado normal, sem que nenhum episódio isolado tenha sido excessivo." },
+
+    { "de": "a-resposta-e-boa-e-a-cronicidade-nao", "para": "o-defeito-nao-esta-no-hormonio-esta-na-alca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Uma substância nociva seria ruim em qualquer dose e em qualquer duração, e esta é necessária em repouso e útil no pico. O que falha é a regulação temporal, e não a natureza do que é regulado." },
+
+    { "de": "o-regulador-e-feito-do-tecido-que-ele-regula", "para": "o-defeito-nao-esta-no-hormonio-esta-na-alca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Uma alça que se desgasta ao funcionar perde a capacidade de terminar aquilo que começou, e um sistema que não termina fica preso do lado ruim da própria curva. É o desenho, e não o reagente, que carrega o modo de falha." }
+  ],
+
+  "mecanismos": [
+    { "id": "eixo-hpa",
+      "fenomeno": "Se o cortisol prejudica a memória, por que um pouco de estresse ajuda a lembrar?",
+      "entrada": "a-forca-fica-onde-ainda-pode-mudar",
+      "terminal": "o-defeito-nao-esta-no-hormonio-esta-na-alca",
+      "limites": "Descreve a modulação da plasticidade hipocampal por glicocorticoides e a alça de retroalimentação do eixo hipotálamo-hipófise-adrenal. Não cobre a resposta rápida de noradrenalina, que acontece em paralelo e responde por boa parte do efeito imediato sobre memória emocional. Não cobre a amígdala, que sob o mesmo hormônio se comporta de modo oposto ao hipocampo e é essencial para explicar o quadro completo. Não cobre o ritmo circadiano do cortisol, que varia mais ao longo do dia que na maioria dos estresses agudos. Os dados de retração dendrítica são sobretudo de roedor; em humano a evidência é de volume por imagem, que é medida indireta e não distingue retração de outras causas." }
+  ]
+}

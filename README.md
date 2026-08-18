@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 758 caixas para os onze mecanismos: 223 construir, 223
-reconstruir, 223 depurar e **89 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 852 caixas para os doze mecanismos: 250 construir, 250
+reconstruir, 250 depurar e **102 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
 A perturbação de um mecanismo parte das **raízes do recorte**, não da
@@ -372,10 +372,24 @@ Fase C fechada: `src/perguntas.js` gera e corrige as quatro operações, e
 `app.html` é o protótipo jogável — arquivo único, sem servidor, com sessão
 de estudo, leitura do mecanismo e deslizador de escala.
 
-Fase D em curso: **8 mecanismos** (gradiente eletroquímico, potencial de
-membrana, potencial de ação, condução saltatória, transmissão sináptica, LTP
-dependente de NMDA, LTD e metaplasticidade, consolidação sistêmica), **7
-etapas** calculadas, 147 transições. Nenhum arquivo declara ligação com outro.
+**Fase D fechada: os 12 mecanismos do primeiro corte estão escritos.** 202
+nós, 250 transições, 42 entidades, **7 etapas** calculadas. Nenhum arquivo
+declara ligação com outro — as etapas, os irmãos e as pontes entre escalas
+são todos resultado de leitura do grafo.
+
+```
+1  gradiente-eletroquimico
+2  potencial-de-membrana
+3  potencial-de-acao · conducao-saltatoria
+4  transmissao-sinaptica · acumulo-de-evidencia
+5  ltp-nmda · controle-top-down
+6  ltd-metaplasticidade · erro-de-previsao
+7  consolidacao-sistemica · eixo-hpa
+```
+
+Cinco das sete etapas têm mais de um mecanismo. Numa grade autorada isso
+seria uma decisão editorial; aqui é o que sobra depois que as dependências
+são calculadas.
 
 A etapa 3 tem DOIS mecanismos, e isso é resultado derivado, não escolha: o
 terminal do potencial de ação (o código de frequência) não fica a montante
@@ -406,4 +420,16 @@ usa para o integrador guardar um total é a mesma que segura um alvo ativo
 sem estímulo. Remover `circuito-integrador` derruba 5 nós do 11 — a ponte é
 verificável, não retórica.
 
-Resta: eixo HPA.
+E o 12 (eixo HPA) fecha um arco que o 07 abriu: duas leituras do mesmo sinal
+com afinidades diferentes, agora com um hormônio no lugar do Ca²⁺. A curva em
+U não precisou ser afirmada — ela cai das duas afinidades. O projeto
+reencontra a própria estrutura em outra escala, e isso não foi arranjado: MR
+e GR têm afinidades diferentes de fato.
+
+**O que falta agora não é conteúdo, é auditoria.** São 250 transições, e
+nenhum portão checa verdade. Os seis verificam coerência: referência que não
+existe, nó órfão, terminal inalcançável, entidade que promete e não entrega,
+gabarito que não bate com o grafo. Todos passam num grafo inteiramente falso,
+desde que ele seja consistente. A tela de leitura do `app.html` mostra o
+endereço de cada transição (`07-….json[3]`) exatamente para tornar esse
+trabalho reportável por número, do celular.
