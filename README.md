@@ -118,8 +118,8 @@ serve para perturbar", alguém declararia:
 - **depurar** — se a transição inversa **também** existe no grafo
   (retroalimentação real), inverter não é erro e a pergunta fica sem gabarito.
 
-Hoje isso dá 682 caixas para os dez mecanismos: 200 construir, 200
-reconstruir, 200 depurar e **82 perturbar** — a assimetria é o sinal de que
+Hoje isso dá 758 caixas para os onze mecanismos: 223 construir, 223
+reconstruir, 223 depurar e **89 perturbar** — a assimetria é o sinal de que
 a regra está derivando, não carimbando.
 
 A perturbação de um mecanismo parte das **raízes do recorte**, não da
@@ -400,4 +400,10 @@ neurônios que integrem e disparem. Ele entra pelo terminal do 03. Numa
 grade autorada, "decisão" seria um módulo avançado, no fim — aqui ele é
 irmão da sinapse, porque é o que o grafo diz.
 
-Restam: controle top-down, eixo HPA.
+O 11 (controle top-down) é o primeiro que reusa uma peça de outro mecanismo
+como PEÇA, e não como ponto de entrada: a realimentação recorrente que o 10
+usa para o integrador guardar um total é a mesma que segura um alvo ativo
+sem estímulo. Remover `circuito-integrador` derruba 5 nós do 11 — a ponte é
+verificável, não retórica.
+
+Resta: eixo HPA.

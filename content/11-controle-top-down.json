@@ -1,0 +1,190 @@
+{
+  "arquivo": "Controle top-down e competição enviesada",
+  "nota_de_autoria": "Entra pelo terminal do 10: se decidir é atravessar um limiar somando evidência, então a regra é boa mas só opera sobre o que chega. O argumento tem dois fios que se encontram no viés. Um vem da CONVERGÊNCIA — campos receptivos que crescem forçam competição, e a competição não é escolha de projeto. O outro vem do PADRÃO MANTIDO, e aqui há uma ponte real com o 10: a mesma realimentação recorrente que faz o integrador guardar um total é a que segura um alvo ativo sem estímulo. O ponto que o mecanismo existe para estabelecer é que o sinal de cima é pequeno e inespecífico, e quem amplifica é a competição local — a atenção não carrega o conteúdo. O `debatido` é sobre a força da conclusão: ausente ou apenas não relatado.",
+
+  "entidades": [
+    { "id": "neuronio-de-convergencia", "nome": "Neurônio de convergência", "escala": "rede",
+      "funcao": "célula alta na hierarquia que recebe de muitas células abaixo, e por isso responde a uma região grande da cena em vez de a um ponto",
+      "se_falhar": "some a competição, e com ela some também a generalização: cada célula voltaria a responder a um ponto só, sem reconhecer nada acima do detalhe" },
+
+    { "id": "interneuronio-inibitorio", "nome": "Interneurônio inibitório local", "escala": "rede",
+      "funcao": "célula de circuito curto pela qual duas representações ativas no mesmo lugar reduzem uma à outra",
+      "se_falhar": "as representações concorrentes coexistem sem que nenhuma se destaque, e a seleção nunca se resolve" },
+
+    { "id": "cortex-prefrontal", "nome": "Córtex pré-frontal", "escala": "sistemas",
+      "funcao": "mantém ativo, por atividade persistente, o padrão do que está sendo procurado, mesmo quando ele não está presente na cena",
+      "se_falhar": "o viés perde a fonte, e a seleção passa a seguir apenas o que salta aos olhos" }
+  ],
+
+  "nos": [
+    { "id": "a-decisao-so-e-boa-quanto-a-evidencia-que-chega", "escala": "rede",
+      "descricao": "A regra de acúmulo opera sobre o que lhe é entregue, e não sobre a cena inteira" },
+
+    { "id": "o-que-nao-e-representado-nao-vira-evidencia", "escala": "rede",
+      "descricao": "O que não chega a ter representação no alto não entra na soma de forma alguma" },
+
+    { "id": "campos-receptivos-crescem-na-hierarquia", "entidade": "neuronio-de-convergencia", "escala": "rede",
+      "descricao": "Subindo a hierarquia, cada célula passa a responder a uma porção maior da cena",
+      "quant": { "ordem_de_grandeza": "de frações de grau na entrada a dezenas de graus no córtex temporal" } },
+
+    { "id": "varios-objetos-caem-no-mesmo-campo", "escala": "rede",
+      "descricao": "Numa cena comum, mais de um objeto cai dentro do campo da mesma célula" },
+
+    { "id": "a-resposta-a-dois-objetos-fica-entre-as-duas", "entidade": "neuronio-de-convergencia", "escala": "celular",
+      "descricao": "A resposta ao par não é a soma das respostas a cada um: fica entre elas",
+      "quant": { "forma": "aproximadamente uma média das respostas isoladas, e não a soma" } },
+
+    { "id": "um-neuronio-nao-representa-dois-de-uma-vez", "escala": "celular",
+      "descricao": "A mesma taxa não consegue afirmar duas coisas diferentes ao mesmo tempo" },
+
+    { "id": "a-competicao-e-forcada-pela-convergencia", "escala": "rede",
+      "descricao": "A disputa por representação é consequência da arquitetura, não um recurso acrescentado" },
+
+    { "id": "representacoes-vizinhas-se-reduzem", "entidade": "interneuronio-inibitorio", "escala": "rede",
+      "descricao": "Duas representações ativas no mesmo lugar reduzem uma à outra por circuito local" },
+
+    { "id": "a-reducao-e-mutua-e-recorrente", "escala": "rede",
+      "descricao": "Quem está por cima reduz mais o outro, e por isso fica ainda mais por cima" },
+
+    { "id": "pequena-vantagem-vira-vantagem-grande", "escala": "rede",
+      "descricao": "Uma diferença mínima entre os concorrentes acaba num resultado quase completo" },
+
+    { "id": "o-vencedor-fica-como-se-o-outro-nao-existisse", "entidade": "neuronio-de-convergencia", "escala": "celular",
+      "descricao": "A resposta ao objeto selecionado se aproxima da que ele produziria sozinho no campo" },
+
+    { "id": "um-padrao-e-mantido-ativo-sem-o-estimulo", "entidade": "cortex-prefrontal", "escala": "sistemas",
+      "descricao": "O padrão do que se procura permanece ativo enquanto o objeto não está presente",
+      "quant": { "duracao_tipica": "segundos, atravessando o intervalo entre a instrução e a cena" } },
+
+    { "id": "o-padrao-mantido-favorece-quem-se-parece-com-ele", "escala": "rede",
+      "descricao": "Quem se parece com o padrão mantido entra na disputa com uma vantagem" },
+
+    { "id": "o-vies-e-pequeno-e-inespecifico", "escala": "rede",
+      "descricao": "O sinal que desce é fraco e não carrega a forma do objeto" },
+
+    { "id": "a-amplificacao-e-feita-pela-competicao-local", "escala": "rede",
+      "descricao": "O trabalho de transformar vantagem em seleção é feito embaixo, não em cima" },
+
+    { "id": "o-nao-selecionado-nao-chega-ao-alto", "escala": "rede",
+      "descricao": "O que perdeu a disputa deixa de ter representação nos níveis altos" },
+
+    { "id": "cegueira-ao-inesperado", "escala": "comportamento",
+      "descricao": "Um objeto saliente e presente atravessa a cena sem ser relatado" },
+
+    { "id": "atender-nao-e-olhar-com-mais-forca", "escala": "rede",
+      "descricao": "Atender é resolver uma disputa, e não aumentar o ganho de um canal" },
+
+    { "id": "atencao-muda-a-evidencia-nao-a-regra", "escala": "rede",
+      "descricao": "O objetivo altera o que chega a contar como evidência, deixando intacta a regra que decide" }
+  ],
+
+  "transicoes": [
+    { "de": "decidir-e-um-limiar-atravessado-nao-uma-comparacao", "para": "a-decisao-so-e-boa-quanto-a-evidencia-que-chega",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Uma regra que soma o que recebe não tem como saber o que não recebeu. A qualidade da decisão passa a depender inteiramente do que foi entregue à soma, e nada dentro da regra protege contra uma entrega ruim." },
+
+    { "de": "a-decisao-so-e-boa-quanto-a-evidencia-que-chega", "para": "o-que-nao-e-representado-nao-vira-evidencia",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Só existe como evidência aquilo que chegou a ter representação em algum lugar que o acumulador leia. O que não foi representado não entra com peso pequeno: não entra." },
+
+    { "de": "campos-receptivos-crescem-na-hierarquia", "para": "varios-objetos-caem-no-mesmo-campo",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neuronio-de-convergencia"],
+      "porque": "Um campo que cobre dezenas de graus cobre também vários objetos de uma cena comum. O crescimento do campo é o que dá invariância à célula, e por isso a sobreposição não é defeito: é o preço de reconhecer o mesmo objeto em posições diferentes." },
+
+    { "de": "varios-objetos-caem-no-mesmo-campo", "para": "a-resposta-a-dois-objetos-fica-entre-as-duas",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neuronio-de-convergencia"],
+      "porque": "A resposta medida ao par fica próxima de uma média das respostas isoladas, e não da soma. É o achado que sustenta o mecanismo inteiro, porque somar seria o esperado se as duas entradas simplesmente convivessem." },
+
+    { "de": "a-resposta-a-dois-objetos-fica-entre-as-duas", "para": "um-neuronio-nao-representa-dois-de-uma-vez",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Uma taxa é um número só, e um número só não afirma duas coisas diferentes ao mesmo tempo. A média não é um meio-termo informativo: ela é ambígua entre os dois objetos e não identifica nenhum." },
+
+    { "de": "um-neuronio-nao-representa-dois-de-uma-vez", "para": "a-competicao-e-forcada-pela-convergencia",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se a representação é escassa e a demanda é maior que ela, disputa é o que resta. A competição não foi acrescentada ao sistema por conveniência: ela cai da mesma convergência que torna o reconhecimento possível." },
+
+    { "de": "varios-objetos-caem-no-mesmo-campo", "para": "representacoes-vizinhas-se-reduzem",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["interneuronio-inibitorio"],
+      "porque": "Circuitos locais fazem com que a atividade de uma representação reduza a da outra, através de interneurônios do mesmo lugar. A redução é de vizinhança, e por isso objetos distantes não disputam entre si." },
+
+    { "de": "representacoes-vizinhas-se-reduzem", "para": "a-reducao-e-mutua-e-recorrente",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["interneuronio-inibitorio"],
+      "porque": "Cada lado reduz o outro na proporção da própria atividade, e o resultado volta a entrar na conta. Quem está momentaneamente por cima reduz mais, e com isso fica ainda mais por cima." },
+
+    { "de": "a-reducao-e-mutua-e-recorrente", "para": "pequena-vantagem-vira-vantagem-grande",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Realimentação num sistema que se reduz mutuamente empurra o resultado para os extremos. Uma diferença mínima na entrada termina numa separação quase completa na saída, sem que nada tenha medido essa diferença." },
+
+    { "de": "a-competicao-e-forcada-pela-convergencia", "para": "pequena-vantagem-vira-vantagem-grande",
+      "tipo": "permite", "certeza": "consolidado",
+      "porque": "A amplificação só faz sentido onde há disputa por um recurso escasso. Sem escassez de representação, favorecer um lado não tiraria nada do outro e não haveria o que amplificar." },
+
+    { "de": "pequena-vantagem-vira-vantagem-grande", "para": "o-vencedor-fica-como-se-o-outro-nao-existisse",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["neuronio-de-convergencia"],
+      "porque": "A resposta ao objeto selecionado volta a se aproximar da que ele produziria sozinho no campo, como se o concorrente tivesse sido removido. Esta é a assinatura medida da seleção, e ela é forte porque prevê um valor específico em vez de apenas um aumento." },
+
+    { "de": "o-integrador-guarda-por-muito-mais-tempo", "para": "um-padrao-e-mantido-ativo-sem-o-estimulo",
+      "tipo": "permite", "certeza": "consolidado",
+      "requer": ["circuito-integrador", "cortex-prefrontal"],
+      "porque": "Guardar um alvo por segundos exige o mesmo recurso que guardar um total: excitação recorrente repondo o que a membrana perde. O que muda é o que está sendo sustentado, e não o modo de sustentar." },
+
+    { "de": "um-padrao-e-mantido-ativo-sem-o-estimulo", "para": "o-padrao-mantido-favorece-quem-se-parece-com-ele",
+      "tipo": "causa", "certeza": "consolidado",
+      "requer": ["cortex-prefrontal"],
+      "porque": "Um padrão ativo soma-se à atividade de quem se parece com ele e não à de quem não se parece. A comparação com o alvo não é feita em lugar nenhum: ela é o efeito de somar duas atividades semelhantes." },
+
+    { "de": "o-padrao-mantido-favorece-quem-se-parece-com-ele", "para": "o-vies-e-pequeno-e-inespecifico",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O que desce é uma vantagem de partida, não uma descrição do objeto. Se o sinal de cima tivesse de carregar a forma procurada, ele precisaria da mesma banda que a via de baixo para cima, e a arquitetura estaria resolvendo o problema duas vezes." },
+
+    { "de": "o-vies-e-pequeno-e-inespecifico", "para": "a-amplificacao-e-feita-pela-competicao-local",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Um sinal fraco só produz efeito grande se houver algo embaixo capaz de amplificá-lo, e a competição recorrente é exatamente isso. O trabalho pesado da seleção acontece onde os objetos são representados, e não onde o objetivo é mantido." },
+
+    { "de": "pequena-vantagem-vira-vantagem-grande", "para": "a-amplificacao-e-feita-pela-competicao-local",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A não linearidade que transforma vantagem pequena em resultado grande está no circuito local, e é ela que dispensa o controle de ser detalhado. Um sistema sem essa amplificação precisaria de um sinal de cima proporcional ao efeito desejado." },
+
+    { "de": "o-vencedor-fica-como-se-o-outro-nao-existisse", "para": "o-nao-selecionado-nao-chega-ao-alto",
+      "tipo": "causa", "certeza": "consolidado",
+      "porque": "Se a célula responde como se apenas um objeto estivesse ali, o outro deixou de ter representação naquele nível. A perda não é de intensidade e sim de existência para quem lê essa camada." },
+
+    { "de": "a-amplificacao-e-feita-pela-competicao-local", "para": "atender-nao-e-olhar-com-mais-forca",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Aumentar o ganho de um canal deixaria os concorrentes onde estavam, apenas mais fracos em comparação. Resolver uma disputa é outra operação, e é ela que explica por que o efeito é quase completo em vez de gradual." },
+
+    { "de": "o-nao-selecionado-nao-chega-ao-alto", "para": "cegueira-ao-inesperado",
+      "tipo": "causa", "certeza": "debatido",
+      "condicao": "vale para o relato; medidas indiretas são o terreno em disputa",
+      "porque": "Se o objeto não conquistou representação no alto, não havia o que relatar, e a cegueira deixa de ser falha de memória para ser ausência do conteúdo. A leitura rival é que a representação existiu e não foi guardada até o momento do relato, e há evidência de efeitos indiretos de itens nunca relatados. As duas previsões só se separam em medidas que não dependem de relato." },
+
+    { "de": "cegueira-ao-inesperado", "para": "atencao-muda-a-evidencia-nao-a-regra",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Quem não relata o objeto não estava decidindo mal: estava decidindo bem sobre uma cena que não o continha. É a demonstração mais forte da separação, porque mostra a regra intacta e a conclusão errada ao mesmo tempo." },
+
+    { "de": "o-nao-selecionado-nao-chega-ao-alto", "para": "atencao-muda-a-evidencia-nao-a-regra",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "O acumulador continua somando exatamente do mesmo jeito, e o que mudou foi o que lhe foi entregue. É por isso que a atenção altera o que se decide sem alterar o modo de decidir." },
+
+    { "de": "o-que-nao-e-representado-nao-vira-evidencia", "para": "atencao-muda-a-evidencia-nao-a-regra",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "A regra de decisão não tem defesa contra o que nunca lhe chegou, e por isso selecionar a entrada é uma forma de determinar a saída sem tocar no procedimento. Quem controla o que vira evidência controla a conclusão sem precisar argumentar." },
+
+    { "de": "atender-nao-e-olhar-com-mais-forca", "para": "atencao-muda-a-evidencia-nao-a-regra",
+      "tipo": "compoe", "certeza": "consolidado",
+      "porque": "Se atender fosse ganho, o objetivo estaria mexendo na sensibilidade do sistema. Sendo disputa resolvida, ele apenas escolhe entre representações que já disputavam sozinhas, o que mantém a separação entre o que se olha e como se julga." }
+  ],
+
+  "mecanismos": [
+    { "id": "controle-top-down",
+      "fenomeno": "Se tudo que entra pelos olhos chega ao córtex, por que você não vê o que não estava procurando?",
+      "entrada": "decidir-e-um-limiar-atravessado-nao-uma-comparacao",
+      "terminal": "atencao-muda-a-evidencia-nao-a-regra",
+      "limites": "Descreve atenção seletiva visual na leitura de competição enviesada. Não cobre atenção espacial dirigida por saliência de baixo para cima, que compartilha o circuito de competição mas dispensa o padrão mantido. Não cobre atenção como modulação de ganho por normalização, que é uma formulação alternativa e descreve boa parte dos mesmos dados com outro compromisso. Não cobre o movimento dos olhos, que resolve o mesmo problema por outra via, nem atenção fora da visão. A fonte do viés está descrita no nível funcional: quais áreas frontais e parietais fazem o quê, e em que ordem, continua sendo objeto de estudo." }
+  ]
+}
