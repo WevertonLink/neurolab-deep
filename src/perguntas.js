@@ -375,19 +375,42 @@ function montarSessao(g, estado, agora, opcoes){
   return { plano, perguntas, atividades };
 }
 
-/* Quantas caixas estão vencidas dentro de um recorte do percurso. É o que a
-   tela precisa para dizer "Estudar esta etapa (23 vencidas)" em vez de
-   oferecer um botão que pode não render pergunta nenhuma. */
-function devidasDe(plano, mecanismos){
+/* Quantas caixas o botão de um cartão vai cobrar, SEPARADAS em novas e
+   vencidas — e a separação importa mais do que parece.
+
+   Uma caixa nasce com vencimento "agora", então tudo está devido desde o
+   primeiro segundo. Chamar isso de "vencido" é dizer ao usuário que ele está
+   ATRASADO em 860 coisas antes de ele começar, o que além de desanimador é
+   falso: nada está atrasado, o material é que nunca foi visto.
+
+   `nova` = nunca teve tentativa. `vencida` = já foi estudada e a data passou.
+   É a distinção que qualquer sistema de revisão faz, e confundir as duas
+   transforma o começo do percurso numa dívida. */
+function devidasDe(estado, plano, mecanismos){
   const so = new Set(mecanismos);
-  return plano.atividades
-    .filter(a=>so.has(a.mecanismo))
-    .reduce((n, a)=>n + a.caixas.length, 0);
+  let novas = 0, vencidas = 0;
+  plano.atividades.filter(a=>so.has(a.mecanismo)).forEach(a=>{
+    a.caixas.forEach(k=>{
+      const c = estado.caixas[k];
+      if(c && c.tentativas > 0) vencidas++; else novas++;
+    });
+  });
+  return { novas, vencidas, total: novas + vencidas };
+}
+
+/* O rótulo que a tela mostra. Mora aqui, e não na tela, pela mesma razão que
+   as ressalvas de certeza moram no plano: se a regra vive na tela, a tela
+   pode esquecer e ninguém fica sabendo. */
+function rotuloDeDevidas(d){
+  if(!d.total) return null;
+  if(!d.vencidas) return d.novas + (d.novas === 1 ? ' nova' : ' novas');
+  if(!d.novas) return d.vencidas + (d.vencidas === 1 ? ' vencida' : ' vencidas');
+  return d.novas + ' novas · ' + d.vencidas + ' vencidas';
 }
 
 module.exports = {
   MAX_ALTERNATIVAS, MIN_ERRADAS, TETO_MARCAR_TUDO,
   sorteador, embaralhar, escolherEvitando, montarSlate, montarSessao,
-  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura, devidasDe,
+  gerar, gerarTravessia, gerarPerturbar, gerarDepurar, assinatura, devidasDe, rotuloDeDevidas,
   corrigir, anotarNoLote, revelar
 };

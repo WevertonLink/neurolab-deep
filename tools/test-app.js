@@ -328,15 +328,57 @@ PROVAS.push({
     const chave = E.chaveDaCaixa(p0.transicoes[0], p0.operacao);
     exigir(salvo.caixas[chave] && salvo.caixas[chave].tentativas === 1,
       `a caixa "${chave}" que a primeira pergunta exercitou não recebeu exatamente uma decisão`);
+
+    /* ---------- sair no meio ----------
+       A tela de pergunta era uma ARMADILHA: entrou, só saía fechando o app.
+       Visto no celular. E fechar o app perdia o lote inteiro, porque ele só
+       era gravado no fim — num telefone, interrupção é a regra.
+
+       Duas exigências, e a segunda é a que importa: existe saída, E a saída
+       GRAVA o que já foi respondido. */
+    const v2 = subir(s.html);
+    v2.acao.onclick();                                   // entra na sessão
+    const saidas = porClasse(v2.app, 'fantasma')
+      .filter(b=>/voltar ao percurso|sair e guardar/i.test(b.textContent));
+    exigir(saidas.length > 0,
+      'a tela de pergunta não tem saída: quem entra só sai fechando o app');
+
+    /* responde UMA e sai */
+    const p1 = esperada.perguntas[0];
+    const alts2 = porClasse(v2.app, 'alt');
+    p1.alternativas.forEach((a, i)=>{ if(p1.corretas.indexOf(a.id) >= 0) alts2[i].onclick(); });
+    v2.acao.onclick();                                   // "Responder"
+    const saida = porClasse(v2.app, 'fantasma')
+      .find(b=>/sair e guardar/i.test(b.textContent));
+    exigir(!!saida,
+      'depois de responder, o botão de saída ainda promete "voltar" em vez de guardar');
+    saida.onclick();
+
+    const meio = v2.dom.localStorage._bruto['neurolab-profundo/estado/v1'];
+    exigir(!!meio, 'saiu no meio da sessão e NADA foi gravado — a resposta se perdeu');
+    const parcial = JSON.parse(meio);
+    const chaveParcial = E.chaveDaCaixa(p1.transicoes[0], p1.operacao);
+    exigir(parcial.caixas[chaveParcial] && parcial.caixas[chaveParcial].tentativas === 1,
+      `saiu no meio e a caixa "${chaveParcial}" da pergunta respondida não registrou tentativa`);
+    exigir(Object.keys(parcial.caixas).filter(k=>parcial.caixas[k].tentativas > 0).length <
+           estudadas.length,
+      'sair depois de UMA pergunta gravou tanto quanto a sessão inteira');
     exigir(salvo.caixas[chave].caixa === 1,
       `acertei o gabarito e a caixa ficou em ${salvo.caixas[chave].caixa}, não subiu para 1`);
     exigir(salvo.caixas[chave].recorde === 1, 'o recorde não acompanhou a subida');
   },
   mutantes: [
+    { como: 'a tela de pergunta não tem saída (a armadilha original)',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = trocar(m.html, /  app\.appendChild\(sair\);\n/, ''); return m; } },
+    { como: 'sair no meio descarta o lote em vez de guardá-lo',
+      aplicar(s){ const m = clonarSujeito(s);
+        m.html = trocar(m.html, 'if(s.resultados.length) fecharSessao();',
+                        'if(false) fecharSessao();'); return m; } },
     { como: 'a tela não anota a evidência no lote',
       aplicar(s){ const m = clonarSujeito(s);
-        m.html = m.html.replace(/s\.caixas \+= Q\.anotarNoLote\(s\.lote, p, c\);/,
-                                's.caixas += 0;'); return m; } },
+        m.html = trocar(m.html, /s\.caixas \+= Q\.anotarNoLote\(s\.lote, p, c\);/,
+                        's.caixas += 0;'); return m; } },
     { como: 'a sessão nunca fecha o lote, e nada chega ao cronograma',
       aplicar(s){ const m = clonarSujeito(s);
         m.html = m.html.replace(/var r = E\.fecharLote\(g, estado, s\.lote, s\.agora\);/,

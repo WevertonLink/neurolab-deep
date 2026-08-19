@@ -70,13 +70,18 @@ function telaPercurso(){
   var agoraTela = Date.now();
   var p = P.percurso(g, estado, agoraTela, idx);
   /* O plano é calculado UMA vez e reusado por todos os cartões: cada um
-     precisa saber quantas caixas próprias estão vencidas, e recalcular por
+     precisa saber quantas caixas próprias estão devidas, e recalcular por
      cartão custaria caro à toa. */
   var plano = E.planoDeSessao(g, estado, agoraTela, Infinity, idx);
 
   app.appendChild(el('h1', { texto: 'NeuroLab Deep' }));
+  /* "860 caixas de revisão" dizia o tamanho do banco e não o seu estado.
+     Novas e vencidas são coisas diferentes: nada está atrasado antes de você
+     começar. */
+  var geral = Q.devidasDe(estado, plano, Object.keys(g.mecanismos));
   app.appendChild(el('p', { class: 'sub',
-    texto: p.total + ' caixas de revisão · ' + g.transicoes.length + ' transições causais' }));
+    texto: p.total + ' caixas · ' + (Q.rotuloDeDevidas(geral) || 'nada para hoje') +
+           ' · ' + g.transicoes.length + ' transições causais' }));
 
   /* a trilha, com os degraus coloridos por estado */
   var trilha = el('div', { class: 'trilha' });
@@ -123,13 +128,14 @@ function telaPercurso(){
          decide sozinho o que cobrar — e não havia como trabalhar um pedaço
          de propósito e ver aquele pedaço andar, que é a modularização que
          ele pediu. Ler não marca nada; só responder marca. */
-      var vencidas = Q.devidasDe(plano, [m.mecanismo]);
+      var d = Q.devidasDe(estado, plano, [m.mecanismo]);
+      var rot = Q.rotuloDeDevidas(d);
       var estudar = el('button', {
         class: 'fantasma estudar-um', type: 'button',
-        texto: vencidas > 0 ? 'Estudar este (' + vencidas + ' vencidas)' : 'Nada vencido aqui'
+        texto: rot ? 'Estudar este (' + rot + ')' : 'Nada a fazer aqui hoje'
       });
-      estudar.disabled = vencidas === 0;
-      if(vencidas > 0){
+      estudar.disabled = d.total === 0;
+      if(d.total > 0){
         estudar.onclick = (function(id){
           return function(){ comecarSessao([id]); };
         })(m.mecanismo);
@@ -178,7 +184,7 @@ function telaPercurso(){
     botao(etapaInicial ? 'Estudar · começa na etapa ' + etapaInicial : 'Estudar',
           function(){ comecarSessao(); });
   }
-  else { rodape.classList.remove('oculto'); acao.textContent = 'Nada vencido hoje'; acao.disabled = true; acao.onclick = null; }
+  else { rodape.classList.remove('oculto'); acao.textContent = 'Nada para hoje — volte amanhã'; acao.disabled = true; acao.onclick = null; }
 }
 
 /* ---------- ler o mecanismo ----------
@@ -288,6 +294,26 @@ function telaPergunta(){
   });
   app.appendChild(prog);
 
+  /* ---------- sair no meio ----------
+     Sem isto a tela de pergunta era uma armadilha: entrou, só saía fechando
+     o app — e fechar o app perdia o lote inteiro, porque ele só era gravado
+     no fim. Num celular a interrupção é a regra, não a exceção.
+
+     Sair GRAVA o que já foi respondido. O lote continua sendo uma decisão
+     por caixa, pela média das respostas que a exercitaram; ele só fecha mais
+     cedo, com menos respostas. Nada é descartado e nada é inventado. */
+  var sair = el('button', { class: 'fantasma', type: 'button',
+    texto: s.resultados.length ? '‹ sair e guardar o que respondi' : '‹ voltar ao percurso' });
+  sair.onclick = function(){
+    if(s.resultados.length) fecharSessao();
+    else { sessao = null; telaPercurso(); }
+  };
+  app.appendChild(sair);
+  /* `responder` acrescenta a revelação SEM redesenhar a tela, então este
+     botão continua ali — mas o rótulo dele ficaria velho depois da primeira
+     resposta, prometendo "voltar" quando já há coisa a guardar. */
+  s.botaoSair = sair;
+
   app.appendChild(el('div', { class: 'linha' }, [
     el('span', { class: 'selo curso', texto: p.operacao }),
     el('span', { class: 'rotulo', texto: (s.i + 1) + ' de ' + s.perguntas.length })
@@ -327,6 +353,7 @@ function responder(p, escolhidas, botoes){
   var c = Q.corrigir(p, escolhidas);
   s.caixas += Q.anotarNoLote(s.lote, p, c);
   s.resultados[s.i] = c;
+  if(s.botaoSair) s.botaoSair.textContent = '‹ sair e guardar o que respondi';
 
   /* marca as alternativas: o que estava certo, o que faltou, o que sobrou */
   Object.keys(botoes).forEach(function(id){
@@ -387,14 +414,19 @@ function fecharSessao(){
 
   limpar();
   semBotao();
-  var acertos = s.resultados.filter(function(x){ return x.acertou; }).length;
+  /* `respondidas`, não `perguntas.length`: quem sai no meio respondeu menos,
+     e dizer "2 de 10" quando só 3 foram feitas mente sobre o desempenho. */
+  var respondidas = s.resultados.filter(function(x){ return x; }).length;
+  var acertos = s.resultados.filter(function(x){ return x && x.acertou; }).length;
   var subiram = r.decididas.filter(function(d){ return d.para > d.de; }).length;
   var cairam = r.decididas.filter(function(d){ return d.para < d.de; }).length;
 
   app.appendChild(el('h1', { texto: 'Sessão fechada' }));
   app.appendChild(el('p', { class: 'sub',
-    texto: acertos + ' de ' + s.perguntas.length + ' perguntas · ' +
-           r.decididas.length + ' caixas decididas' }));
+    texto: acertos + ' de ' + respondidas + ' perguntas · ' +
+           r.decididas.length + ' caixas decididas' +
+           (respondidas < s.perguntas.length
+             ? ' · saiu no meio, e o que respondeu foi guardado' : '') }));
 
   var cartao = el('div', { class: 'cartao' });
   var dois = el('div', { class: 'dois' });
